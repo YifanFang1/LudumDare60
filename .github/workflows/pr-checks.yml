@@ -1,0 +1,12 @@
+name: PR checks
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+
+jobs:
+  repo-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "ok"
