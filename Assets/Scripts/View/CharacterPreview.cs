@@ -11,12 +11,16 @@ using UnityEditor;
 // hitboxes at that tick: red while active, faint yellow when not. Select the CharacterData asset
 // and drag its sliders (hurtbox, hitbox boxes, sprite offset and scale): everything here updates
 // live. Tick N here is exactly tick N of the move in the real fight.
+// Press Play in the inspector to step through the move's ticks automatically (60 per second).
+// Only the sprite and boxes are previewed; the Animator of a View Prefab plays in matches.
 [ExecuteAlways]
 public class CharacterPreview : MonoBehaviour
 {
     public CharacterData character;
-    public int moveIndex;
-    [Range(0, 120)] public int tick;
+    public int moveIndex;               // slider in the inspector (see Editor/CharacterPreviewEditor)
+    public int tick;                    // slider in the inspector, 0 .. totalTicks - 1
+    public bool playing;                // steps through the move's ticks in the editor
+    [Range(0.1f, 2f)] public float playSpeed = 1f;
     public bool faceRight = true;
 
     [Header("What to show")]
@@ -28,8 +32,44 @@ public class CharacterPreview : MonoBehaviour
 
     SpriteRenderer art;                // lives on a hidden child object, never saved in the scene
 
+#if UNITY_EDITOR
+    double lastTime;
+    float tickBank;
+
+    // Steps `tick` forward 60 times a second while "playing" (edit mode only).
+    void EditorStep()
+    {
+        double now = EditorApplication.timeSinceStartup;
+        float dt = (float)(now - lastTime);
+        lastTime = now;
+
+        if (!playing || Application.isPlaying || character == null) { tickBank = 0f; return; }
+        int total = TotalTicks();
+        if (total <= 0) return;
+
+        tickBank += dt * playSpeed;
+        while (tickBank >= 1f / 60f)
+        {
+            tickBank -= 1f / 60f;
+            tick = (tick + 1) % total;
+        }
+        SceneView.RepaintAll();
+    }
+#endif
+
+    public int TotalTicks()
+    {
+        if (character == null || character.def == null || character.def.moves == null || character.def.moves.Length == 0) return 0;
+        MoveDef move = character.def.moves[Mathf.Clamp(moveIndex, 0, character.def.moves.Length - 1)].move;
+        return move == null ? 0 : move.totalTicks;
+    }
+
     void OnEnable()
     {
+#if UNITY_EDITOR
+        lastTime = EditorApplication.timeSinceStartup;
+        EditorApplication.update += EditorStep;
+#endif
         if (art == null)
         {
             GameObject go = new GameObject("PreviewSprite");
@@ -42,6 +82,9 @@ public class CharacterPreview : MonoBehaviour
 
     void OnDisable()
     {
+#if UNITY_EDITOR
+        EditorApplication.update -= EditorStep;
+#endif
         if (art == null) return;
         if (Application.isPlaying) Destroy(art.gameObject);
         else DestroyImmediate(art.gameObject);

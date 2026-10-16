@@ -298,7 +298,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchController
   relayUrl: ws://localhost:8787
-  releaseRelayUrl: 
+  releaseRelayUrl: wss://ld-relay.fightinggame.workers.dev
   fetchServerCharacters: 1
   fetchInEditor: 0
 --- !u!4 &2075206608
