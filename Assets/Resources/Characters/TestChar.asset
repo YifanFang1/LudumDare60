@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b597348f8411e4aed9108a6fd5d6b6c7, type: 3}
+  m_Name: TestChar
+  m_EditorClassIdentifier: LD.CharacterData::CharacterData
+  def:
+    id: 691929585
+    displayName: New Character
+    maxHp: 100
+    walkSpeed: 60
+    hurtbox:
+      x: -500
+      y: 0
+      w: 1000
+      h: 2000
+    moves:
+    - button: 1
+      move:
+        name: Heavy
+        totalTicks: 28
+        hitboxes:
+        - spawnTick: 10
+          lifetime: 4
+          box:
+            x: 300
+            y: 700
+            w: 1300
+            h: 700
+          damage: 12
+          hitstun: 20
+          knockback: 80
+          followOwner: 1
+          vx: 0
+    - button: 0
+      move:
+        name: Light
+        totalTicks: 15
+        hitboxes:
+        - spawnTick: 4
+          lifetime: 3
+          box:
+            x: 400
+            y: 800
+            w: 1000
+            h: 400
+          damage: 5
+          hitstun: 12
+          knockback: 40
+          followOwner: 1
+          vx: 0
+  viewPrefab: {fileID: 0}
+  sprite: {fileID: 0}
+  spriteOffsetX: 0
+  spriteOffsetY: 0
+  spriteScale: 1
+  placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
+  idleLoopTicks: 60
+  walkLoopTicks: 30

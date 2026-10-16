@@ -1,0 +1,14 @@
+{
+    "name": "LD.Match",
+    "rootNamespace": "",
+    "references": ["LD.Sim", "LD.Characters", "Unity.InputSystem"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
