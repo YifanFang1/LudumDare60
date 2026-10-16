@@ -128,9 +128,11 @@ public class GameSim
             if (hitWorld.Overlaps(hurtWorld))
             {
                 h.hasHit = true;
+                h.blocked = victim.IsBlocking;
                 int cx, cy;
                 hitWorld.OverlapCenter(hurtWorld, out cx, out cy);
-                AddEvent(SimEventType.Hit, h.owner, 1 - h.owner, cx, cy, h.def.damage);
+                if (h.blocked) AddEvent(SimEventType.Block, h.owner, 1 - h.owner, cx, cy, 0);
+                else AddEvent(SimEventType.Hit, h.owner, 1 - h.owner, cx, cy, h.def.damage);
                 hitsThisTick.Add(h);
             }
         }
@@ -174,7 +176,8 @@ public class GameSim
                 h = h * 31 + f.hp;
                 h = h * 31 + (int)f.state;
                 h = h * 31 + f.stateTick;
-                h = h * 31 + f.hitstunTicks;
+                h = h * 31 + f.stunTicks;
+                h = h * 31 + (f.holdingBack ? 1 : 0);
                 h = h * 31 + f.HashExtra();
             }
             h = h * 31 + hitboxes.Count;

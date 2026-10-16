@@ -12,7 +12,9 @@ Players fight **online** (room codes through a Cloudflare relay) or **solo vs an
 | Character | Status | Notes |
 |---|---|---|
 | Overpowered Elephant | Planned | The only confirmed character so far. Details TBD. |
-| Brawler | In code | The code example and test dummy (id 0). Not a real roster character. |
+| Brawler | In code | Close-range test character (id 0) and the fallback for unknown ids. Not a real roster character. |
+| Shooter | In code | Long-range test character (id 1): jab and a one-on-screen fireball. Not a real roster character. |
+| Sandbag | In code | Training dummy (id 2): ignores all input, refills health instead of being KO'd. |
 
 The plan is 4 characters at launch, with more later. The team will fill in this table.
 
@@ -27,6 +29,8 @@ The plan is 4 characters at launch, with more later. The team will fill in this 
 
 **Read [Assets/Scripts/ARCHITECTURE.md](Assets/Scripts/ARCHITECTURE.md) before you change code.** It covers the assembly layout, the no-code character workflow, hitbox units and how characters get published. Keep it up to date when the architecture changes.
 
+**To make a character, read [Assets/Scripts/Characters/CHARACTERS.md](Assets/Scripts/Characters/CHARACTERS.md).** Code characters extend the `BaseFighter` template.
+
 ## Hard rules (break these and online play desyncs or the build breaks)
 1. **The sim is deterministic.** In `Assets/Scripts/Sim` and `Assets/Scripts/Characters`:
    - Use ints only: no `float`, `Time`, `UnityEngine.Random`, Unity physics or `UnityEngine`.
@@ -36,15 +40,15 @@ The plan is 4 characters at launch, with more later. The team will fill in this 
 2. **Only the dependencies allowed by the asmdefs**: `Sim <- Characters <- Match <- Net`, `CharacterData -> Characters`, `View -> IMatchSession + CharacterData`. Never add a reference that points the other way. Visuals and audio react to `SimEvent`s; the sim never reads them.
 3. **Extra fighter state** (meters, cooldowns, combo counters, stances) must be mixed into `HashExtra()`. Otherwise desyncs go undetected.
 4. **Bump `Version`** in [RelayLockstepSession.cs](Assets/Scripts/Net/RelayLockstepSession.cs) whenever the sim rules or the network message format change.
-5. **Make characters as data whenever possible.** Use `CharacterData` assets in `Assets/Resources/Characters/`, created with right click > Create > Fight > Character. Ids are random and permanent; never reuse or hand-edit them. Use a `Fighter` subclass registered in `CharacterList` only when a mechanic can't be expressed as data. Many of the "Old Tech(nique)" gimmicks will need one.
+5. **Make characters as data whenever possible.** Use `CharacterData` assets in `Assets/Resources/Characters/`, created with right click > Create > Fight > Character. Ids are random and permanent; never reuse or hand-edit them. Use a `BaseFighter` subclass registered in `CharacterList` (fixed id 0-999) only when a mechanic can't be expressed as data. Many of the "Old Tech(nique)" gimmicks will need one.
 6. **The AI** (`AIInputSource`) runs on only one machine. It may read the sim and use `System.Random`, but it must only produce input bits.
 7. **WebGL limits:** browsers on https only allow `wss://` connections, there are no threads, and the game must keep ticking in a background tab (`runInBackground` is set).
 
 ## Current state vs plan
-**Built:** walk, light and heavy attacks, hitstun, KO, projectiles (hitboxes that don't follow their owner), lockstep online play through the relay with desync hashes, local play vs a placeholder AI, the inspector character editor with live hitbox preview, a basic lobby and controls UI, and publishing character data to the server.
+**Built:** walk, light and heavy attacks, blocking by holding back (with blockstun), hitstun, KO, a `BaseFighter` template with Brawler, Shooter and Sandbag test characters, a "Debug boxes" hitbox/hurtbox toggle panel, art for code characters (`CodeCharacterArt`) with an Animator generator (Fight > Create Animator for Selected Character), EditMode tests, projectiles (hitboxes that don't follow their owner), lockstep online play through the relay with desync hashes, local play vs a placeholder AI, the inspector character editor with live hitbox preview, a basic lobby and controls UI, and publishing character data to the server.
 
 **Not built yet:**
-- **Blocking.** `Buttons.Block` (L) is bound but the sim ignores it. The MVP plan is to block by walking backward.
+- **Block button.** Blocking works by holding back. `Buttons.Block` (L) is still bound but the sim ignores it.
 - **Grab/throw.**
 - **Specials.**
 - **Online character choice.** Both online players are currently Brawler.
@@ -56,7 +60,7 @@ The plan is 4 characters at launch, with more later. The team will fill in this 
 - Moveset additions: dash, jump (the `Buttons.Up` bit is reserved), aerials, high/low attacks, supers or ultimates.
 - A proper character select screen and online lobby, including sending each player's character choice over the network.
 
-Default keys: A/D move, S down, J light, K heavy, L block. They can be rebound in `FightControls`.
+Default keys: A/D move (hold away from the opponent to block), S down, J light, K heavy, L block (unused). They can be rebound in `FightControls`.
 
 ## Commands
 - Relay, run in `relay/`:
