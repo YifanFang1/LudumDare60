@@ -1,0 +1,14 @@
+{
+    "name": "LD.Net.Relay",
+    "rootNamespace": "",
+    "references": ["LD.Sim", "LD.Characters", "LD.Match", "LD.CharacterData", "endel.nativewebsocket"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
