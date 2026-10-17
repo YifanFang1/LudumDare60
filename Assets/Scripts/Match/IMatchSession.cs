@@ -1,6 +1,6 @@
 using System;
 
-public enum MatchPhase { Lobby, Waiting, Playing }
+public enum MatchPhase { Lobby, Waiting, CharacterSelect, Playing }
 
 // THE ONE DOOR between "a match is happening" and everything that wants to look at it.
 //
@@ -22,9 +22,15 @@ public interface IMatchSession
     string Status { get; }          // last message for the lobby ("Room is full", ...)
 
     // Character ids (see CharacterList). For Play vs AI: yours and the AI's.
-    // Online matches do not use these yet (character ids are not exchanged over the network).
+    // Online, only LocalCharacter is yours to set; the opponent picks their own.
     int LocalCharacter { get; set; }
     int OpponentCharacter { get; set; }
+
+    // Character select (Phase == CharacterSelect). Change LocalCharacter (and OpponentCharacter
+    // when ChoosesOpponent) while browsing, then call ConfirmCharacter. The match starts once
+    // every player has confirmed: right away vs AI, when both have picked online.
+    bool ChoosesOpponent { get; }       // true vs AI: you also pick the AI's character
+    bool CharacterConfirmed { get; }    // you have locked in your pick
 
     // Optional online extras. When SupportsRooms is false the lobby simply hides them.
     bool SupportsRooms { get; }
@@ -40,6 +46,7 @@ public interface IMatchSession
     // ----- commands -----
     void PlayVsAI();
     void QuickMatch();              // join whoever is waiting, or wait to be joined (needs SupportsRooms)
+    void ConfirmCharacter();
     void CreateRoom();
     void JoinRoom(string code);
     void Leave();

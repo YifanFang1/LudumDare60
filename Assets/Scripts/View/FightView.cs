@@ -69,6 +69,7 @@ public class FightView : MonoBehaviour
         GUI.Label(new Rect(width / 2f - 50, 200, 200, 30), result);
         if (GUI.Button(new Rect(width / 2f - 60, 230, 120, 30), "Back to lobby"))
         {
+            AudioManager.Click();
             match.Leave();
         }
     }
