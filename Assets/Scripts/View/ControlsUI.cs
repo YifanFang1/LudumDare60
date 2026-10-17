@@ -28,7 +28,7 @@ public class ControlsUI : MonoBehaviour
 
         if (!open)
         {
-            GUILayout.BeginArea(new Rect(20, 420, 200, 40));
+            GUILayout.BeginArea(new Rect(20, 60, 320, 40));
             if (GUILayout.Button("Controls")) open = true;
             GUILayout.EndArea();
             return;
