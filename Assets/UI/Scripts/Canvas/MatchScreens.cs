@@ -32,6 +32,13 @@ public class MatchScreens : MonoBehaviour
     [Tooltip("Turn off the old OnGUI lobby and HUD (LobbyUI, FightView) while this canvas is in the scene.")]
     public bool replaceImguiUI = true;
 
+    [Header("Debug")]
+    [Tooltip("Off: hides the debug UI (tick / controls / info lines, hurtbox and hitbox overlays and their checkboxes). Fighter placeholder boxes stay visible.")]
+    public bool showDebugUI = true;
+
+    // Read by the HUD and WorldView so one checkbox here controls every debug overlay.
+    public static bool DebugUI = true;
+
     [Tooltip("Which screen to show in the editor while the game is not running, so you can design each one.")]
     public UiScreen editorPreview = UiScreen.Lobby;
 
@@ -56,6 +63,7 @@ public class MatchScreens : MonoBehaviour
 
     void Awake()
     {
+        DebugUI = showDebugUI;
         match = SessionFinder.Find();
         if (match == null)
         {
@@ -76,6 +84,7 @@ public class MatchScreens : MonoBehaviour
 
     void Update()
     {
+        DebugUI = showDebugUI;   // so ticking the box while playing takes effect at once
         MatchPhase phase = match.Phase;
         // Leaving the menus for a room or match remembers the page; backing out of it lands on that same page again.
         if (phase != MatchPhase.Lobby && lastPhase == MatchPhase.Lobby) pageBeforeMatch = page;

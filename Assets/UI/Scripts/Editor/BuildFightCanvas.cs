@@ -343,8 +343,8 @@ public static class BuildFightCanvas
         rowLayout.childForceExpandHeight = true;
         TMP_Text confirmLabel;
         TMP_Text backLabel;
-        Button confirm = Btn(row.transform, "ConfirmButton", "Ready", 64f, out confirmLabel);
-        Button back = Btn(row.transform, "BackButton", "Back", 64f, out backLabel);
+        Button back = Btn(row.transform, "BackButton", "Back", 64f, out backLabel);          // left
+        Button confirm = Btn(row.transform, "ConfirmButton", "Ready", 64f, out confirmLabel);   // right
 
         TMP_Text status = FreeText(screen.transform, "StatusText", "", 24, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.4f));
         Anchor(status.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1000f, 40f));

@@ -73,9 +73,9 @@ public class HudScreen : MonoBehaviour
         string info = match.IsOnline
             ? "Online - you are P" + (match.LocalSlot + 1) + (match.SupportsRooms ? "   room " + match.RoomCode : "")
             : "Offline vs AI";
-        SetText(infoText, info);
-        SetText(controlsText, FightControls.Hint());
-        SetText(tickText, "tick " + sim.tick + "   " + sim.fighters[match.LocalSlot].state);
+        ShowDebug(infoText, info);
+        ShowDebug(controlsText, FightControls.Hint());
+        ShowDebug(tickText, "tick " + sim.tick + "   " + sim.fighters[match.LocalSlot].state);
         SetText(stalledText, match.Stalled ? "waiting for opponent input..." : "");
         SetText(warningText, match.Warning);
 
@@ -89,6 +89,14 @@ public class HudScreen : MonoBehaviour
         }
 
         UpdateWorldNames(sim);
+    }
+
+    // Debug lines: hidden when Match Screens > Show Debug UI is off.
+    static void ShowDebug(TMP_Text text, string value)
+    {
+        if (text == null) return;
+        if (text.gameObject.activeSelf != MatchScreens.DebugUI) text.gameObject.SetActive(MatchScreens.DebugUI);
+        if (MatchScreens.DebugUI) SetText(text, value);
     }
 
     static void SetText(TMP_Text text, string value)

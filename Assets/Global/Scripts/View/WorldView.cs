@@ -170,7 +170,7 @@ public class WorldView : MonoBehaviour
             if (f.state == FighterStateId.Hitstun) c = Color.Lerp(c, Color.black, 0.35f);
             if (f.state == FighterStateId.Blockstun) c = Color.Lerp(c, Color.cyan, 0.5f);
             if (f.state == FighterStateId.KO) c = Color.gray;
-            v.placeholder.enabled = showHurtboxes;   // with no art the box IS the body
+            v.placeholder.enabled = showHurtboxes || !MatchScreens.DebugUI;   // with no art the box IS the body, so debug-off never hides it
             Place(v.placeholder, f.HurtboxWorld(), c);
             return;
         }
@@ -184,8 +184,9 @@ public class WorldView : MonoBehaviour
 
         if (v.hurt != null)
         {
-            v.hurt.enabled = showHurtboxes;
-            if (showHurtboxes) Place(v.hurt, f.HurtboxWorld(), new Color(0.2f, 1f, 0.3f, 0.35f));
+            bool hurtOn = showHurtboxes && MatchScreens.DebugUI;
+            v.hurt.enabled = hurtOn;
+            if (hurtOn) Place(v.hurt, f.HurtboxWorld(), new Color(0.2f, 1f, 0.3f, 0.35f));
         }
     }
 
@@ -251,7 +252,7 @@ public class WorldView : MonoBehaviour
 
     void UpdateHitboxes(GameSim sim)
     {
-        int count = showHitboxes ? sim.hitboxes.Count : 0;
+        int count = showHitboxes && MatchScreens.DebugUI ? sim.hitboxes.Count : 0;
 
         while (hitboxQuads.Count < count)
         {
@@ -283,7 +284,7 @@ public class WorldView : MonoBehaviour
 
     void OnGUI()
     {
-        if (!showToggles || match == null || match.Phase != MatchPhase.Playing) return;
+        if (!showToggles || !MatchScreens.DebugUI || match == null || match.Phase != MatchPhase.Playing) return;
 
         float width, height;
         GuiDraw.BeginVirtualScreen(out width, out height);
