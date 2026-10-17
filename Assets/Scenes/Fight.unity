@@ -149,32 +149,50 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxBackground
   layers:
-  - name: Midground
-    sprite: {fileID: 21300000, guid: 99eb197da52271e4c95d87ec77284a30, type: 3}
-    followCamera: 0
-    tile: 0
-    driftSpeed: 0
-    x: 0
-    y: -2
-    scale: 1
-    tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Sky
-    sprite: {fileID: 21300000, guid: 02a9d72b74541c04bbb755dbbf6f3366, type: 3}
-    followCamera: 0
+    sprite: {fileID: 21300000, guid: 04976559144225a4f90dc41ab2ff68b7, type: 3}
+    followCamera: 0.9
+    tile: 1
+    driftSpeed: 0
+    x: 0
+    y: 1
+    scale: 8
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Flavor
+    sprite: {fileID: 21300000, guid: 7c544b09e1904f845b8e84fdfa1251cd, type: 3}
+    followCamera: 0.6
+    tile: 0
+    driftSpeed: 0
+    x: 2.06
+    y: 7.86
+    scale: 7
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Background
+    sprite: {fileID: 21300000, guid: 698337ea3de23b64ca2b4a0eb599aac9, type: 3}
+    followCamera: 0.6
     tile: 0
     driftSpeed: 0
     x: 0
-    y: -2
-    scale: 1
+    y: 0.62
+    scale: 8
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Midground
+    sprite: {fileID: 21300000, guid: a173f5633589f12419363d60d326914a, type: 3}
+    followCamera: 0.3
+    tile: 0
+    driftSpeed: 0
+    x: 0
+    y: -0.21
+    scale: 8
     tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Foreground
-    sprite: {fileID: 21300000, guid: 31316b6ad10b50a438dc164e25887d75, type: 3}
+    sprite: {fileID: 21300000, guid: cde66e17182e3504da47053bb4b9a245, type: 3}
     followCamera: 0
     tile: 0
     driftSpeed: 0
     x: 0
-    y: -2
-    scale: 1
+    y: -1.07
+    scale: 8
     tint: {r: 1, g: 1, b: 1, a: 1}
   material: {fileID: 0}
   sortingOrder: -100
@@ -509,7 +527,7 @@ MonoBehaviour:
   maxSize: 5
   padding: 2.5
   stageHalfWidth: 10
-  floorMargin: 2
+  floorMargin: 1
   smoothTime: 0.15
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

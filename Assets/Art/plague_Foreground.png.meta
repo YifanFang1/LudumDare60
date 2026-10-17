@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 02a9d72b74541c04bbb755dbbf6f3366
+guid: cde66e17182e3504da47053bb4b9a245
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3829979119961430066
-    second: pixel_background_sky_0
+      213: 3665705143027451706
+    second: plague_Foreground_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -53,7 +53,7 @@ TextureImporter:
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 1
+  spriteGenerateFallbackPhysicsShape: 0
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationMethod: 0
@@ -102,13 +102,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: pixel_background_sky_0
+      name: plague_Foreground_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 2416
-        height: 1327
+        width: 264
+        height: 35
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -117,8 +117,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ec72981584e29dac0800000000000000
-      internalID: -3829979119961430066
+      spriteID: a374975e7633fd230800000000000000
+      internalID: 3665705143027451706
       vertices: []
       indices: 
       edges: []
@@ -137,7 +137,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      pixel_background_sky_0: -3829979119961430066
+      plague_Foreground_0: 3665705143027451706
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
