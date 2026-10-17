@@ -19,11 +19,11 @@ public class NetClient
     public Action<int, int> OnHash;         // tick, hash   (other player's)
     public Action<string> OnStatus;         // "full", "badversion", "left", "closed", "error: ..."
 
-    public async void Connect(string baseUrl, string code, string version)
+    public async void Connect(string baseUrl, string code, string version, bool isPublic = false)
     {
         try
         {
-            ws = new WebSocket(baseUrl + "/room/" + code + "?v=" + version);
+            ws = new WebSocket(baseUrl + "/room/" + code + "?v=" + version + (isPublic ? "&pub=1" : ""));
             ws.OnOpen += () => { if (OnOpen != null) OnOpen(); };
             ws.OnMessage += HandleMessage;
             ws.OnError += (e) => { if (OnStatus != null) OnStatus("error: " + e); };

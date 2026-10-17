@@ -9,8 +9,8 @@ function check(name, ok) {
   if (!ok) failed++;
 }
 
-function connect(code, version = "1") {
-  const ws = new WebSocket(`${BASE}/room/${code}?v=${version}`);
+function connect(code, version = "1", pub = false) {
+  const ws = new WebSocket(`${BASE}/room/${code}?v=${version}${pub ? "&pub=1" : ""}`);
   const msgs = [];
   const waiters = [];
   ws.on("message", (data) => {
@@ -41,6 +41,48 @@ function connect(code, version = "1") {
   const body = await res.json();
   check("GET /characters.json returns a bundle", res.status === 200 && body.format === 1 && Array.isArray(body.characters));
   check("characters.json allows cross-origin reads (itch page)", res.headers.get("access-control-allow-origin") === "*");
+}
+
+// quick match + public/private rooms
+{
+  const http = BASE.replace(/^ws/, "http");
+  const get = async () => {
+    const r = await fetch(http + "/quick");
+    return { code: (await r.text()).trim(), cors: r.headers.get("access-control-allow-origin") };
+  };
+  const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // nobody waiting -> a fresh code, and the caller hosts it
+  const qa = await get();
+  check("quick: returns a 4-letter code with CORS", /^[A-Z]{4}$/.test(qa.code) && qa.cors === "*");
+  const hostA = connect(qa.code, "1", true);
+  await hostA.open;
+
+  // a private room (no pub flag) must never be handed out
+  const privCode = "P" + Math.floor(Math.random() * 1000);
+  const priv = connect(privCode);
+  await priv.open;
+  await pause(100);
+
+  const qb = await get();
+  check("quick: joins the waiting public room, not the private one", qb.code === qa.code && qb.code !== privCode);
+  const joinB = connect(qb.code, "1", true);
+  await joinB.open;
+  check("quick: both players start", (await hostA.waitFor("start")) !== null && (await joinB.waitFor("start")) !== null);
+
+  // a public room made with Create room (pub=1) is found by quick match
+  const pubCode = "U" + Math.floor(Math.random() * 1000);
+  const pub = connect(pubCode, "1", true);
+  await pub.open;
+  await pause(100);
+  const qc = await get();
+  check("quick: finds a public room made by Create room", qc.code === pubCode);
+
+  // a full room is skipped; a room whose host left is skipped
+  const qd = await get();
+  check("quick: empty pool gives a new room", qd.code !== pubCode && qd.code !== qa.code);
+
+  for (const x of [hostA, joinB, priv, pub]) x.ws.close();
 }
 
 const code = "T" + Math.floor(Math.random() * 1000);

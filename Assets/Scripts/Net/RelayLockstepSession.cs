@@ -93,16 +93,49 @@ public class RelayLockstepSession : MatchSessionBase
 
     // ---------- commands ----------
 
+    // Joins a waiting public room, or hosts a new public one if nobody is waiting.
+    public override void QuickMatch()
+    {
+        if (CharactersLoading) { Status = "Still loading characters, try again in a moment"; return; }
+        if (quickBusy) return;
+        StartCoroutine(QuickMatchRoutine());
+    }
+
+    bool quickBusy;
+
+    IEnumerator QuickMatchRoutine()
+    {
+        quickBusy = true;
+        Status = "Finding a match...";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(HttpBase(relayUrl) + "/quick"))
+        {
+            yield return request.SendWebRequest();
+
+            string code = request.result == UnityWebRequest.Result.Success ? request.downloadHandler.text.Trim().ToUpper() : "";
+            if (code.Length != 4)
+            {
+                Status = "Could not reach the server for quick match";
+            }
+            else if (Phase == MatchPhase.Lobby)   // the player may have started something else meanwhile
+            {
+                StartOnline(code, true);   // quick match rooms are always public
+            }
+        }
+
+        quickBusy = false;
+    }
+
     public override void CreateRoom()
     {
         if (CharactersLoading) { Status = "Still loading characters, try again in a moment"; return; }
-        StartOnline(RandomCode());
+        StartOnline(RandomCode(), PublicRoom);
     }
 
     public override void JoinRoom(string code)
     {
         if (CharactersLoading) { Status = "Still loading characters, try again in a moment"; return; }
-        StartOnline(code);
+        StartOnline(code, false);   // joining: the room is already public or private, the host decided
     }
 
     public override void Leave()
@@ -113,7 +146,7 @@ public class RelayLockstepSession : MatchSessionBase
 
     // ---------- internals ----------
 
-    void StartOnline(string code)
+    void StartOnline(string code, bool isPublic)
     {
         if (code.Length != 4)
         {
@@ -139,7 +172,7 @@ public class RelayLockstepSession : MatchSessionBase
         net.OnOpen = () => { Status = "Connected. Waiting for an opponent..."; };
         net.OnStart = BeginOnlineMatch;
         net.OnStatus = HandleStatus;
-        net.Connect(relayUrl, code, Version + "-" + CharacterList.DataHash());
+        net.Connect(relayUrl, code, Version + "-" + CharacterList.DataHash(), isPublic);
     }
 
     void BeginOnlineMatch(int slot, int seed, int delay)

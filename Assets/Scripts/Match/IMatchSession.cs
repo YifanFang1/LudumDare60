@@ -30,6 +30,7 @@ public interface IMatchSession
     bool SupportsRooms { get; }
     string RoomCode { get; }
     string ServerAddress { get; set; }
+    bool PublicRoom { get; set; }   // rooms you create: public ones can be found by Quick match, private ones need the code
 
     // ----- subscribe -----
     event Action<GameSim> MatchStarted;      // a new match just began (sim is freshly reset)
@@ -38,6 +39,7 @@ public interface IMatchSession
 
     // ----- commands -----
     void PlayVsAI();
+    void QuickMatch();              // join whoever is waiting, or wait to be joined (needs SupportsRooms)
     void CreateRoom();
     void JoinRoom(string code);
     void Leave();
