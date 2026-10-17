@@ -10,6 +10,7 @@ prefabs and scenes, so people working on different features stay out of each oth
         Scripts/Net        LD.Net.Relay   online play through the relay
         Scripts/View       (no asmdef)    WorldView, FightView
         Audio/             AudioManager + music
+        Rendering/         SpriteOutline (fighter outlines) + OutlineProfile, shader and material in Resources/
       Characters/      everything about fighters (guide: CHARACTERS.md)
         Scripts/Fighters   LD.Characters  BaseFighter, CharacterList, test fighters
         Scripts/Data       LD.CharacterData  CharacterData, CodeCharacterArt, loader
@@ -53,6 +54,7 @@ Each code folder is its own assembly (asmdef). The arrows are the ONLY allowed d
   - `SimHarness`: shared helpers (`NewMatch`, `Run`, `TestFighter`). The tests also reference LD.Match, for the AI.
 - **Audio**: `AudioManager` on the GameManager object. It plays fight sounds from `IMatchSession.SimEventRaised` and picks music from the match phase; menus call `AudioManager.Click()` / `Confirm()`, which do nothing if there is no AudioManager. Every clip slot is optional.
 - **Juice** (`Assets/Juice`): screen shake and particles. It only listens to `IMatchSession` events, so it never touches the sim.
+- **Outlines** (`Global/Rendering`): `SpriteOutline` draws any number of coloured outline layers around a sprite's shape (each one around the last), worked out from the current frame every frame. `WorldView` adds it to both fighters: the fighter this machine controls gets the **Player** layers and the other one the **Enemy** layers, so online each player sees themselves in the Player colours. Edit the colours and widths in **Fight > Outline Colors (Player and Enemy)** (the `OutlineProfile` asset). Preview without pressing Play: add `SpriteOutline` to any sprite in the scene, or use the Outline option on `CharacterPreview`. Sprites need **Mesh Type: Full Rect** in their import settings.
 
 ## Making a character (no code)
 1. Project window: make a folder `Assets/Characters/<Name>/Resources`, then right click it > Create > Fight > Character. Name the file.

@@ -13,6 +13,7 @@ using UnityEditor;
 // live. Tick N here is exactly tick N of the move in the real fight.
 // Press Play in the inspector to step through the move's ticks automatically (60 per second).
 // Only the sprite and boxes are previewed; the Animator of a View Prefab plays in matches.
+// Outline shows the sprite with the Player or Enemy outline (colours: Fight > Outline Colors).
 [ExecuteAlways]
 public class CharacterPreview : MonoBehaviour
 {
@@ -29,8 +30,12 @@ public class CharacterPreview : MonoBehaviour
     public bool showHitboxes = true;
     public bool showInactiveHitboxes = true;
     public bool filled = true;         // translucent fill as well as the outline
+    public bool showOutline = true;
+    [Tooltip("Which outline colours to preview. Custom is plain white here.")]
+    public SpriteOutline.Style outline = SpriteOutline.Style.Player;
 
     SpriteRenderer art;                // lives on a hidden child object, never saved in the scene
+    SpriteOutline artOutline;          // on the same hidden object
 
 #if UNITY_EDITOR
     double lastTime;
@@ -77,6 +82,7 @@ public class CharacterPreview : MonoBehaviour
             go.transform.SetParent(transform, false);
             art = go.AddComponent<SpriteRenderer>();
             art.sortingOrder = -5;
+            artOutline = go.AddComponent<SpriteOutline>();
         }
     }
 
@@ -89,6 +95,7 @@ public class CharacterPreview : MonoBehaviour
         if (Application.isPlaying) Destroy(art.gameObject);
         else DestroyImmediate(art.gameObject);
         art = null;
+        artOutline = null;
     }
 
     void SyncSprite()
@@ -102,7 +109,14 @@ public class CharacterPreview : MonoBehaviour
         int facing = faceRight ? 1 : -1;
         art.sprite = character.sprite;
         art.transform.localPosition = new Vector3(facing * character.spriteOffsetX, character.spriteOffsetY, 0f);
-        art.transform.localScale = new Vector3(facing * character.spriteScale, character.spriteScale, 1f);
+        art.transform.localScale = new Vector3(facing * character.SpriteFlip * character.spriteScale, character.spriteScale, 1f);
+
+        if (artOutline != null)
+        {
+            artOutline.enabled = showOutline;
+            artOutline.style = outline;
+            if (showOutline) artOutline.Apply();
+        }
     }
 
     void OnDrawGizmos()
