@@ -50,10 +50,35 @@ public class JuiceProfile : ScriptableObject
     [Tooltip("Seconds without a hit before the hill levels out again. 0 = it stays tilted until the match ends.")]
     [Range(0f, 10f)] public float hillTiltHoldTime = 2f;
 
+    [Header("Impact frame: when an Ultimate hits, the screen goes black and the fighters white")]
+    [Tooltip("Also play it (with the zoom punch and CRT glitch) when an Ultimate is blocked.")]
+    public bool impactOnBlockedUltimate = true;
+    public Color impactBackgroundColor = Color.black;
+    public Color impactSilhouetteColor = Color.white;
+    [Tooltip("Sparks flip what is behind them: white on the background, black on the fighters. " +
+             "Turn off to draw them in Impact Spark Color instead.")]
+    public bool impactInvertSparks = true;
+    public Color impactSparkColor = Color.white;
+    [Tooltip("Ticks at the start shown inverted (background and fighter colours swapped) before the " +
+             "normal impact frame. 0 = no flicker.")]
+    [Min(0)] public int impactInvertedTicks = 2;
+
+    [Header("Zoom punch: the camera snaps in towards an Ultimate hit")]
+    [Tooltip("How much it zooms in, as a fraction of the view. 0 = no zoom punch.")]
+    [Range(0f, 0.6f)] public float zoomPunchAmount = 0.25f;
+    [Tooltip("How far the camera slides towards the hit. 0 = stays centred, 1 = centred on the hit.")]
+    [Range(0f, 1f)] public float zoomPunchPull = 0.5f;
+    [Tooltip("Seconds to ease back out after the impact frame ends.")]
+    [Range(0f, 2f)] public float zoomPunchReturnTime = 0.35f;
+
+    [Header("CRT glitch: the CRT filter spikes when an Ultimate hits")]
+    [Tooltip("Seconds the glitch takes to fade out. 0 = no glitch.")]
+    [Range(0f, 2f)] public float crtGlitchTime = 0.5f;
+
     [Header("Durations (ticks, 60 = 1 second)")]
     public int flashTicks = 4;
-    public int impactTicks = 3;
-    public int koImpactTicks = 6;
+    [Tooltip("How long the impact frame shows when an Ultimate hits (including the inverted beat). 0 = off.")]
+    public int impactTicks = 8;
 
     [Header("Characters")]
     [Tooltip("Used by any character without its own profile below.")]

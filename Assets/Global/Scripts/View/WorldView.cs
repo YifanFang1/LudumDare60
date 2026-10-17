@@ -121,6 +121,12 @@ public class WorldView : MonoBehaviour
         }
     }
 
+    /// <summary>The GameObject holding fighter i's art, or null between matches. JuiceManager uses it for impact frames.</summary>
+    public GameObject FighterRoot(int i)
+    {
+        return views[i] != null ? views[i].root : null;
+    }
+
     void Clear()
     {
         if (worldRoot != null) Destroy(worldRoot);
@@ -331,9 +337,19 @@ public class WorldView : MonoBehaviour
         GuiDraw.BeginVirtualScreen(out width, out height);
         // A titled panel so it's easy to spot. Hitboxes only exist for the few ticks an attack is
         // active, so with "Hitboxes" on you see a yellow flash exactly when a move can hit.
-        GUILayout.BeginArea(new Rect(12, height - 96, 230, 84), "Debug boxes", GUI.skin.window);
+        // Offline only, the panel also gets a cheat button, so it is taller.
+        float panelHeight = match.IsOnline ? 84 : 112;
+        GUILayout.BeginArea(new Rect(12, height - panelHeight - 12, 230, panelHeight), "Debug boxes", GUI.skin.window);
         showHurtboxes = GUILayout.Toggle(showHurtboxes, " Hurtboxes (green: bodies)");
         showHitboxes = GUILayout.Toggle(showHitboxes, " Hitboxes (yellow: attacks)");
+
+        // Testing cheat: fill both Ultimate meters. This changes the sim from outside Step(), which
+        // would desync an online match, so the button only exists vs the AI.
+        if (!match.IsOnline && GUILayout.Button("Full Ultimate meter (both)"))
+        {
+            match.Sim.fighters[0].meter = Fighter.MeterMax;
+            match.Sim.fighters[1].meter = Fighter.MeterMax;
+        }
         GUILayout.EndArea();
     }
 
