@@ -20,10 +20,12 @@ MonoBehaviour:
   tintStrength: 0.3
   colorSplit: 0.003
   waveAmount: 0.00415
-  waveFrequency: 30
-  waveSpeed: 3
-  scanlineScrollSpeed: 2
-  scanlineCount: 300
-  scanlineDarkness: 0.5
+  waveFrequency: 21.9
+  waveSpeed: 1.9
+  scanlineScrollSpeed: -2.8
+  scanlineCount: 149
+  scanlineDarkness: 0.351
   curvature: 0.01
   vignetteStrength: 1
+  glitchColorSplit: 0.015
+  glitchWaveAmount: 0.01
