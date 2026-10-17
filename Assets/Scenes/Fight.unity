@@ -372,6 +372,7 @@ GameObject:
   - component: {fileID: 2075206609}
   - component: {fileID: 2075206612}
   - component: {fileID: 2075206611}
+  - component: {fileID: 2075206613}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -463,6 +464,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1689b201d023c4cd3bfecca2d5b2ccfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ControlsUI
+--- !u!114 &2075206613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2075206606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96a86c73d92ce8840bb2fef25146a03a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  attackSounds: []
+  hitSounds: []
+  heavyHitSounds: []
+  blockSounds: []
+  koSound: {fileID: 0}
+  heavyHitDamage: 10
+  fightStart: {fileID: 0}
+  winJingle: {fileID: 0}
+  loseJingle: {fileID: 0}
+  drawJingle: {fileID: 0}
+  buttonClick: {fileID: 0}
+  confirm: {fileID: 0}
+  menuMusic: {fileID: 8300000, guid: 726fed668e1e8104996c65324109379e, type: 3}
+  characterSelectMusic: {fileID: 0}
+  fightMusic: {fileID: 0}
+  sfxVolume: 1
+  uiVolume: 0.8
+  musicVolume: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
