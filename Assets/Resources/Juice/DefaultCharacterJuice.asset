@@ -16,5 +16,5 @@ MonoBehaviour:
   lightAttack: Sparks
   heavyAttack: Sparks
   block: 
-  lowHealthAura: 
-  lowHealthPercent: 25
+  lowHealthAura: Bleed
+  lowHealthPercent: 40
