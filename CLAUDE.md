@@ -32,28 +32,29 @@ The plan is 4 characters at launch, with more later. The team will fill in this 
 ## Tech stack
 - Unity **6000.6.3f1**, URP 2D renderer, the new Input System, plus the 2D Animation, Aseprite and PSD importers.
 - Online play uses `NativeWebSocket` to connect to a **Cloudflare Worker + Durable Object** relay in [relay/](relay/) (JavaScript, `wrangler`).
-- Main scene: [Assets/Scenes/Fight.unity](Assets/Scenes/Fight.unity).
+- Main scene: [Assets/MenuScreen/Menu.unity](Assets/MenuScreen/Menu.unity) (lobby + fight).
+- Folders are grouped by feature (`Global`, `Characters`, `Juice`, `UI`, `MenuScreen`, `Stages`), not by file type. See the folder map at the top of ARCHITECTURE.md.
 
 
-**Read [Assets/Scripts/ARCHITECTURE.md](Assets/Scripts/ARCHITECTURE.md) before you change code.** It covers the assembly layout, the no-code character workflow, hitbox units and how characters get published. Keep it up to date when the architecture changes.
+**Read [Assets/Global/ARCHITECTURE.md](Assets/Global/ARCHITECTURE.md) before you change code.** It covers the assembly layout, the no-code character workflow, hitbox units and how characters get published. Keep it up to date when the architecture changes.
 
 
-**To make a character, read [Assets/Scripts/Characters/CHARACTERS.md](Assets/Scripts/Characters/CHARACTERS.md).** Code characters extend the `BaseFighter` template.
+**To make a character, read [Assets/Characters/CHARACTERS.md](Assets/Characters/CHARACTERS.md).** Code characters extend the `BaseFighter` template.
 
 
-**Art and hitboxes:** importing a sprite (cutout PNG, bottom pivot, Pixels Per Unit from the hurtbox height) and the rules for sizing hurtboxes and hitboxes are in [CHARACTERS.md](Assets/Scripts/Characters/CHARACTERS.md#adding-art-and-animation). Gameplay sets the boxes and the art is fitted to them. Hurtboxes sit slightly inside the art, and hitboxes cover only the striking part on the impact frame.
+**Art and hitboxes:** importing a sprite (cutout PNG, bottom pivot, Pixels Per Unit from the hurtbox height) and the rules for sizing hurtboxes and hitboxes are in [CHARACTERS.md](Assets/Characters/CHARACTERS.md#adding-art-and-animation). Gameplay sets the boxes and the art is fitted to them. Hurtboxes sit slightly inside the art, and hitboxes cover only the striking part on the impact frame.
 
 
 ## Hard rules (break these and online play desyncs or the build breaks)
-1. **The sim is deterministic.** In `Assets/Scripts/Sim` and `Assets/Scripts/Characters`:
+1. **The sim is deterministic.** In `Assets/Global/Scripts/Sim` and `Assets/Characters/Scripts/Fighters`:
    - Use ints only: no `float`, `Time`, `UnityEngine.Random`, Unity physics or `UnityEngine`.
    - Positions are in milli-units (1000 = 1 Unity unit). Time is in ticks (60 per second).
    - The game state changes only inside `GameSim.Step(in0, in1)`.
    - `LD.Sim` has "No Engine References" turned on, and that is on purpose. Don't turn it off.
 2. **Only the dependencies allowed by the asmdefs**: `Sim <- Characters <- Match <- Net`, `CharacterData -> Characters`, `View -> IMatchSession + CharacterData`. Never add a reference that points the other way. Visuals and audio react to `SimEvent`s; the sim never reads them.
 3. **Extra fighter state** (meters, cooldowns, combo counters, stances) must be mixed into `HashExtra()`. Otherwise desyncs go undetected.
-4. **Bump `Version`** in [RelayLockstepSession.cs](Assets/Scripts/Net/RelayLockstepSession.cs) whenever the sim rules or the network message format change.
-5. **Make characters as data whenever possible.** Use `CharacterData` assets in `Assets/Resources/Characters/`, created with right click > Create > Fight > Character. Ids are random and permanent; never reuse or hand-edit them. Use a `BaseFighter` subclass registered in `CharacterList` (fixed id 0-999) only when a mechanic can't be expressed as data. Many of the "Old Tech(nique)" gimmicks will need one.
+4. **Bump `Version`** in [RelayLockstepSession.cs](Assets/Global/Scripts/Net/RelayLockstepSession.cs) whenever the sim rules or the network message format change.
+5. **Make characters as data whenever possible.** Use `CharacterData` assets in `Assets/Characters/<Name>/Resources/` (any `Resources` folder works), created with right click > Create > Fight > Character. Ids are random and permanent; never reuse or hand-edit them. Use a `BaseFighter` subclass registered in `CharacterList` (fixed id 0-999) only when a mechanic can't be expressed as data. Many of the "Old Tech(nique)" gimmicks will need one.
 6. **The AI** (`AIInputSource`) runs on only one machine. It may read the sim and use `System.Random`, but it must only produce input bits.
 7. **WebGL limits:** browsers on https only allow `wss://` connections, there are no threads, and the game must keep ticking in a background tab (`runInBackground` is set).
 
