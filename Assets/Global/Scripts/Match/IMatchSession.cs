@@ -39,6 +39,7 @@ public interface IMatchSession
     // Optional online extras. When SupportsRooms is false the lobby simply hides them.
     bool SupportsRooms { get; }
     string RoomCode { get; }
+    bool IsQuickMatch { get; }      // the room you are waiting in was found by Quick match, so there is no code to share
     string ServerAddress { get; set; }
     bool PublicRoom { get; set; }   // rooms you create: public ones can be found by Quick match, private ones need the code
 

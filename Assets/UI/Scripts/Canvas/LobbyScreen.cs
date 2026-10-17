@@ -70,7 +70,11 @@ public class LobbyScreen : MonoBehaviour
         }
 
         Hook(quickMatchButton, () => match.QuickMatch());
-        Hook(createRoomButton, () => match.CreateRoom());
+        Hook(createRoomButton, () =>
+        {
+            match.PublicRoom = false;   // rooms you create are private: friends join with the code
+            match.CreateRoom();
+        });
         Hook(joinRoomButton, () => match.JoinRoom(codeInput != null ? codeInput.text : ""));
         Hook(playVsAiButton, () => match.PlayVsAI());
         Hook(backButton, () =>

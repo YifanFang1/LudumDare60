@@ -38,6 +38,7 @@ public class MatchScreens : MonoBehaviour
     IMatchSession match;
     MenuPage page;
     MenuPage previousPage;
+    MenuPage pageBeforeMatch = MenuPage.Mode;
     MatchPhase lastPhase = MatchPhase.Lobby;
 
     // Go to another page (Main, Controls, Play = the lobby). Used by the buttons on the screens.
@@ -76,8 +77,9 @@ public class MatchScreens : MonoBehaviour
     void Update()
     {
         MatchPhase phase = match.Phase;
-        // Back from a match: land where a rematch is one click away (online lobby, or the mode choice).
-        if (phase == MatchPhase.Lobby && lastPhase != MatchPhase.Lobby) page = match.IsOnline ? MenuPage.Play : MenuPage.Mode;
+        // Leaving the menus for a room or match remembers the page; backing out of it lands on that same page again.
+        if (phase != MatchPhase.Lobby && lastPhase == MatchPhase.Lobby) pageBeforeMatch = page;
+        if (phase == MatchPhase.Lobby && lastPhase != MatchPhase.Lobby) page = pageBeforeMatch;
         lastPhase = phase;
 
         bool inMenus = phase == MatchPhase.Lobby;

@@ -231,21 +231,17 @@ public static class BuildFightCanvas
 
         GameObject online = NewGroup("OnlineGroup", panel);
         TMP_Text unused;
-        Button quick = Btn(online.transform, "QuickMatchButton", "Quick match", 60f, out unused);
-        TMP_Text publicLabel;
-        Toggle publicToggle = MakeToggle(online.transform, "PublicToggle", "Private room (code only)", out publicLabel);
-        Button create = Btn(online.transform, "CreateRoomButton", "Create room", 60f, out unused);
-        Txt(online.transform, "CodeLabel", "Room code", 22, TextAlignmentOptions.MidlineLeft, Muted, 28f);
-        TMP_InputField codeInput = InputBox(online.transform, "CodeInput", "ABCD", 52f);
-        Button join = Btn(online.transform, "JoinRoomButton", "Join room", 60f, out unused);
+        Button quick = Btn(online.transform, "QuickMatchButton", "Quick match", 72f, out unused);
+        Txt(online.transform, "PrivateLabel", "Private room", 22, TextAlignmentOptions.MidlineLeft, Muted, 28f);
+        Button create = Btn(online.transform, "CreateRoomButton", "Create private room", 60f, out unused);
+        TMP_InputField codeInput = InputBox(online.transform, "CodeInput", "Room code (ABCD)", 52f);
+        Button join = Btn(online.transform, "JoinRoomButton", "Join with code", 60f, out unused);
 
         TMP_Text status = Txt(panel, "StatusText", "", 22, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.4f), 34f);
         Button back = Btn(panel, "BackButton", "Back", 60f, out unused);
 
         LobbyScreen ls = screen.AddComponent<LobbyScreen>();
         ls.codeInput = codeInput;
-        ls.publicToggle = publicToggle;
-        ls.publicLabel = publicLabel;
         ls.quickMatchButton = quick;
         ls.createRoomButton = create;
         ls.joinRoomButton = join;
@@ -260,7 +256,7 @@ public static class BuildFightCanvas
         GameObject screen = NewScreen("WaitingScreen", parent, true);
         RectTransform panel = NewPanel("Panel", screen.transform, 600f);
 
-        Txt(panel, "Heading", "Room code", 28, TextAlignmentOptions.Center, Muted, 40f);
+        TMP_Text heading = Txt(panel, "Heading", "Room code", 28, TextAlignmentOptions.Center, Muted, 40f);
         TMP_Text code = Txt(panel, "RoomCodeText", "ABCD", 110, TextAlignmentOptions.Center, Color.white, 130f);
         TMP_Text hint = Txt(panel, "HintText", "Give your opponent this code", 24, TextAlignmentOptions.Center, Muted, 36f);
         TMP_Text status = Txt(panel, "StatusText", "", 22, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.4f), 34f);
@@ -268,6 +264,7 @@ public static class BuildFightCanvas
         Button cancel = Btn(panel, "CancelButton", "Cancel", 60f, out unused);
 
         WaitingScreen ws = screen.AddComponent<WaitingScreen>();
+        ws.headingText = heading;
         ws.roomCodeText = code;
         ws.hintText = hint;
         ws.statusText = status;

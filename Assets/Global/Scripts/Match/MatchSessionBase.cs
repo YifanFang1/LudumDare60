@@ -22,6 +22,7 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     public string Warning { get; protected set; }
     public string Status { get; protected set; }
     public string RoomCode { get; protected set; }
+    public bool IsQuickMatch { get; protected set; }
 
     string localName;
     string[] names = { "P1", "P2" };

@@ -126,6 +126,7 @@ public class RelayLockstepSession : MatchSessionBase
             else if (Phase == MatchPhase.Lobby)   // the player may have started something else meanwhile
             {
                 StartOnline(code, true);   // quick match rooms are always public
+                IsQuickMatch = true;       // after StartOnline, which clears the previous room
             }
         }
 
@@ -136,12 +137,14 @@ public class RelayLockstepSession : MatchSessionBase
     {
         if (CharactersLoading) { Status = "Still loading characters, try again in a moment"; return; }
         StartOnline(RandomCode(), PublicRoom);
+        IsQuickMatch = false;
     }
 
     public override void JoinRoom(string code)
     {
         if (CharactersLoading) { Status = "Still loading characters, try again in a moment"; return; }
-        StartOnline(code, false);   // joining: the room is already public or private, the host decided
+        StartOnline(code, false);
+        IsQuickMatch = false;       // joining: the room is already public or private, the host decided
     }
 
     public override void Leave()
