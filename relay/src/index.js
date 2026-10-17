@@ -10,6 +10,9 @@
 // Everything else a client sends is passed to the other client untouched.
 //
 // Also serves GET /characters.json: the shared character data every client downloads at startup.
+// And GET /quick: quick match. Returns the code of a waiting PUBLIC room, or a fresh room code if
+// none is waiting (the caller then hosts it). Connect with &pub=1 to be in the pool; rooms without
+// it are private and only reachable by code.
 
 // The character data exported from Unity (menu: Fight > Export Characters to Server File).
 // It is bundled into the worker when you run `npm run deploy` and served at /characters.json.
@@ -28,6 +31,12 @@ export default {
         },
       });
     }
+    if (new URL(request.url).pathname === "/quick") {
+      const code = await env.MATCHMAKER.get(env.MATCHMAKER.idFromName("global")).fetch("https://matchmaker/pick").then((r) => r.text());
+      return new Response(code, {
+        headers: { "content-type": "text/plain", "access-control-allow-origin": "*", "cache-control": "no-cache" },
+      });
+    }
     if (request.headers.get("Upgrade") !== "websocket") {
       return new Response("ld relay ok");
     }
@@ -43,11 +52,16 @@ export default {
 
 export class Room {
   constructor(state, env) {
+    this.env = env;
     this.sockets = [];
     this.version = null;
   }
 
   async fetch(request) {
+    // Plain HTTP (not a websocket): the matchmaker asks how many players are inside.
+    if (request.headers.get("Upgrade") !== "websocket") {
+      return new Response(String(this.sockets.length));
+    }
     const version = new URL(request.url).searchParams.get("v") || "0";
 
     const pair = new WebSocketPair();
@@ -64,6 +78,11 @@ export class Room {
     } else {
       this.version = version;
       this.sockets.push(server);
+      // The first player of a public room puts it in the quick match pool.
+      if (this.sockets.length === 1 && new URL(request.url).searchParams.get("pub") === "1") {
+        const code = new URL(request.url).pathname.split("/").pop().toUpperCase();
+        this.env.MATCHMAKER.get(this.env.MATCHMAKER.idFromName("global")).fetch("https://matchmaker/add?code=" + code).catch(() => {});
+      }
       server.addEventListener("message", (e) => this.forward(server, e.data));
       server.addEventListener("close", () => this.leave(server));
       server.addEventListener("error", () => this.leave(server));
@@ -94,5 +113,52 @@ export class Room {
       other.send("left");
       other.close(1000, "left");
     }
+  }
+}
+
+// Quick match. One global instance keeps the pool of PUBLIC rooms that have one player waiting.
+// A room joins the pool when its first player connects with &pub=1 (Quick match and public Create room).
+// Private rooms never touch it. Before handing a room out the matchmaker asks the room how many
+// players are inside, so players who already left are never matched.
+const LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // same alphabet as the client: no I or O
+
+export class Matchmaker {
+  constructor(state, env) {
+    this.env = env;
+    this.pool = new Map(); // code -> time it was added
+    this.queue = Promise.resolve(); // one request at a time, so two callers never grab the same room
+  }
+
+  fetch(request) {
+    const url = new URL(request.url);
+    const job = url.pathname === "/add" ? () => this.add(url.searchParams.get("code")) : () => this.pick();
+    const result = this.queue.then(job);
+    this.queue = result.catch(() => {});
+    return result.then((text) => new Response(text));
+  }
+
+  async add(code) {
+    if (code) this.pool.set(code, Date.now());
+    return "ok";
+  }
+
+  async playersIn(code) {
+    const room = this.env.ROOMS.get(this.env.ROOMS.idFromName(code));
+    const count = await room.fetch("https://room/count").then((r) => r.text());
+    return parseInt(count, 10);
+  }
+
+  // Oldest waiting public room, otherwise a brand new one (the caller becomes the host).
+  async pick() {
+    for (const [code, since] of [...this.pool.entries()]) {
+      this.pool.delete(code);
+      const inside = await this.playersIn(code);
+      // 1 = a host is waiting. 0 = the host is still connecting (give it 10 seconds).
+      if (inside === 1 || (inside === 0 && Date.now() - since < 10000)) return code;
+    }
+    let code = "";
+    for (let i = 0; i < 4; i++) code += LETTERS[Math.floor(Math.random() * LETTERS.length)];
+    this.pool.set(code, Date.now()); // so the next quick player finds this room
+    return code;
   }
 }

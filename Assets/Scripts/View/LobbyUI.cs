@@ -36,12 +36,18 @@ public class LobbyUI : MonoBehaviour
 
     void DrawLobby()
     {
-        GUILayout.BeginArea(new Rect(20, 20, 320, 380));
+        GUILayout.BeginArea(new Rect(20, 20, 320, 450));
         if (match.SupportsRooms)
         {
             GUILayout.Label("Server");
             match.ServerAddress = GUILayout.TextField(match.ServerAddress);
 
+            if (GUILayout.Button("Quick match"))
+            {
+                match.QuickMatch();
+            }
+
+            match.PublicRoom = GUILayout.Toggle(match.PublicRoom, match.PublicRoom ? "Room is public (Quick match can find it)" : "Room is private (code only)");
             if (GUILayout.Button("Create room"))
             {
                 AudioManager.Click();
