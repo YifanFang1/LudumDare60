@@ -24,6 +24,9 @@ public class JuiceManager : MonoBehaviour
     [Tooltip("Log every juice call to the console. Handy while the effects are still stubs.")]
     [SerializeField] bool logCalls = true;
 
+    [Tooltip("Camera to shake. Leave empty to use the main camera (the one WorldView frames).")]
+    [SerializeField] Camera shakeCamera;
+
     [Header("Testing (while playing: right click this component's title)")]
     [Tooltip("Effect name used by the Test menu items.")]
     [SerializeField] string testEffect = "Sparks";
@@ -34,6 +37,7 @@ public class JuiceManager : MonoBehaviour
 
     IMatchSession match;
     JuiceParticles particles;
+    JuiceScreenShake shake;
     readonly JuiceHandle[] lowHealthAura = new JuiceHandle[2];
 
     /// <summary>Same as FightControls: "Enter Play Mode without domain reload" keeps statics alive.</summary>
@@ -57,6 +61,7 @@ public class JuiceManager : MonoBehaviour
 
         if (profile == null) profile = ScriptableObject.CreateInstance<JuiceProfile>();
         particles = new JuiceParticles(transform);
+        shake = new JuiceScreenShake(profile, shakeCamera);
 
         // Found the same way FightView and LobbyUI find it. Without it the API still works,
         // there are just no automatic reactions to the fight.
@@ -77,6 +82,8 @@ public class JuiceManager : MonoBehaviour
 
     void OnDisable()
     {
+        if (shake != null) shake.Restore();   // never leave the camera mid-shake
+
         if (match == null) return;
         match.MatchStarted -= OnMatchStarted;
         match.SimEventRaised -= OnSimEvent;
@@ -96,28 +103,39 @@ public class JuiceManager : MonoBehaviour
     {
         float dt = Time.unscaledDeltaTime;
 
-        // TODO: decay shake trauma and move the camera rig
         // TODO: count down active hit flashes
         // TODO: count down the impact frame
     }
 
-    /// <summary>Runs after the sim has ticked (in Update), so attached effects sit exactly where WorldView draws the fighters.</summary>
+    /// <summary>
+    /// Runs after the sim has ticked (in Update), so attached effects sit exactly where WorldView
+    /// draws the fighters, and the camera shake is applied on top of wherever the camera rests.
+    /// </summary>
     void LateUpdate()
     {
+        float dt = Time.unscaledDeltaTime;
         GameSim sim = match != null && match.Phase == MatchPhase.Playing ? match.Sim : null;
         if (sim != null) UpdateCharacterAuras(sim);
-        particles.Tick(Time.unscaledDeltaTime, sim);
+        particles.Tick(dt, sim);
+        shake.Tick(dt);
     }
     #endregion
 
     #region Public API
     /// <summary>
     /// Shakes the screen. Hits add trauma, which decays over time, so rapid hits stack instead of restarting.
+    /// The shake strength is trauma squared (see JuiceProfile), so 0.2 is a nudge and 1 is a big kick.
     /// </summary>
     /// <param name="trauma">Intensity of the screen shake that decays over time, values range within 0-1.</param>
     public static void Shake(float trauma)
     {
         if (instance) instance.DoShake(trauma);
+    }
+
+    /// <summary>Current screen-shake trauma, 0..1 (0 when there is no JuiceManager).</summary>
+    public static float ShakeTrauma
+    {
+        get { return instance ? instance.shake.Trauma : 0f; }
     }
 
     /// <summary>
@@ -222,12 +240,14 @@ public class JuiceManager : MonoBehaviour
                 string spark = attacker == null ? "Sparks"
                              : heavy ? attacker.heavyAttack : attacker.lightAttack;
                 Burst(spark, SimToWorld(e.x, e.y), facing);
+                Shake(heavy ? profile.heavyHitTrauma : profile.lightHitTrauma);
                 break;
             }
 
             case SimEventType.Block:
             {
                 // a = attacker, b = blocker, (x, y) = centre of the overlap
+                Shake(profile.blockTrauma);
                 CharacterJuiceProfile blocker = profile.ForCharacter(sim.fighters[e.b].characterId);
                 if (blocker == null) break;
                 int facing = sim.fighters[e.b].x >= sim.fighters[e.a].x ? 1 : -1;   // away from the attacker
@@ -256,8 +276,8 @@ public class JuiceManager : MonoBehaviour
     #region Implementation
     void DoShake(float trauma)
     {
-        Log("Shake " + trauma.ToString("0.00"));
-        // TODO: trauma = Mathf.Min(1, trauma + amount); offset = trauma^2 * Perlin noise on a camera rig parent
+        Log("Shake +" + trauma.ToString("0.00") + " (now " + Mathf.Clamp01(shake.Trauma + trauma).ToString("0.00") + ")");
+        shake.Add(trauma);
     }
 
     void DoFlash(int fighter, Color color, int ticks)
@@ -310,9 +330,10 @@ public class JuiceManager : MonoBehaviour
     {
         Log("ResetAll");
         particles.StopAll();
+        shake.Clear();
         lowHealthAura[0] = JuiceHandle.None;
         lowHealthAura[1] = JuiceHandle.None;
-        // TODO: clear trauma, flashes, impact frame
+        // TODO: clear flashes, impact frame
     }
 
     void Log(string message)
@@ -332,6 +353,24 @@ public class JuiceManager : MonoBehaviour
     void TestAttach()
     {
         if (Application.isPlaying) DoAttach(testEffect, 0, 120, 1f);
+    }
+
+    [ContextMenu("Test: Shake (light hit)")]
+    void TestShakeLight()
+    {
+        if (Application.isPlaying) DoShake(profile.lightHitTrauma);
+    }
+
+    [ContextMenu("Test: Shake (heavy hit)")]
+    void TestShakeHeavy()
+    {
+        if (Application.isPlaying) DoShake(profile.heavyHitTrauma);
+    }
+
+    [ContextMenu("Test: Shake (KO)")]
+    void TestShakeKO()
+    {
+        if (Application.isPlaying) DoShake(profile.koTrauma);
     }
     #endregion
 }

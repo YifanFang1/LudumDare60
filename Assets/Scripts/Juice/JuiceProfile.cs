@@ -19,10 +19,25 @@ public class JuiceProfile : ScriptableObject
     [Tooltip("Hits at or above this damage count as heavy hits.")]
     [Min(0f)] public float heavyThreshold = 10.0f;
 
-    [Header("Screen shake (trauma, 0..1)")]
+    [Header("Screen shake: how much trauma (0..1) each event adds")]
     [Range(0f, 1f)] public float lightHitTrauma = 0.2f;
     [Range(0f, 1f)] public float heavyHitTrauma = 0.5f;
+    [Range(0f, 1f)] public float blockTrauma = 0.1f;
     [Range(0f, 1f)] public float koTrauma = 1f;
+
+    [Header("Screen shake: feel")]
+    [Tooltip("Furthest the camera moves at full trauma, in Unity units (a fighter is about 1 unit wide).")]
+    [Range(0f, 2f)] public float maxShakeOffset = 0.35f;
+    [Tooltip("Most the camera rolls at full trauma, in degrees. 0 = no roll.")]
+    [Range(0f, 10f)] public float maxShakeRoll = 1.5f;
+    [Tooltip("How fast the shake wobbles. Higher = more jittery, lower = more of a sway.")]
+    [Range(1f, 60f)] public float shakeFrequency = 25f;
+    [Tooltip("Trauma lost per second. 1.5 means a full-trauma shake lasts about 0.7 seconds.")]
+    [Range(0.1f, 5f)] public float traumaDecay = 1.5f;
+    [Tooltip("Strength = trauma ^ this. 2 makes small hits subtle and big hits punchy; 1 is linear.")]
+    [Range(1f, 3f)] public float traumaExponent = 2f;
+    [Tooltip("Scales every shake. Set to 0 to turn screen shake off (e.g. an accessibility option).")]
+    [Range(0f, 2f)] public float shakeMultiplier = 1f;
 
     [Header("Durations (ticks, 60 = 1 second)")]
     public int flashTicks = 4;
