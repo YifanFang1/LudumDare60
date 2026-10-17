@@ -36,14 +36,21 @@ public class LobbyUI : MonoBehaviour
 
     void DrawLobby()
     {
-        GUILayout.BeginArea(new Rect(20, 20, 320, 380));
+        GUILayout.BeginArea(new Rect(20, 20, 320, 450));
         if (match.SupportsRooms)
         {
             GUILayout.Label("Server");
             match.ServerAddress = GUILayout.TextField(match.ServerAddress);
 
+            if (GUILayout.Button("Quick match"))
+            {
+                match.QuickMatch();
+            }
+
+            match.PublicRoom = GUILayout.Toggle(match.PublicRoom, match.PublicRoom ? "Room is public (Quick match can find it)" : "Room is private (code only)");
             if (GUILayout.Button("Create room"))
             {
+                AudioManager.Click();
                 match.CreateRoom();
             }
 
@@ -52,6 +59,7 @@ public class LobbyUI : MonoBehaviour
             codeInput = GUILayout.TextField(codeInput, 4).ToUpper();
             if (GUILayout.Button("Join room"))
             {
+                AudioManager.Click();
                 match.JoinRoom(codeInput);
             }
 
@@ -60,6 +68,7 @@ public class LobbyUI : MonoBehaviour
 
         if (GUILayout.Button("Play vs AI"))
         {
+            AudioManager.Click();
             pickingOpponent = false;
             match.PlayVsAI();
         }
@@ -83,7 +92,9 @@ public class LobbyUI : MonoBehaviour
                 "You: " + CharacterList.NameOf(match.LocalCharacter),
                 "Opponent: " + CharacterList.NameOf(match.OpponentCharacter)
             };
+            bool wasPickingOpponent = pickingOpponent;
             pickingOpponent = GUILayout.Toolbar(pickingOpponent ? 1 : 0, tabs, GUILayout.Width(400)) == 1;
+            if (pickingOpponent != wasPickingOpponent) AudioManager.Click();
         }
         else
         {
@@ -104,6 +115,7 @@ public class LobbyUI : MonoBehaviour
             int id = ids[i];
             if (DrawCharacterButton(id, id == current) && id != current)
             {
+                AudioManager.Click();
                 if (forOpponent) match.OpponentCharacter = id;
                 else match.LocalCharacter = id;
             }
@@ -118,10 +130,12 @@ public class LobbyUI : MonoBehaviour
         GUILayout.BeginHorizontal();
         if (!match.CharacterConfirmed && GUILayout.Button(match.ChoosesOpponent ? "Fight!" : "Ready", GUILayout.Width(120)))
         {
+            AudioManager.Confirm();
             match.ConfirmCharacter();
         }
         if (GUILayout.Button(match.ChoosesOpponent ? "Back" : "Leave room", GUILayout.Width(120)))
         {
+            AudioManager.Click();
             match.Leave();
         }
         GUILayout.EndHorizontal();
@@ -155,6 +169,7 @@ public class LobbyUI : MonoBehaviour
         GUILayout.Label(match.Status);
         if (GUILayout.Button("Cancel"))
         {
+            AudioManager.Click();
             match.Leave();
         }
         GUILayout.EndArea();

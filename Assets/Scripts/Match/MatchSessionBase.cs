@@ -29,6 +29,7 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     public bool CharacterConfirmed { get; protected set; }
 
     public virtual bool SupportsRooms { get { return false; } }
+    public bool PublicRoom { get; set; }
     public virtual string ServerAddress { get { return ""; } set { } }
 
     public event Action<GameSim> MatchStarted;
@@ -78,6 +79,7 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     }
 
     // Subclasses that have no online mode just say so.
+    public virtual void QuickMatch() { Status = "Online play is not available in this build"; }
     public virtual void CreateRoom() { Status = "Online play is not available in this build"; }
     public virtual void JoinRoom(string code) { Status = "Online play is not available in this build"; }
 
