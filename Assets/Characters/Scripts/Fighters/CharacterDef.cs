@@ -1,7 +1,8 @@
 using System;
 
 // Which button starts a move. (Add more here when you add buttons in Sim/Buttons.cs.)
-public enum AttackButton { Light, Heavy }
+// New values go at the END: assets and the server file store the number.
+public enum AttackButton { Light, Heavy, Grab, Special, Ultimate }
 
 [Serializable]
 public class MoveBinding
@@ -24,7 +25,14 @@ public class CharacterDef
 
     public static int ButtonMask(AttackButton b)
     {
-        return b == AttackButton.Heavy ? Buttons.Heavy : Buttons.Light;
+        switch (b)
+        {
+            case AttackButton.Heavy: return Buttons.Heavy;
+            case AttackButton.Grab: return Buttons.Grab;
+            case AttackButton.Special: return Buttons.Special;
+            case AttackButton.Ultimate: return Buttons.Ultimate;
+            default: return Buttons.Light;
+        }
     }
 
     // A new character starts with a basic Light and Heavy punch so it is playable immediately.
@@ -81,6 +89,7 @@ public class CharacterDef
                 h = h * 31 + (int)b.button;
                 if (b.move == null) continue;
                 h = h * 31 + b.move.totalTicks;
+                h = h * 31 + (b.move.ultimate ? 1 : 0);
                 if (b.move.hitboxes == null) continue;
                 for (int j = 0; j < b.move.hitboxes.Length; j++)
                 {
@@ -93,6 +102,9 @@ public class CharacterDef
                     h = h * 31 + hb.knockback;
                     h = h * 31 + (hb.followOwner ? 1 : 0);
                     h = h * 31 + hb.vx;
+                    h = h * 31 + (hb.unblockable ? 1 : 0);
+                    h = h * 31 + (hb.grab ? 1 : 0);
+                    // hb.visual is cosmetic, so it is left out on purpose.
                 }
             }
             return h;

@@ -1,23 +1,29 @@
 // THE CHARACTER TEMPLATE. Every character written in code extends this class.
 //
 // It gives a new character sensible defaults for everything, so a subclass only writes what
-// makes it different (see Brawler.cs and Shooter.cs, about 30 lines each):
+// makes it different (see Brawler.cs and Shooter.cs, about 30 lines each). The defaults are the
+// STANDARD MOVESET from Design/SHARED_KIT.md, so a character that overrides nothing is already
+// fully playable (the six roster placeholders, e.g. Samurai.cs, are exactly that):
 //
-//   Trait          Default                         Override to change it
-//   ------------   -----------------------------   ---------------------------------------
-//   Health         100                             MaxHp
-//   Walk speed     60 milli-units per tick         WalkSpeed
-//   Body           1 unit wide, 2 units tall       Hurtbox
-//   Light (J)      none                            LightAttack  (return a MoveDef)
-//   Heavy (K)      none                            HeavyAttack
-//   Move rules     any move can always be used     CanUseMove   (e.g. "one fireball at a time")
+//   Trait          Default                              Override to change it
+//   ------------   ----------------------------------   ---------------------------------------
+//   Health         100                                  MaxHp
+//   Walk speed     60 milli-units per tick              WalkSpeed
+//   Body           1 unit wide, 2 units tall            Hurtbox
+//   Light (J)      StandardLight: fast jab              LightAttack  (return a MoveDef, or null)
+//   Heavy (K)      StandardHeavy: slow, long reach      HeavyAttack
+//   Grab (L)       StandardGrab: unblockable, short     GrabMove
+//   Special (I)    StandardSpecial: a projectile        SpecialMove
+//   Ultimate (O)   StandardUltimate: big strike         UltimateMove (needs a full meter)
+//   Dashes         about 1.8 units                      ForwardDash / BackDash (in Fighter)
+//   Move rules     one Special projectile at a time     CanUseMove   (e.g. "one fireball at a time")
 //
-// Everything every fighter shares (walking, blocking by holding back, hitstun, KO) is already
-// done by Fighter in the Sim folder, so characters get it for free.
+// Everything every fighter shares (walking, blocking by holding back, dashing, hitstun, KO, the
+// meter) is already done by Fighter in the Sim folder, so characters get it for free.
 //
-// Building moves: use the Melee(...) and Projectile(...) helpers below with NAMED arguments, so
-// every number says what it is. Store moves in `static readonly` fields and never change them at
-// runtime: both players share the same MoveDef objects.
+// Building moves: use the Melee(...), Grab(...), Projectile(...) and Ultimate(...) helpers below
+// with NAMED arguments, so every number says what it is. Store moves in `static readonly` fields
+// and never change them at runtime: both players share the same MoveDef objects.
 //
 // RULES: this folder is part of the deterministic sim. Ints only, no UnityEngine, no Random,
 // no Time. Any extra state you add (meters, cooldowns) must go into HashExtra().
@@ -30,32 +36,83 @@ public abstract class BaseFighter : Fighter
     public override int WalkSpeed { get { return 60; } }
     public override Box Hurtbox { get { return new Box(-500, 0, 1000, 2000); } }
 
-    // The move each attack button starts. null = that button does nothing for this character.
-    protected virtual MoveDef LightAttack { get { return null; } }
-    protected virtual MoveDef HeavyAttack { get { return null; } }
+    // The move each button starts. null = that button does nothing for this character.
+    protected virtual MoveDef LightAttack { get { return StandardLight; } }
+    protected virtual MoveDef HeavyAttack { get { return StandardHeavy; } }
+    protected virtual MoveDef GrabMove { get { return StandardGrab; } }
+    protected virtual MoveDef SpecialMove { get { return StandardSpecial; } }
+    protected virtual MoveDef UltimateMove { get { return StandardUltimate; } }
+
+    // ---------- the standard moveset (Design/SHARED_KIT.md) ----------
+    // Every character gets these unless it overrides the slot. Public so tests can check them.
+    // The names are the slot names, because a move's name is also its Animator state.
+
+    // Fast and safe.
+    public static readonly MoveDef StandardLight = Melee("Light",
+        totalTicks: 15, spawnTick: 4, activeTicks: 3,
+        box: new Box(400, 900, 900, 400),
+        damage: 5, hitstun: 12, knockback: 40);
+
+    // Long reach, big damage, punishable if it whiffs or is blocked.
+    public static readonly MoveDef StandardHeavy = Melee("Heavy",
+        totalTicks: 28, spawnTick: 10, activeTicks: 4,
+        box: new Box(300, 700, 1300, 700),
+        damage: 12, hitstun: 20, knockback: 80);
+
+    // Unblockable, short reach, long whiff recovery (33 ticks). Hold back when it lands to throw
+    // the opponent behind you.
+    public static readonly MoveDef StandardGrab = Grab("Grab",
+        totalTicks: 40, spawnTick: 5, activeTicks: 2,
+        box: new Box(300, 600, 700, 1000),
+        damage: 12, hitstun: 40, knockback: 90);
+
+    // A projectile that crosses the arena in about 2.5 s. Only one on screen at a time (CanUseMove).
+    public static readonly MoveDef StandardSpecial = Projectile("Special",
+        totalTicks: 30, spawnTick: 12, lifetime: 150,
+        box: new Box(400, 900, 500, 400),
+        speed: 100, damage: 10, hitstun: 18, knockback: 60,
+        visual: "special");
+
+    // A big blockable strike after the superflash. Needs a full meter; gives no meter back.
+    // If it's blocked, its long recovery is the risk.
+    public static readonly MoveDef StandardUltimate = Ultimate("Ultimate",
+        totalTicks: 45, spawnTick: 6, activeTicks: 4,
+        box: new Box(300, 0, 2000, 2200),
+        damage: 30, hitstun: 40, knockback: 120);
 
     // Extra rules for when a move is allowed (resources, cooldowns, projectile limits).
-    // `sim` is read-only here: look, don't change.
+    // `sim` is read-only here: look, don't change. If you override this, call
+    // base.CanUseMove(sim, move) for the moves you don't handle yourself.
     protected virtual bool CanUseMove(GameSim sim, MoveDef move)
     {
+        if (move == StandardSpecial) return ProjectilesOnScreen(sim) == 0;
         return true;
     }
 
     // ---------- the standard control scheme ----------
-    // Heavy wins if both buttons are pressed on the same tick. Override ChooseMove itself only if
+    // If several buttons are pressed on the same tick: Ultimate > Special > Grab > Heavy > Light.
+    // Holding a button repeats its move, except the Ultimate, which needs a FRESH press so holding
+    // O can't fire it by accident the moment the bar fills. Override ChooseMove itself only if
     // your character needs different controls (e.g. Down + Light for a low attack).
     public override MoveDef ChooseMove(GameSim sim, int input)
     {
+        if ((pressedInput & Buttons.Ultimate) != 0 && meter >= MeterMax && IsUsable(sim, UltimateMove)) return UltimateMove;
+        if ((input & Buttons.Special) != 0 && IsUsable(sim, SpecialMove)) return SpecialMove;
+        if ((input & Buttons.Grab) != 0 && IsUsable(sim, GrabMove)) return GrabMove;
         if ((input & Buttons.Heavy) != 0 && IsUsable(sim, HeavyAttack)) return HeavyAttack;
         if ((input & Buttons.Light) != 0 && IsUsable(sim, LightAttack)) return LightAttack;
         return null;
     }
 
+    // Every move this character can do, for editor tools (one Animator state per move).
     public override MoveDef[] ListMoves()
     {
         System.Collections.Generic.List<MoveDef> moves = new System.Collections.Generic.List<MoveDef>();
         if (LightAttack != null) moves.Add(LightAttack);
         if (HeavyAttack != null) moves.Add(HeavyAttack);
+        if (GrabMove != null) moves.Add(GrabMove);
+        if (SpecialMove != null) moves.Add(SpecialMove);
+        if (UltimateMove != null) moves.Add(UltimateMove);
         return moves.ToArray();
     }
 
@@ -85,10 +142,31 @@ public abstract class BaseFighter : Fighter
         };
     }
 
+    // A grab: like Melee, but it ignores blocking and can't catch someone in hitstun/blockstun
+    // (see HitboxDef.grab). Keep the box short: grabs only work up close.
+    protected static MoveDef Grab(string name, int totalTicks, int spawnTick, int activeTicks, Box box,
+                                  int damage, int hitstun, int knockback)
+    {
+        MoveDef move = Melee(name, totalTicks, spawnTick, activeTicks, box, damage, hitstun, knockback);
+        move.hitboxes[0].grab = true;
+        return move;
+    }
+
+    // An Ultimate: like Melee, but it needs a full meter, spends it, and starts with the
+    // superflash freeze (see MoveDef.ultimate). The startup counts from the end of the freeze.
+    protected static MoveDef Ultimate(string name, int totalTicks, int spawnTick, int activeTicks, Box box,
+                                      int damage, int hitstun, int knockback)
+    {
+        MoveDef move = Melee(name, totalTicks, spawnTick, activeTicks, box, damage, hitstun, knockback);
+        move.ultimate = true;
+        return move;
+    }
+
     // A shot that leaves the fighter and flies forward at `speed` milli-units per tick until it
     // hits something or its `lifetime` runs out. The fighter can act again after `totalTicks`.
+    // `visual` names the sprite the view draws for it (set in the character's art asset).
     protected static MoveDef Projectile(string name, int totalTicks, int spawnTick, int lifetime, Box box,
-                                        int speed, int damage, int hitstun, int knockback)
+                                        int speed, int damage, int hitstun, int knockback, string visual = null)
     {
         return new MoveDef
         {
@@ -98,7 +176,7 @@ public abstract class BaseFighter : Fighter
             {
                 new HitboxDef { spawnTick = spawnTick, lifetime = lifetime, box = box,
                                 damage = damage, hitstun = hitstun, knockback = knockback,
-                                followOwner = false, vx = speed }
+                                followOwner = false, vx = speed, visual = visual }
             }
         };
     }

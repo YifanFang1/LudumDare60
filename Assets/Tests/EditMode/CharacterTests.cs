@@ -1,29 +1,14 @@
 using NUnit.Framework;
+using static SimHarness;
 
 // Quick checks that the character framework still works. They run the real sim with no scene,
 // so they finish in milliseconds.
 //   Run them: Window > General > Test Runner > EditMode > Run All
 //
 // When you add a character with a special rule, add a test here that proves the rule works.
+// The shared kit (grab, dash, meter, rounds...) is tested in KitTests.cs. Helpers: SimHarness.cs.
 public class CharacterTests
 {
-    const int None = 0;
-
-    // A fresh match with the two characters standing `gap` milli-units apart (centre to centre).
-    static GameSim NewMatch(int p0Character, int p1Character, int gap)
-    {
-        GameSim sim = new GameSim();
-        sim.Reset(1, CharacterList.Create(p0Character), CharacterList.Create(p1Character));
-        sim.fighters[0].x = -gap / 2;
-        sim.fighters[1].x = gap / 2;
-        return sim;
-    }
-
-    static void Run(GameSim sim, int in0, int in1, int ticks)
-    {
-        for (int i = 0; i < ticks; i++) sim.Step(in0, in1);
-    }
-
     [Test]
     public void CodeCharactersAreRegistered()
     {
@@ -31,6 +16,28 @@ public class CharacterTests
         Assert.IsInstanceOf<Shooter>(CharacterList.Create(Shooter.Id));
         Assert.IsInstanceOf<Sandbag>(CharacterList.Create(Sandbag.Id));
         Assert.AreEqual(Shooter.Id, CharacterList.Create(Shooter.Id).characterId);
+    }
+
+    [Test]
+    public void RosterCharactersAreRegisteredWithTheStandardMoveset()
+    {
+        int[] ids = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id };
+        string[] names = { "Samurai", "Painter", "Black and White Cowboy", "Elephant", "Executioner", "Plague Doctor" };
+        string[] slots = { "Light", "Heavy", "Grab", "Special", "Ultimate" };
+
+        for (int i = 0; i < ids.Length; i++)
+        {
+            Fighter f = CharacterList.Create(ids[i]);
+            Assert.AreEqual(ids[i], f.characterId);
+            Assert.IsTrue(CharacterList.IsCodeCharacter(ids[i]));
+            Assert.AreEqual(names[i], CharacterList.NameOf(ids[i]));
+
+            MoveDef[] moves = f.ListMoves();
+            Assert.AreEqual(slots.Length, moves.Length, names[i] + " should have every standard move");
+            for (int m = 0; m < slots.Length; m++) Assert.AreEqual(slots[m], moves[m].name);
+        }
+        Assert.AreEqual(typeof(Samurai), CharacterList.Create(Samurai.Id).GetType());
+        Assert.AreEqual(typeof(PlagueDoctor), CharacterList.Create(PlagueDoctor.Id).GetType());
     }
 
     [Test]

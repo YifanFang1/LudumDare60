@@ -14,13 +14,18 @@ Players fight **online** (room codes through a Cloudflare relay) or **solo vs an
 ### Roster
 | Character | Status | Notes |
 |---|---|---|
-| Overpowered Elephant | Planned | The only confirmed character so far. Details TBD. |
+| Samurai | In code, placeholder (id 10) | Shoto. Placeholder: standard moveset, design TBD by the team. |
+| Painter | In code, placeholder (id 11) | Rushdown. Placeholder: standard moveset, design TBD by the team. |
+| Black and White Cowboy | In code, placeholder (id 12) | Zoner. Placeholder: standard moveset, design TBD by the team. |
+| Elephant | In code, placeholder (id 13) | Grappler ("Overpowered Elephant"). Placeholder: standard moveset, design TBD by the team. |
+| Executioner | In code, placeholder (id 14) | Trapper. Placeholder: standard moveset, design TBD by the team. |
+| Plague Doctor | In code, placeholder (id 15) | Mixup. Placeholder: standard moveset, design TBD by the team. |
 | Brawler | In code | Close-range test character (id 0) and the fallback for unknown ids. Not a real roster character. |
 | Shooter | In code | Long-range test character (id 1): jab and a one-on-screen fireball. Not a real roster character. |
 | Sandbag | In code | Training dummy (id 2): ignores all input, refills health instead of being KO'd. |
 
 
-The plan is 4 characters at launch, with more later. The team will fill in this table.
+The plan is 6 characters at launch, with more later. **The plan, the shared moveset and every design decision are in [Design/](Design/README.md)** (start with [DECISIONS.md](Design/DECISIONS.md) and [IMPLEMENTATION_PLAN.md](Design/IMPLEMENTATION_PLAN.md)). For now all six share one standard moveset; creative design (moves, looks, Old Tech) comes from the team.
 
 
 **Idea pool (not committed):** steampunk British zoner whose ultimate runs the opponent over with a train · Salem witch (fireball, familiar) · plague doctor · Dr. Frankenstein (+ monster) · Vietnam soldier (rocket jump with self-stun, tree-disguise or bear-trap counters, matchstick projectile) · caveman (rock bash, spear, bow, fire) · medieval knight/executioner · torture-museum character (iron maiden, brazen bull) · samurai · Wall Street guy / oil tycoon / Henry Ford · printing press goons / typewriter "ink" guy (art is PNGs of a real guy posing) · philosopher whose words hurt · Sisyphus and his boulder · Little Boy vs Fat Man · Nokia-phone weapon · radio-possessing horrors · coal-mine canary · washing-machine weapon · puppet who briefly possesses the opponent.
@@ -36,7 +41,7 @@ The plan is 4 characters at launch, with more later. The team will fill in this 
 - Folders are grouped by feature (`Global`, `Characters`, `Juice`, `UI`, `MenuScreen`, `Stages`), not by file type. See the folder map at the top of ARCHITECTURE.md.
 
 
-**Read [Assets/Global/ARCHITECTURE.md](Assets/Global/ARCHITECTURE.md) before you change code.** It covers the assembly layout, the no-code character workflow, hitbox units and how characters get published. Keep it up to date when the architecture changes.
+**Read [Assets/ARCHITECTURE.md](Assets/ARCHITECTURE.md) before you change code.** It covers the assembly layout, the no-code character workflow, hitbox units and how characters get published. Keep it up to date when the architecture changes.
 
 
 **To make a character, read [Assets/Characters/CHARACTERS.md](Assets/Characters/CHARACTERS.md).** Code characters extend the `BaseFighter` template.
@@ -60,13 +65,12 @@ The plan is 4 characters at launch, with more later. The team will fill in this 
 
 
 ## Current state vs plan
-**Built:** walk, light and heavy attacks, blocking by holding back (with blockstun), hitstun, KO, a `BaseFighter` template with Brawler, Shooter and Sandbag test characters, a "Debug boxes" hitbox/hurtbox toggle panel, art for code characters (`CodeCharacterArt`) with an Animator generator (Fight > Create Animator for Selected Character), EditMode tests, projectiles (hitboxes that don't follow their owner), lockstep online play through the relay with desync hashes, local play vs a placeholder AI, the inspector character editor with live hitbox preview, a basic lobby and controls UI, and publishing character data to the server.
+**Built:** walk, light and heavy attacks, blocking by holding back (with blockstun), hitstun, KO, the **shared kit** ([Design/SHARED_KIT.md](Design/SHARED_KIT.md): grab with back throw, double-tap dashes, a Special projectile, an Ultimate with a meter and a freeze, pushboxes, best-of-3 rounds with the meter carrying over), a `BaseFighter` template whose defaults are that standard moveset, the six launch-roster characters as placeholders (ids 10-15), Brawler, Shooter and Sandbag test characters, a "Debug boxes" hitbox/hurtbox toggle panel, art for code characters (`CodeCharacterArt`) with an Animator generator (Fight > Create Animator for Selected Character), EditMode tests (including a determinism soak test over every character pair), projectiles (hitboxes that don't follow their owner), lockstep online play through the relay with desync hashes, local play vs a simple AI that uses the whole kit, the inspector character editor with live hitbox preview, a basic lobby and controls UI, and publishing character data to the server.
 
 
 **Not built yet:**
-- **Block button.** Blocking works by holding back. `Buttons.Block` (L) is still bound but the sim ignores it.
-- **Grab/throw.**
-- **Specials.**
+- **Each character's own design** (moves, Special, Ultimate, 2 perks, Old Tech). All six roster characters use the standard moveset until the team designs them ([Design/Characters/_TEMPLATE.md](Design/Characters/_TEMPLATE.md)).
+- **Kit extensions** (cancels, armor, status effects, teleports...): specified in [Design/SHARED_KIT.md](Design/SHARED_KIT.md#extensions-build-when-a-design-needs-them), built when a design needs one.
 - **Online character choice.** Both online players are currently Brawler.
 - **A real AI.**
 
@@ -75,11 +79,11 @@ The plan is 4 characters at launch, with more later. The team will fill in this 
 
 
 **Roadmap (after the MVP):**
-- Moveset additions: dash, jump (the `Buttons.Up` bit is reserved), aerials, high/low attacks, supers or ultimates.
+- Moveset additions: jump (the `Buttons.Up` bit is reserved), aerials, high/low attacks.
 - A proper character select screen and online lobby, including sending each player's character choice over the network.
 
 
-Default keys: A/D move (hold away from the opponent to block), S down, J light, K heavy, L block (unused). They can be rebound in `FightControls`.
+Default keys: A/D move (hold away from the opponent to block, tap twice to dash), S down, J light, K heavy, L grab, I special, O ultimate. They can be rebound in `FightControls`. `Buttons.Block` (64) is reserved and unused: blocking is holding back.
 
 
 ## Commands

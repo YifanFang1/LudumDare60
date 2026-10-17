@@ -4,6 +4,8 @@
 //
 //   Light (J)  Poke       weak, short; so the Shooter isn't helpless up close
 //   Heavy (K)  Fireball   slow projectile; only ONE can be on screen at a time
+//   Grab, Special, Ultimate and dashes: the template's standard ones. The Special is also a
+//   projectile, so it shares the "one on screen" limit with the Fireball.
 //
 // Id 1.
 public class Shooter : BaseFighter
@@ -29,10 +31,11 @@ public class Shooter : BaseFighter
     protected override MoveDef LightAttack { get { return Poke; } }
     protected override MoveDef HeavyAttack { get { return Fireball; } }
 
-    // No fireball spam: wait until the last one hits something or flies off.
+    // No fireball spam: wait until the last one hits something or flies off. Every other move
+    // (the standard Special too) follows the template's rules.
     protected override bool CanUseMove(GameSim sim, MoveDef move)
     {
         if (move == Fireball) return ProjectilesOnScreen(sim) == 0;
-        return true;
+        return base.CanUseMove(sim, move);
     }
 }

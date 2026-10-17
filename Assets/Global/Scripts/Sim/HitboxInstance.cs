@@ -9,6 +9,7 @@ public class HitboxInstance
     public int lifetime;       // ticks left
     public bool hasHit;
     public bool blocked;       // set when it connects: true if the victim was blocking
+    public bool fromUltimate;  // spawned by an Ultimate move: its hits give no meter
 
     public Box World(GameSim sim)
     {
