@@ -1,12 +1,13 @@
 using System;
 using UnityEngine;
 
-public enum JuiceParticle
+public enum JuiceParticleType
 {
     // --- general particles ---
-    Spawn = 0,
-    Triumph = 1,
-    Defeat = 2,
+    None = 0,
+    Spawn = 1,
+    Triumph = 2,
+    Defeat = 3,
 
     // --- specific particles --- 
     Dust = 10,
@@ -17,6 +18,7 @@ public enum JuiceParticle
     Wind = 15,
     Magic = 16,
     LightRays = 17,
+    Sludge = 18
 }
 
 [CreateAssetMenu(menuName = "Fight/Juice Profile", fileName = "JuiceProfile")]
@@ -39,14 +41,30 @@ public class JuiceProfile : ScriptableObject
     [Header("Particle effects")]
     public ParticleEntry[] effects = new ParticleEntry[0];
 
+    [Header("Characters")]
+    [Tooltip("Used by Brawler (written in code) and any character without its own profile below.")]
+    public CharacterJuiceProfile defaultCharacter;
+    public CharacterJuiceProfile[] characters = new CharacterJuiceProfile[0];
+
+    // The juice for a character id (see CharacterList). Falls back to the default profile.
+    public CharacterJuiceProfile ForCharacter(int characterId)
+    {
+        for (int i = 0; i < characters.Length; i++)
+        {
+            CharacterJuiceProfile c = characters[i];
+            if (c != null && c.character != null && c.character.def.id == characterId) return c;
+        }
+        return defaultCharacter;
+    }
+
     [Serializable]
     public class ParticleEntry
     {
-        public JuiceParticle id;
-        public GameObject prefab;
+        public JuiceParticleType id;
+        public JuiceEffect prefab;
     }
 
-    public GameObject GetParticle(JuiceParticle id)
+    public JuiceEffect GetParticle(JuiceParticleType id)
     {
         for (int i = 0; i < effects.Length; i++)
         {

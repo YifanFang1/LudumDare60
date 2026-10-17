@@ -113,7 +113,7 @@ public class JuiceManager : MonoBehaviour
 
     // effect is a name from the JuiceProfile's effect list (see JuiceFx for the built-in names).
     // pos is in Unity units (use SimToWorld for sim positions). facing: 1 = right, -1 = left.
-    public static void Burst(JuiceParticle effect, Vector2 pos, int facing = 1)
+    public static void Burst(JuiceParticleType effect, Vector2 pos, int facing = 1)
     {
         if (instance) instance.DoBurst(effect, pos, facing);
     }
@@ -175,7 +175,7 @@ public class JuiceManager : MonoBehaviour
             case SimEventType.AttackStart:
             {
                 // a = attacker, (x, y) = attacker's feet
-                Burst(JuiceParticle.Spawn, SimToWorld(e.x, e.y), sim.fighters[e.a].facing);
+                Burst(JuiceParticleType.Spawn, SimToWorld(e.x, e.y), sim.fighters[e.a].facing);
                 break;
             }
         }
@@ -195,7 +195,7 @@ public class JuiceManager : MonoBehaviour
         // TODO: needs the fighter's renderers from WorldView; drive _FlashColor / _FlashAmount via MaterialPropertyBlock
     }
 
-    void DoBurst(JuiceParticle effect, Vector2 pos, int facing)
+    void DoBurst(JuiceParticleType effect, Vector2 pos, int facing)
     {
         Log("Burst " + effect + " at " + pos + " facing " + facing);
         // TODO: look up the prefab in profile.effects, take one from a pool, place, flip by facing, play
