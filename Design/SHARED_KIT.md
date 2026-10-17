@@ -160,7 +160,7 @@ New `SimEventType` values, **added at the end**: `Grab`, `Dash`, `SuperFlash`, `
 
 None of these touch the sim. They react to `SimEvent`s and read state.
 
-- **HUD (`FightView`):** a meter bar under each health bar (glowing when full), round pips, and a "ROUND 2" / "FINAL ROUND" banner on `RoundStart`.
+- **HUD:** an Ultimate meter for each player (glowing when full), round pips, and "ROUND 1" / "FINAL ROUND" / "K.O." banners. Both HUDs have them: the Canvas `HudScreen` used by `Menu.unity` (**Fight > Add Meter And Round HUD** adds them to an existing canvas), and the OnGUI `FightView` fallback.
 - **Superflash:** a generic screen flash plus the character's name on `SuperFlash`.
 - **Projectile art:** `CharacterLook` gets a list of `(visual key, Sprite)` pairs. `WorldView` draws every non-follow hitbox whose `visual` matches, **always** (not only when debug boxes are on). Without art it's a yellow box, as today. The standard Special uses the key `special`.
 - **Animator states:** add `DashForward` and `DashBack` to the generic state list (`WorldView` and `CharacterAnimatorTool`). `Grab`, `Special` and `Ultimate` come from `ListMoves()` once `BaseFighter.ListMoves()` includes the new slots.

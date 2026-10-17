@@ -2,7 +2,7 @@
 
 > Copy this file to `Design/Characters/<Name>.md` when the team designs a character. Keep every heading, even if the answer is "standard" (the [standard moveset](../SHARED_KIT.md#the-standard-moveset)). Roster characters keep their id from [../README.md](../README.md) (10-15); a brand-new character takes the next free id (16 and up) and adds a row to the roster table there.
 
-**Id:** <...> · **Class:** `<Name> : BaseFighter` in `Assets/Scripts/Characters/<Name>.cs` · **Era:** <...> · **Art style:** <who draws it, and how>
+**Id:** <...> · **Class:** `<Name> : BaseFighter` in `Assets/Characters/Scripts/Fighters/<Name>.cs` · **Era:** <...> · **Art style:** <who draws it, and how>
 
 ## Game plan
 Two or three sentences: how this character wins, and what it's weak to. Every move below should serve this.

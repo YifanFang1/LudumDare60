@@ -17,7 +17,7 @@ Later    Real designs       each character designed by the team from Characters/
 
 ## Phase 1: the kit (sim only)
 
-Do these in order: each one depends on the previous. File paths are under `Assets/Scripts/`.
+Do these in order: each one depends on the previous. File paths are as they were when the plan was written, under `Assets/Scripts/`. Since the folder reorganisation (#14), `Sim/`, `Match/`, `Net/` and `View/` are under `Assets/Global/Scripts/`, `Characters/` is `Assets/Characters/Scripts/Fighters/`, `CharacterData/` is `Assets/Characters/Scripts/Data/`, `Editor/` is `Assets/Characters/Scripts/Editor/`, and `Audio/` is `Assets/Global/Audio/`.
 
 | Step | What | Files | Test it with | Est. |
 |---|---|---|---|---|
@@ -43,8 +43,8 @@ After Phase 2, Brawler and Shooter already have grabs, dashes, a Special, an Ult
 
 | Step | What | Est. |
 |---|---|---|
-| **R1** | Six classes, one file each, in `Assets/Scripts/Characters/`: `Samurai` (id 10), `Painter` (11), `Cowboy` (12), `Elephant` (13), `Executioner` (14), `PlagueDoctor` (15). Each one is only a header comment and its id, because `BaseFighter`'s defaults are the standard moveset (see below). Register all six in `CharacterList` (and its comment list), with the display name "Black and White Cowboy" for `Cowboy`. Add them to the soak test's pool. | 0.5h |
-| **R2** | For each, a **Code Character Art** asset in `Resources/Characters` with a different `Placeholder Color` (otherwise six identical boxes can't be told apart). Run **Fight > Create Animator for Selected Character** only when an artist starts on that character: it assigns a View Prefab, which replaces the coloured box, and an empty prefab shows nothing (D-36). These are Unity Editor steps, not code. | 0.5h |
+| **R1** | Six classes, one file each, in `Assets/Characters/Scripts/Fighters/`: `Samurai` (id 10), `Painter` (11), `Cowboy` (12), `Elephant` (13), `Executioner` (14), `PlagueDoctor` (15). Each one is only a header comment and its id, because `BaseFighter`'s defaults are the standard moveset (see below). Register all six in `CharacterList` (and its comment list), with the display name "Black and White Cowboy" for `Cowboy`. Add them to the soak test's pool. | 0.5h |
+| **R2** | For each, a **Code Character Art** asset in a `Resources` folder (`Assets/Characters/CharacterDataBase/Resources/`) with a different `Placeholder Color` (otherwise six identical boxes can't be told apart). Run **Fight > Create Animator for Selected Character** only when an artist starts on that character: it assigns a View Prefab, which replaces the coloured box, and an empty prefab shows nothing (D-36). These are Unity Editor steps, not code. | 0.5h |
 | **R3** | Update the roster table in the root `CLAUDE.md`, the status tables in [README.md](README.md), and CHARACTERS.md. | 0.25h |
 
 What a placeholder character looks like. One file per character keeps people out of each other's files when the real designs arrive:

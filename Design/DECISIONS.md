@@ -149,3 +149,12 @@ As before, holding J repeats jabs. The Ultimate needs a fresh press so holding O
 
 ### D-36 Generate a character's Animator only when its art work starts (Default)
 `WorldView` draws a character's View Prefab instead of its coloured placeholder box. A freshly generated prefab has no sprites, so running **Fight > Create Animator for Selected Character** too early makes the character invisible (only the debug hurtbox shows). For now the six roster characters get a Code Character Art asset with a distinct `Placeholder Color`, and the Animator is generated when an artist picks the character up.
+
+### D-37 Merge with main (2026-10-17): network Version 7 (Default)
+Main bumped `Version` to "6" for player names, and the shared kit also bumped it to "6" on its own branch. The merge is "7", so a build with only one of the two changes can never match a build with both and desync.
+
+### D-38 The kit HUD is in the Canvas HUD too (Decided)
+Main's Canvas UI (`HudScreen`, in `Menu.unity`) switches the OnGUI `FightView` off, which hid the meter, round pips, banners and Ultimate flash in the real game. `HudScreen` now shows them as well, through optional slots. `BuildFightCanvas` creates them, and **Fight > Add Meter And Round HUD** adds them to a FightUI that already exists, without touching the rest. The round banner is worked out from `sim.round` rather than events, because the HUD screen only switches on after the match has started.
+
+### D-39 A landed grab gets the same juice as a hit (Decided)
+`JuiceManager` handles the `Grab` event like `Hit` (sparks and screen shake). A grab-specific effect can replace it later.

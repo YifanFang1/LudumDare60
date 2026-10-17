@@ -1,6 +1,6 @@
 # Design docs
 
-This folder holds the **plan** for the launch roster: the shared moveset every character gets, the decisions behind it, and the build order. The code docs live next to the code ([Assets/Scripts/ARCHITECTURE.md](../Assets/Scripts/ARCHITECTURE.md), [CHARACTERS.md](../Assets/Scripts/Characters/CHARACTERS.md)) and describe what is *built*. This folder describes what is *planned* and *why*.
+This folder holds the **plan** for the launch roster: the shared moveset every character gets, the decisions behind it, and the build order. The code docs live next to the code ([Assets/ARCHITECTURE.md](../Assets/ARCHITECTURE.md), [CHARACTERS.md](../Assets/Characters/CHARACTERS.md)) and describe what is *built*. This folder describes what is *planned* and *why*.
 
 It sits outside `Assets/` on purpose, so Unity doesn't make `.meta` files for it.
 
@@ -41,4 +41,4 @@ Update these tables when you finish a step.
 
 ## Numbers in these docs
 
-Units are the same as in the code: **ticks** (60 = 1 second) and **milli-units** (1000 = 1 Unity unit; the arena runs from -8000 to 8000). Boxes are `Box(x, y, w, h)` as in [Box.cs](../Assets/Scripts/Sim/Box.cs). The numbers are starting values; once something is in code, **the code is the source of truth**.
+Units are the same as in the code: **ticks** (60 = 1 second) and **milli-units** (1000 = 1 Unity unit; the arena runs from -8000 to 8000). Boxes are `Box(x, y, w, h)` as in [Box.cs](../Assets/Global/Scripts/Sim/Box.cs). The numbers are starting values; once something is in code, **the code is the source of truth**.
