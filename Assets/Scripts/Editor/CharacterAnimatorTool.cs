@@ -9,8 +9,9 @@ using UnityEngine;
 // Select a character's art asset (a CodeCharacterArt, or an inspector CharacterData) and run this.
 // It makes everything an animated character needs, with the exact names the game looks for:
 //
-//   Assets/Art/<Name>/<Name>.controller        Animator with states Idle, Walk, Hitstun,
-//                                              Blockstun, KO and one per move (Light, Heavy, ...)
+//   Assets/Art/<Name>/<Name>.controller        Animator with states Idle, Walk, DashForward,
+//                                              DashBack, Hitstun, Blockstun, KO and one per move
+//                                              (Light, Heavy, Grab, Special, Ultimate, ...)
 //   Assets/Art/<Name>/<Name>_<State>.anim      one empty clip per state, ready for frames
 //   Assets/Art/<Name>/<Name>_View.prefab       Animator + a child "Art" SpriteRenderer
 //
@@ -25,7 +26,7 @@ public static class CharacterAnimatorTool
     const string ArtRoot = "Assets/Art";
 
     // Every fighter state the view can ask for (see WorldView.Pose). Moves are added per character.
-    static readonly string[] StateNames = { "Idle", "Walk", "Hitstun", "Blockstun", "KO" };
+    static readonly string[] StateNames = { "Idle", "Walk", "DashForward", "DashBack", "Hitstun", "Blockstun", "KO" };
     static readonly string[] LoopingStates = { "Idle", "Walk" };
 
     [MenuItem(MenuPath, true)]

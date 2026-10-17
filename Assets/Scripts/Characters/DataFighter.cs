@@ -31,7 +31,9 @@ public class DataFighter : Fighter
         for (int i = 0; i < def.moves.Length; i++)
         {
             MoveBinding b = def.moves[i];
-            if (b.move != null && (input & CharacterDef.ButtonMask(b.button)) != 0) return b.move;
+            if (b.move == null || (input & CharacterDef.ButtonMask(b.button)) == 0) continue;
+            if (b.move.ultimate && meter < MeterMax) continue;   // not ready: try the next binding
+            return b.move;
         }
         return null;
     }

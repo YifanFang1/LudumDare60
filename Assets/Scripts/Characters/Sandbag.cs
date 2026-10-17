@@ -11,7 +11,8 @@ public class Sandbag : BaseFighter
 {
     public const int Id = 2;
 
-    // No LightAttack / HeavyAttack overrides: the template's default is "no move".
+    // It keeps the template's standard moves, but never uses them: FilterInput throws every
+    // button away before the fighter reads it.
 
     // Ignore every button, from a player or the AI. No walking, no attacks, no blocking.
     protected override int FilterInput(int input) { return 0; }

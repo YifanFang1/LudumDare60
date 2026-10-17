@@ -23,8 +23,9 @@ This guide is for anyone adding a fighter. Read [ARCHITECTURE.md](../ARCHITECTUR
 
 
 ```
-Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, hitstun, KO, the state machine.
- ├─ BaseFighter          (Characters/BaseFighter.cs) THE TEMPLATE. Default traits, J/K controls, move helpers.
+Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing, meter, hitstun, KO, the state machine.
+ ├─ BaseFighter          (Characters/BaseFighter.cs) THE TEMPLATE. The standard moveset, controls, move helpers.
+ │   ├─ Samurai ... PlagueDoctor   ids 10-15, the launch roster. Placeholders: the standard moveset, unchanged
  │   ├─ Brawler          id 0, close range test character
  │   ├─ Shooter          id 1, long range test character
  │   ├─ Sandbag          id 2, training dummy (does nothing, never dies)
@@ -34,14 +35,17 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, hitstun
 
 
 - **Fighter** is shared by everyone. Change it only for rules that should apply to every character, such as a new state like jumping. Changing it changes the sim, so bump `Version` in [RelayLockstepSession.cs](../Net/RelayLockstepSession.cs).
-- **BaseFighter** is the template. It gives a character defaults for every trait, so a subclass only writes what's different.
+- **BaseFighter** is the template. It gives a character defaults for every trait, and its moves default to the **standard moveset** ([Design/SHARED_KIT.md](../../../Design/SHARED_KIT.md)), so a subclass only writes what's different. A subclass that overrides nothing is already fully playable: that's what the six roster placeholders (`Samurai.cs` etc.) are.
 - **Your character** overrides a few properties. Brawler and Shooter are about 30 lines each.
 
 
-### What every character gets for free (from `Fighter`)
-- Walking left and right (A/D), always turning to face the opponent.
-- **Blocking:** hold the direction *away* from the opponent while standing or walking. A blocked hit does 0 damage and still pushes you back. It also puts you in **Blockstun** for 60% of the move's hitstun: you can't act, but you keep blocking while you hold back. You can't block during your own attack or while in hitstun. The numbers are `BlockstunPercent` and `BlockPushPercent` in `Fighter.cs`.
-- Hitstun, knockback, KO, and hitbox/hurtbox collisions.
+### What every character gets for free (from `Fighter` and `GameSim`)
+- Walking left and right (A/D), always turning to face the opponent. Fighters can't walk through each other (pushboxes).
+- **Blocking:** hold the direction *away* from the opponent while standing or walking. A blocked hit does 0 damage and still pushes you back. It also puts you in **Blockstun** for 60% of the move's hitstun: you can't act, but you keep blocking while you hold back. You can't block during your own attack, a dash or hitstun. The numbers are `BlockstunPercent` and `BlockPushPercent` in `Fighter.cs`.
+- **Dashing:** double-tap a direction (two fresh presses within 12 ticks). Toward the opponent is a forward dash. Override `ForwardDash` / `BackDash` to change them.
+- **Grab rules and back throws:** any hitbox with `grab` set ignores blocking but can't catch a stunned fighter; hold back when it lands to throw the victim behind you.
+- **The Ultimate meter:** fills from hits (dealt, taken and blocked). A move with `ultimate` set needs a full bar, spends it and freezes the match for a moment.
+- Hitstun, knockback, KO, best-of-3 rounds, and hitbox/hurtbox collisions.
 
 
 ### The template's traits (from `BaseFighter`)
@@ -52,17 +56,23 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, hitstun
 | Health | 100 | `MaxHp` |
 | Walk speed | 60 milli-units per tick (3.6 units per second) | `WalkSpeed` |
 | Body (hurtbox) | 1 unit wide, 2 units tall | `Hurtbox` |
-| Light attack (J) | none | `LightAttack` |
-| Heavy attack (K) | none | `HeavyAttack` |
-| When a move is allowed | always | `CanUseMove(sim, move)` |
-| Controls | K beats J if both are pressed | `ChooseMove(sim, input)` (rarely needed) |
+| Light (J) | `StandardLight`: startup 4, 5 dmg | `LightAttack` |
+| Heavy (K) | `StandardHeavy`: startup 10, 12 dmg, long reach | `HeavyAttack` |
+| Grab (L) | `StandardGrab`: startup 5, 12 dmg, short reach, 40 ticks if it whiffs | `GrabMove` |
+| Special (I) | `StandardSpecial`: a projectile, 10 dmg, one on screen | `SpecialMove` |
+| Ultimate (O) | `StandardUltimate`: 30 dmg strike, needs a full meter | `UltimateMove` |
+| Dashes | about 1.8 units forward and back | `ForwardDash` / `BackDash` |
+| When a move is allowed | always, except one Special projectile at a time | `CanUseMove(sim, move)`: call `base.CanUseMove` for moves you don't handle |
+| Controls | Ultimate > Special > Grab > Heavy > Light if pressed together | `ChooseMove(sim, input)` (rarely needed) |
+
+Return `null` from a move slot to take that move away (e.g. a character with no projectile).
 
 
 ## Make a new code character, step by step
 
 
 1. **Copy a character.** Duplicate `Brawler.cs` for melee or `Shooter.cs` for ranged, inside `Assets/Scripts/Characters/`. Rename the file and the class, e.g. `Knight.cs` / `class Knight : BaseFighter`. The class name must match the file name.
-2. **Pick an id.** Set `public const int Id = 2;` using the next free number in the list at the top of [CharacterList.cs](CharacterList.cs). Never reuse or change an id once it has been pushed: it is what gets saved and sent over the network.
+2. **Pick an id.** Set `public const int Id = 16;` using the next free number in the list at the top of [CharacterList.cs](CharacterList.cs) (3-9 are for test characters, 16 and up for new roster characters). Never reuse or change an id once it has been pushed: it is what gets saved and sent over the network.
 3. **Register it.** Add one line to the static constructor in `CharacterList.cs`, then add your id to the comment list above it:
    ```csharp
    Add(Knight.Id, "Knight", delegate { return new Knight(); }, null);
@@ -99,7 +109,7 @@ static readonly MoveDef Fireball = Projectile("Heavy",
 
 | Argument | Meaning |
 |---|---|
-| `name` | The move's name. Also the Animator state the view plays, so keep `"Light"` / `"Heavy"` unless you have a reason not to. |
+| `name` | The move's name. Also the Animator state the view plays, so keep the slot names (`"Light"`, `"Heavy"`, `"Grab"`, `"Special"`, `"Ultimate"`) unless you have a reason not to. |
 | `totalTicks` | How long the whole move lasts. You can't act until it's over. |
 | `spawnTick` | The tick when the hitbox appears (the **startup**). Smaller is faster. |
 | `activeTicks` (melee) | How long the hitbox stays out. |
@@ -110,6 +120,8 @@ static readonly MoveDef Fireball = Projectile("Heavy",
 | `hitstun` | Ticks the victim can't act. Blockstun is 60% of this. |
 | `knockback` | Push speed in milli-units per tick for the whole hitstun or blockstun. |
 
+
+**More helpers:** `Grab(...)` takes the same arguments as `Melee` and makes a grab. `Ultimate(...)` does the same for an Ultimate (its startup counts from the end of the freeze). `Projectile(...)` takes an optional `visual:` name, which is the key for the projectile's sprite in the character's art asset (**Projectile Sprites**). The standard Special uses `"special"`.
 
 **Recovery** = `totalTicks - spawnTick - activeTicks`. A fast, short move has small numbers for both. A strong move should have long startup or recovery so it can be punished.
 
@@ -122,13 +134,14 @@ Need more than one hitbox (a two-hit combo, a sweep that grows)? Build the `Move
 
 | You want... | Do this |
 |---|---|
-| A move that's only usable sometimes | Override `CanUseMove`. See the one-fireball rule in `Shooter.cs`. `ProjectilesOnScreen(sim)` is there for you. |
+| A move that's only usable sometimes | Override `CanUseMove`. See the one-fireball rule in `Shooter.cs`, and end with `return base.CanUseMove(sim, move);` so the template's rules still apply. `ProjectilesOnScreen(sim)` is there for you. |
 | Something that happens every tick (regen, a timer) | Override `OnTick(sim)`. |
 | To react to landing or taking a hit | Override `OnHitDealt` / `OnHitReceived`. They also run for blocked hits; check `hit.blocked`. |
 | Different controls (e.g. Down + J = low kick) | Override `ChooseMove(sim, input)` and test the bits from `Sim/Buttons.cs`. |
 | To ignore or change the player's input (stun, reversed controls) | Override `FilterInput(input)`. Sandbag returns 0 to ignore everything. |
 | A fighter that can't be KO'd | Override `CanBeKnockedOut` to return false; a lethal hit refills health instead. |
-| A new button | Add a bit in `Sim/Buttons.cs` (keep the old values), then a `Make(...)` line in `FightControls`. |
+| A new button | Add a bit in `Sim/Buttons.cs` (keep the old values), then a `Make(...)` line in `FightControls`. For inspector characters, also add it at the end of `AttackButton` in `CharacterDef.cs`. |
+| An engine rule the kit doesn't have yet (cancels, armor, poison, teleports...) | Check the extensions list in [Design/SHARED_KIT.md](../../../Design/SHARED_KIT.md#extensions-build-when-a-design-needs-them): build it as a generic hook with a do-nothing default, plus a test in `KitTests.cs`. Never write `if (this is MyCharacter)` in `Fighter` or `GameSim`. |
 
 
 **Extra state (meters, cooldowns, counters, stances) MUST be added to `HashExtra()`.** Otherwise online desyncs go unnoticed:
@@ -171,6 +184,8 @@ These exist to test the framework. They are not final roster characters.
 | Light (J) | Jab: startup 4, 6 dmg, 15 ticks total | Poke: startup 3, 4 dmg, 13 ticks total | none |
 | Heavy (K) | Haymaker: startup 10, 14 dmg, long reach, 28 ticks | Fireball: startup 12, 10 dmg, speed 90, 30 ticks; **one on screen at a time** | none |
 
+
+Brawler and Shooter also get the standard Grab, Special, Ultimate and dashes from the template. Shooter's Special is a second projectile, and it shares the one-on-screen limit with the Fireball.
 
 **Testing reach and damage:** in the lobby set **"Opponent:"** to Sandbag. It ignores all input (it never blocks either), and the match never ends.
 
@@ -243,7 +258,8 @@ Run the menu again after adding a move: it only adds the missing states and clip
 |---|---|---|
 | `Idle` | Standing still | Loops every `Idle Loop Ticks` (60 = 1 s) |
 | `Walk` | Walking (forward or back) | Loops every `Walk Loop Ticks` |
-| `Light`, `Heavy`, ... | One per move, named like the move | Stretched over the move's length |
+| `DashForward`, `DashBack` | Dashing toward / away from the opponent | Stretched over the dash |
+| `Light`, `Heavy`, `Grab`, `Special`, `Ultimate`, ... | One per move, named like the move | Stretched over the move's length |
 | `Hitstun` | Just got hit | Stretched over the hitstun |
 | `Blockstun` | Just blocked | Stretched over the blockstun |
 | `KO` | Knocked out | Plays over 1 second, then holds the last frame |
@@ -287,7 +303,7 @@ Your own prefab works too, as long as it has an Animator with these state names.
 ## Checklist before you push a new character
 - [ ] Unique id, registered in `CharacterList.cs` and listed in its comment.
 - [ ] Ints only; any extra state is in `HashExtra()`.
-- [ ] Tested vs the AI in `Fight.unity`; EditMode tests pass.
+- [ ] Tested vs the AI in `Fight.unity`; EditMode tests pass, including `SoakTests` (it adds new code characters to its pool by itself).
 - [ ] Roster table in `CLAUDE.md` updated.
 - [ ] `.meta` files committed with any new files.
 - [ ] (Optional) a Code Character Art asset in `Resources/Characters`, so artists have a slot to fill.
