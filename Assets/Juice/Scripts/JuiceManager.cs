@@ -16,6 +16,7 @@ using UnityEngine;
 /// Hit stop is NOT here: it changes gameplay timing, so it has to live in the sim (see Sim/).
 /// </summary>
 [DisallowMultipleComponent]
+[DefaultExecutionOrder(75)]   // shake after FightCamera (50) moves the camera, or it would overwrite the shake
 public class JuiceManager : MonoBehaviour
 {
     #region Settings
@@ -278,6 +279,7 @@ public class JuiceManager : MonoBehaviour
                              : heavy ? attacker.heavyAttack : attacker.lightAttack;
                 Burst(spark, SimToWorld(e.x, e.y), facing);
                 Shake(heavy ? profile.heavyHitTrauma : profile.lightHitTrauma);
+                shake.AddHillTilt(-facing);   // facing is +1 when the attacker is on the left
                 break;
             }
 
