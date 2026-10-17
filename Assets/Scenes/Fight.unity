@@ -418,6 +418,7 @@ GameObject:
   - component: {fileID: 2075206612}
   - component: {fileID: 2075206611}
   - component: {fileID: 2075206613}
+  - component: {fileID: 2075206614}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -539,6 +540,22 @@ MonoBehaviour:
   sfxVolume: 1
   uiVolume: 0.8
   musicVolume: 0.5
+--- !u!114 &2075206614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2075206606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56638eec0c8f3d449a7bf7b9da23ec31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JuiceManager
+  profile: {fileID: 11400000, guid: 23a9a1ee3af5f174394d9c48a1037975, type: 2}
+  logCalls: 1
+  shakeCamera: {fileID: 1361291966}
+  testEffect: Sparks
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
