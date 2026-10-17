@@ -13,7 +13,7 @@ Each folder is its own assembly (asmdef). The arrows are the ONLY allowed depend
 - **CharacterData** (LD.CharacterData): `CharacterLook` (art fields), the `CharacterData` ScriptableObject you edit in the inspector, `CodeCharacterArt` (art for code characters), and the loader that adds every asset in `Resources/Characters` to the roster.
 - **Match** (LD.Match): `IMatchSession`, `MatchSessionBase`, `LocalMatchSession`, input sources, tick runner. `FightControls` holds the key bindings (new Input System, rebindable, saved in PlayerPrefs).
 - **Net** (LD.Net.Relay): the Cloudflare relay session; also downloads the published character file. Nothing outside this folder references it. Delete the folder and swap `RelayLockstepSession` for `LocalMatchSession` on the GameObject to ship without online play.
-- **View**: `WorldView` (fighters as GameObjects), `FightView` (HUD), `LobbyUI`, `ControlsUI`, `CharacterPreview`.
+- **View**: `WorldView` (fighters as GameObjects), `FightView` (HUD), `LobbyUI`, `ControlsUI`, `CharacterPreview`, `FightCamera` (follows and zooms on the fighters), `ParallaxBackground` (layered stage art).
 - **Tests** (`Assets/Tests/EditMode`, LD.Tests.EditMode): sim-only checks of the character framework. Window > General > Test Runner > EditMode > Run All.
 - Juice (screen shake, sparks) and audio are removed for now. They only listen to `IMatchSession` events, so they can be added back later without touching the sim.
 
