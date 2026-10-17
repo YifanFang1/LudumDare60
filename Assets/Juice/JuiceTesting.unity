@@ -119,6 +119,100 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &204926487
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 204926489}
+  - component: {fileID: 204926488}
+  m_Layer: 0
+  m_Name: Background
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &204926488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 204926487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0967285be27c2bb4fb019439c359f545, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxBackground
+  layers:
+  - name: Sky
+    sprite: {fileID: 21300000, guid: 04976559144225a4f90dc41ab2ff68b7, type: 3}
+    followCamera: 0.9
+    tile: 1
+    driftSpeed: 0
+    x: 0
+    y: 1
+    scale: 8
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Flavor
+    sprite: {fileID: 21300000, guid: 7c544b09e1904f845b8e84fdfa1251cd, type: 3}
+    followCamera: 0.6
+    tile: 0
+    driftSpeed: 0
+    x: 2.06
+    y: 7.86
+    scale: 7
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Background
+    sprite: {fileID: 21300000, guid: 698337ea3de23b64ca2b4a0eb599aac9, type: 3}
+    followCamera: 0.6
+    tile: 0
+    driftSpeed: 0
+    x: 0
+    y: 0.62
+    scale: 8
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Midground
+    sprite: {fileID: 21300000, guid: a173f5633589f12419363d60d326914a, type: 3}
+    followCamera: 0.3
+    tile: 0
+    driftSpeed: 0
+    x: 0
+    y: -0.21
+    scale: 8
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Foreground
+    sprite: {fileID: 21300000, guid: cde66e17182e3504da47053bb4b9a245, type: 3}
+    followCamera: 0
+    tile: 0
+    driftSpeed: 0
+    x: 0
+    y: -1.07
+    scale: 8
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  material: {fileID: 0}
+  sortingOrder: -100
+  referenceCameraY: 3
+  referenceSize: 5
+--- !u!4 &204926489
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 204926487}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.6091, y: 0.4155, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1152043979
 GameObject:
   m_ObjectHideFlags: 0
@@ -185,6 +279,7 @@ GameObject:
   - component: {fileID: 1361291967}
   - component: {fileID: 1361291966}
   - component: {fileID: 1361291965}
+  - component: {fileID: 1361291968}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -266,6 +361,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1361291968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1361291964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &2075206606
 GameObject:
   m_ObjectHideFlags: 0
