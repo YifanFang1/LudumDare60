@@ -27,6 +27,12 @@ public class JuiceManager : MonoBehaviour
 
     IMatchSession match;
 
+    JuiceParticles particles;
+    readonly JuiceHandle[] lowHealthAura = new JuiceHandle[2];
+
+    [Header("Testing (while playing: right click this component's title)")]
+    [SerializeField] JuiceParticleType testEffect = JuiceParticleType.Sparks;
+
     // Same as FightControls: "Enter Play Mode without domain reload" keeps statics alive.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics()
@@ -46,6 +52,7 @@ public class JuiceManager : MonoBehaviour
         instance = this;
 
         if (profile == null) profile = ScriptableObject.CreateInstance<JuiceProfile>();
+        particles = new JuiceParticles(profile, transform);
 
         // Found the same way FightView and LobbyUI find it. Without it the API still works,
         // there are just no automatic reactions to the fight.
@@ -88,6 +95,14 @@ public class JuiceManager : MonoBehaviour
         // TODO: count down the impact frame
     }
 
+    // After the sim has ticked (in Update), so attached effects sit exactly where WorldView draws the fighters.
+    void LateUpdate()
+    {
+        GameSim sim = match != null && match.Phase == MatchPhase.Playing ? match.Sim : null;
+        if (sim != null) UpdateCharacterAuras(sim);
+        particles.Tick(Time.unscaledDeltaTime, sim);
+    }
+
     #endregion
 
     #region Public API
@@ -111,11 +126,33 @@ public class JuiceManager : MonoBehaviour
         if (instance) instance.DoFlash(fighter, color, ticks);
     }
 
-    // effect is a name from the JuiceProfile's effect list (see JuiceFx for the built-in names).
-    // pos is in Unity units (use SimToWorld for sim positions). facing: 1 = right, -1 = left.
-    public static void Burst(JuiceParticleType effect, Vector2 pos, int facing = 1)
+    /// <summary>Plays a particle effect once at a point. It cleans itself up.</summary>
+    /// <param name="pos">Unity units (use SimToWorld for sim positions).</param>
+    /// <param name="facing">1 = right, -1 = left. Mirrors effects with Flip With Facing ticked.</param>
+    /// <param name="scale">Size multiplier.</param>
+    public static void Burst(JuiceParticleType effect, Vector2 pos, int facing = 1, float scale = 1f)
     {
-        if (instance) instance.DoBurst(effect, pos, facing);
+        if (instance) instance.DoBurst(effect, pos, facing, scale);
+    }
+
+    /// <summary>Plays a particle effect that follows a fighter.</summary>
+    /// <param name="fighter">Sim index (0 or 1).</param>
+    /// <param name="ticks">How long it emits (60 = 1 second). 0 = until Stop is called.</param>
+    /// <returns>A handle for Stop / IsPlaying. Safe to keep after the effect has ended.</returns>
+    public static JuiceHandle Attach(JuiceParticleType effect, int fighter, int ticks = 0, float scale = 1f)
+    {
+        return instance ? instance.DoAttach(effect, fighter, ticks, scale) : JuiceHandle.None;
+    }
+
+    /// <summary>Stops an attached effect. Particles already out fade normally.</summary>
+    public static void Stop(JuiceHandle handle)
+    {
+        if (instance) instance.particles.Stop(handle);
+    }
+
+    public static bool IsPlaying(JuiceHandle handle)
+    {
+        return instance && instance.particles.IsPlaying(handle);
     }
 
     // Full-screen contrast flash for big hits. ticks: 60 = 1 second.
@@ -160,7 +197,12 @@ public class JuiceManager : MonoBehaviour
             case SimEventType.Hit:
             {
                 // a = attacker, b = victim, (x, y) = centre of the overlap, amount = damage
-                
+                bool heavy = e.amount >= profile.heavyThreshold;
+                int facing = sim.fighters[e.b].x >= sim.fighters[e.a].x ? 1 : -1;   // away from the attacker
+                CharacterJuiceProfile attacker = profile.ForCharacter(sim.fighters[e.a].characterId);
+                JuiceParticleType spark = attacker == null ? JuiceParticleType.Sparks
+                                    : heavy ? attacker.heavyAttack : attacker.lightAttack;
+                Burst(spark, SimToWorld(e.x, e.y), facing);
                 break;
             }
 
@@ -195,10 +237,46 @@ public class JuiceManager : MonoBehaviour
         // TODO: needs the fighter's renderers from WorldView; drive _FlashColor / _FlashAmount via MaterialPropertyBlock
     }
 
-    void DoBurst(JuiceParticleType effect, Vector2 pos, int facing)
+    void DoBurst(JuiceParticleType effect, Vector2 pos, int facing, float scale)
     {
         Log("Burst " + effect + " at " + pos + " facing " + facing);
-        // TODO: look up the prefab in profile.effects, take one from a pool, place, flip by facing, play
+        particles.Burst(effect, pos, facing, scale);
+    }
+
+    JuiceHandle DoAttach(JuiceParticleType effect, int fighter, int ticks, float scale)
+    {
+        Log("Attach " + effect + " to fighter " + fighter + (ticks > 0 ? " for " + ticks + " ticks" : " until stopped"));
+        return particles.Attach(effect, fighter, ticks, scale, match != null ? match.Sim : null);
+    }
+
+    // Example of a persistent effect driven by a condition: start the character's low-health
+    // aura when HP drops to the threshold, stop it if HP is above it or the fighter is KO'd.
+    void UpdateCharacterAuras(GameSim sim)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            Fighter f = sim.fighters[i];
+            CharacterJuiceProfile cj = profile.ForCharacter(f.characterId);
+
+            bool want = cj != null && cj.lowHealthAura != JuiceParticleType.None
+                        && f.hp > 0 && f.hp * 100 <= f.MaxHp * cj.lowHealthPercent;
+            bool has = particles.IsPlaying(lowHealthAura[i]);
+
+            if (want && !has) lowHealthAura[i] = particles.Attach(cj.lowHealthAura, i, 0, 1f, sim);
+            else if (!want && has) particles.Stop(lowHealthAura[i]);
+        }
+    }
+
+    [ContextMenu("Test: Burst test effect at centre")]
+    void TestBurst()
+    {
+        if (Application.isPlaying) DoBurst(testEffect, new Vector2(0f, 1f), 1, 1f);
+    }
+
+    [ContextMenu("Test: Attach test effect to P1 for 2 seconds")]
+    void TestAttach()
+    {
+        if (Application.isPlaying) DoAttach(testEffect, 0, 120, 1f);
     }
 
     void DoImpactFrame(int ticks)
@@ -210,6 +288,9 @@ public class JuiceManager : MonoBehaviour
     void ResetAll()
     {
         Log("ResetAll");
+        particles.StopAll();
+        lowHealthAura[0] = JuiceHandle.None;
+        lowHealthAura[1] = JuiceHandle.None;
         // TODO: clear trauma, flashes, impact frame; return pooled particles
     }
 

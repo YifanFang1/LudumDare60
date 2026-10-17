@@ -11,15 +11,19 @@ public struct JuiceHandle
     public static readonly JuiceHandle None = new JuiceHandle(0);
 }
 
-// Plays, positions, times and pools particle effects for JuiceManager. View only.
-//
-// Every effect is a prefab (ParticleSystem + JuiceEffect) listed in the JuiceProfile.
-// The same prefab can be played three ways:
-//   Burst        at a point; plays once and cleans itself up    (hit sparks, dust)
-//   Attach(n)    follows a fighter for n ticks, then fades out   (a timed aura)
-//   Attach(0)    follows a fighter until Stop(handle)            (low-health sparks, a stance)
-//
-// Finished effects are switched off and reused instead of destroyed.
+/// <summary>
+/// Plays, positions, times and pools particle effects for JuiceManager. View only.
+/// <para>
+/// Every effect is a prefab (ParticleSystem + JuiceEffect) listed in the JuiceProfile.
+/// The same prefab can be played three ways:
+/// </para>
+/// <code>
+///   Burst        at a point; plays once and cleans itself up    (hit sparks, dust)
+///   Attach(n)    follows a fighter for n ticks, then fades out  (a timed aura)
+///   Attach(0)    follows a fighter until Stop(handle)           (low-health sparks, a stance)
+/// </code>
+/// Finished effects are switched off and reused instead of destroyed.
+/// </summary>
 public class JuiceParticles
 {
     class Active
@@ -48,8 +52,7 @@ public class JuiceParticles
         root.SetParent(parent, false);
     }
 
-    // ---------- playing ----------
-
+    #region API
     public JuiceHandle Burst(JuiceParticleType id, Vector2 pos, int facing, float scale)
     {
         JuiceEffect fx = Take(id);
@@ -95,9 +98,9 @@ public class JuiceParticles
     {
         for (int i = active.Count - 1; i >= 0; i--) Release(i);
     }
+    #endregion
 
-    // ---------- every frame ----------
-
+    #region Tick
     // sim is null when no match is running; attached effects then stay where they are.
     public void Tick(float dt, GameSim sim)
     {
@@ -113,9 +116,9 @@ public class JuiceParticles
             if (!a.effect.IsAlive) Release(i);
         }
     }
+    #endregion
 
-    // ---------- internals ----------
-
+    #region Internals
     void PlaceOnFighter(JuiceEffect fx, Fighter f, float scale)
     {
         fx.Place(JuiceManager.SimToWorld(f.x, f.y), f.facing, scale);
@@ -192,4 +195,5 @@ public class JuiceParticles
         }
         free.Push(a.effect);
     }
+    #endregion
 }
