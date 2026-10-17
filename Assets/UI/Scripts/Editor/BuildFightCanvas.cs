@@ -237,7 +237,6 @@ public static class BuildFightCanvas
         TMP_InputField codeInput = InputBox(online.transform, "CodeInput", "Room code (ABCD)", 52f);
         Button join = Btn(online.transform, "JoinRoomButton", "Join with code", 60f, out unused);
 
-        TMP_Text status = Txt(panel, "StatusText", "", 22, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.4f), 34f);
         Button back = Btn(panel, "BackButton", "Back", 60f, out unused);
 
         LobbyScreen ls = screen.AddComponent<LobbyScreen>();
@@ -246,7 +245,6 @@ public static class BuildFightCanvas
         ls.createRoomButton = create;
         ls.joinRoomButton = join;
         ls.backButton = back;
-        ls.statusText = status;
         ls.onlineGroup = online;
         return screen;
     }
