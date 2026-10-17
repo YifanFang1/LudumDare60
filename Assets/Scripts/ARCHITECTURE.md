@@ -45,4 +45,4 @@ An empty server file means "nothing published yet" and the characters inside the
 ints only, no float/Time/Random/UnityEngine, state changes only inside `GameSim.Step`. Visuals react to the sim; the sim never reads them.
 
 ## Online
-Online play does not exchange character choices yet (both players are Brawler). The network version includes a hash of all character data, so two builds with different characters refuse to match instead of desyncing.
+Character select happens after both players are in the room: each player picks their own character and presses Ready, which sends `c,<characterId>` through the relay (it forwards any message untouched, so the relay needs no change). When both picks have arrived, both machines start the match with the picks ordered by slot. Vs AI uses the same screen, and you pick the AI's character too. The network version includes a hash of all character data, so two builds with different characters refuse to match instead of desyncing.

@@ -6,8 +6,9 @@ using NativeWebSocket;   // Package Manager > Add package from git URL:
 // Talks to the relay. Text messages only:
 //   we send:     i,<tick>,<bits>    input for a tick
 //                h,<tick>,<hash>    state hash, to detect desyncs
+//                c,<characterId>    our character pick
 //   we receive:  start,<slot>,<seed>,<delay>   both players are in
-//                i,... and h,...    forwarded from the other player
+//                i,... h,... c,...  forwarded from the other player
 //                full / badversion / left      status messages
 public class NetClient
 {
@@ -17,6 +18,7 @@ public class NetClient
     public Action<int, int, int> OnStart;   // slot, seed, delay
     public Action<int, int> OnInput;        // tick, bits   (other player's)
     public Action<int, int> OnHash;         // tick, hash   (other player's)
+    public Action<int> OnCharacter;         // character id (other player's pick)
     public Action<string> OnStatus;         // "full", "badversion", "left", "closed", "error: ..."
 
     public async void Connect(string baseUrl, string code, string version)
@@ -58,6 +60,7 @@ public class NetClient
         OnStart = null;
         OnInput = null;
         OnHash = null;
+        OnCharacter = null;
         OnStatus = null;
         if (ws != null)
         {
@@ -86,6 +89,10 @@ public class NetClient
         else if (p[0] == "h" && p.Length >= 3)
         {
             if (OnHash != null) OnHash(int.Parse(p[1]), int.Parse(p[2]));
+        }
+        else if (p[0] == "c" && p.Length >= 2)
+        {
+            if (OnCharacter != null) OnCharacter(int.Parse(p[1]));
         }
         else
         {

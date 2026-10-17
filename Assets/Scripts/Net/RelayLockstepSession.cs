@@ -16,7 +16,7 @@ public class RelayLockstepSession : MatchSessionBase
     // Bump this whenever the sim or the message format changes. The hash of the inspector-made
     // character data is added automatically, so changed characters are refused too.
     // Players on different versions are refused by the relay instead of silently desyncing.
-    const string Version = "3";
+    const string Version = "4";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 
@@ -37,6 +37,11 @@ public class RelayLockstepSession : MatchSessionBase
     NetClient net;
     Dictionary<int, int> myHashes = new Dictionary<int, int>();
     Dictionary<int, int> theirHashes = new Dictionary<int, int>();
+
+    // From the relay's start message, kept until both players have picked a character.
+    int pendingSlot, pendingSeed, pendingDelay;
+    int myPick, theirPick;
+    bool haveTheirPick;
 
     protected override void Awake()
     {
@@ -137,13 +142,48 @@ public class RelayLockstepSession : MatchSessionBase
 
         net = new NetClient();
         net.OnOpen = () => { Status = "Connected. Waiting for an opponent..."; };
-        net.OnStart = BeginOnlineMatch;
+        net.OnStart = BeginCharacterSelect;
+        net.OnCharacter = OnTheirCharacter;
         net.OnStatus = HandleStatus;
         net.Connect(relayUrl, code, Version + "-" + CharacterList.DataHash());
     }
 
-    void BeginOnlineMatch(int slot, int seed, int delay)
+    // Both players are in: pick characters before the fight starts.
+    void BeginCharacterSelect(int slot, int seed, int delay)
     {
+        pendingSlot = slot;
+        pendingSeed = seed;
+        pendingDelay = delay;
+        haveTheirPick = false;
+        EnterCharacterSelect(false);
+    }
+
+    public override void ConfirmCharacter()
+    {
+        if (net == null) { base.ConfirmCharacter(); return; }   // Play vs AI on this component
+        if (Phase != MatchPhase.CharacterSelect || CharacterConfirmed) return;
+
+        CharacterConfirmed = true;
+        myPick = LocalCharacter;
+        net.Send("c," + myPick);
+        Status = "Waiting for opponent to pick...";
+        TryBeginOnlineMatch();
+    }
+
+    void OnTheirCharacter(int id)
+    {
+        theirPick = id;
+        haveTheirPick = true;
+        if (!CharacterConfirmed) Status = "Opponent is ready";
+        TryBeginOnlineMatch();
+    }
+
+    void TryBeginOnlineMatch()
+    {
+        if (!CharacterConfirmed || !haveTheirPick) return;
+
+        int slot = pendingSlot;
+        OpponentCharacter = theirPick;
         myHashes.Clear();
         theirHashes.Clear();
         Status = "";
@@ -158,8 +198,11 @@ public class RelayLockstepSession : MatchSessionBase
         IInputSource second = slot == 0 ? (IInputSource)remote : local;
 
         MatchSetup setup = new MatchSetup();
-        setup.seed = seed;   // character ids are not exchanged yet: both players are Brawler (id 0)
-        StartMatch(setup, first, second, delay, slot, true);
+        // Both machines must build the same fight, so order the picks by slot, not by "mine".
+        setup.seed = pendingSeed;
+        setup.p0Character = slot == 0 ? myPick : theirPick;
+        setup.p1Character = slot == 0 ? theirPick : myPick;
+        StartMatch(setup, first, second, pendingDelay, slot, true);
     }
 
     void CloseNet()
