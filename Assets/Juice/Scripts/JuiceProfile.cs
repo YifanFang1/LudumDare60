@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -55,16 +56,21 @@ public class JuiceProfile : ScriptableObject
     public int impactTicks = 3;
     public int koImpactTicks = 6;
 
+    [Header("Triggers")]
+    [Tooltip("WhileLowHealth is true while HP is at or below this percent of max HP (and above 0).")]
+    [Range(0, 100)] public int lowHealthPercent = 25;
+
     [Header("Characters")]
-    [Tooltip("Used by any character without its own profile below.")]
+    [Tooltip("Reactions every character gets (unless its own profile turns Use Default Reactions off).")]
     public CharacterJuiceProfile defaultCharacter;
+    [Tooltip("Per-character profiles. Each one adds its reactions on top of the default ones.")]
     public CharacterJuiceProfile[] characters = new CharacterJuiceProfile[0];
     #endregion
 
     #region Lookups
     /// <summary>
-    /// The juice for a character id (see CharacterList). Works for inspector characters and code
-    /// characters alike. Falls back to <see cref="defaultCharacter"/>, which may be null.
+    /// The character's own juice profile for a character id (see CharacterList), or null if it has
+    /// none. Works for inspector characters and code characters alike.
     /// </summary>
     public CharacterJuiceProfile ForCharacter(int characterId)
     {
@@ -73,7 +79,32 @@ public class JuiceProfile : ScriptableObject
             CharacterJuiceProfile c = characters[i];
             if (c != null && c.character != null && c.character.CharacterId == characterId) return c;
         }
-        return defaultCharacter;
+        return null;
+    }
+
+    /// <summary>
+    /// Every reaction a character uses: its own profile's rows, then the default profile's rows
+    /// (unless its profile turns Use Default Reactions off). Clears <paramref name="into"/> first.
+    /// </summary>
+    public void CollectReactions(int characterId, List<JuiceReaction> into)
+    {
+        into.Clear();
+        CharacterJuiceProfile own = ForCharacter(characterId);
+        AddRows(own, into);
+        if (defaultCharacter != null && defaultCharacter != own && (own == null || own.useDefaultReactions))
+        {
+            AddRows(defaultCharacter, into);
+        }
+    }
+
+    static void AddRows(CharacterJuiceProfile p, List<JuiceReaction> into)
+    {
+        if (p == null || p.reactions == null) return;
+        for (int i = 0; i < p.reactions.Length; i++)
+        {
+            JuiceReaction r = p.reactions[i];
+            if (r != null && !string.IsNullOrEmpty(r.trigger) && r.trigger.Trim().Length > 0) into.Add(r);
+        }
     }
     #endregion
 }
