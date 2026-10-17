@@ -1,31 +1,41 @@
-// BRAWLER: a close-range test character, and the simplest example of BaseFighter.
-// Tough and stocky, walks in fast, hits hard, but has no way to hurt you from far away.
+// A sample character. Copy this file to make a new one: change the numbers, add moves,
+// override Hurtbox, or use the hooks from Fighter for special mechanics. Then add one line to
+// CharacterList.cs.
 //
-//   Light (J)  Jab        fast, short, safe
-//   Heavy (K)  Haymaker   slow start, long reach, big damage and knockback
-//
-// Id 0. It is also the fallback when a character id is unknown, so it must always exist.
-// To make your own character, copy this file (or Shooter.cs for a ranged one) and follow
-// Characters/CHARACTERS.md.
-public class Brawler : BaseFighter
+// This folder (LD.Characters) can only see LD.Sim. It cannot see networking, input, drawing or
+// audio, so a character can never break when those change. Write moves as data and let the sim
+// run them; put visuals/sounds in the view layer by listening to sim events.
+public class Brawler : Fighter
 {
-    public const int Id = 0;
+    static readonly MoveDef Light = new MoveDef
+    {
+        name = "Light",
+        totalTicks = 15,
+        hitboxes = new HitboxDef[]
+        {
+            new HitboxDef { spawnTick = 4, lifetime = 3, box = new Box(400, 800, 1000, 400),
+                            damage = 5, hitstun = 12, knockback = 40 }
+        }
+    };
 
-    static readonly MoveDef Jab = Melee("Light",
-        totalTicks: 15, spawnTick: 4, activeTicks: 3,
-        box: new Box(400, 900, 900, 400),
-        damage: 6, hitstun: 14, knockback: 40);
+    static readonly MoveDef Heavy = new MoveDef
+    {
+        name = "Heavy",
+        totalTicks = 28,
+        hitboxes = new HitboxDef[]
+        {
+            new HitboxDef { spawnTick = 10, lifetime = 4, box = new Box(300, 700, 1300, 700),
+                            damage = 12, hitstun = 20, knockback = 80 }
+        }
+    };
 
-    static readonly MoveDef Haymaker = Melee("Heavy",
-        totalTicks: 28, spawnTick: 10, activeTicks: 4,
-        box: new Box(400, 700, 1300, 700),
-        damage: 14, hitstun: 22, knockback: 90);
+    public override int MaxHp { get { return 100; } }
+    public override int WalkSpeed { get { return 60; } }
 
-    // A bit more health and speed than the template, and a wider, shorter body.
-    public override int MaxHp { get { return 110; } }
-    public override int WalkSpeed { get { return 70; } }
-    public override Box Hurtbox { get { return new Box(-600, 0, 1200, 1900); } }
-
-    protected override MoveDef LightAttack { get { return Jab; } }
-    protected override MoveDef HeavyAttack { get { return Haymaker; } }
+    public override MoveDef ChooseMove(int input)
+    {
+        if ((input & Buttons.Heavy) != 0) return Heavy;
+        if ((input & Buttons.Light) != 0) return Light;
+        return null;
+    }
 }

@@ -8,7 +8,6 @@ public class HitboxInstance
     public int facing;
     public int lifetime;       // ticks left
     public bool hasHit;
-    public bool blocked;       // set when it connects: true if the victim was blocking
 
     public Box World(GameSim sim)
     {

@@ -1,6 +1,6 @@
 // A character built from a CharacterDef (edited in the Unity inspector). Behaves exactly like a
-// hand-written character such as Brawler. For special mechanics, write a BaseFighter subclass in
-// code instead (see Characters/CHARACTERS.md); for normal characters the inspector is enough.
+// hand-written Fighter subclass such as Brawler. For special mechanics, write a subclass in code
+// instead (see Brawler.cs); for normal characters the inspector is enough.
 public class DataFighter : Fighter
 {
     readonly CharacterDef def;
@@ -14,18 +14,7 @@ public class DataFighter : Fighter
     public override int WalkSpeed { get { return def.walkSpeed; } }
     public override Box Hurtbox { get { return def.hurtbox; } }
 
-    public override MoveDef[] ListMoves()
-    {
-        if (def.moves == null) return new MoveDef[0];
-        System.Collections.Generic.List<MoveDef> moves = new System.Collections.Generic.List<MoveDef>();
-        for (int i = 0; i < def.moves.Length; i++)
-        {
-            if (def.moves[i].move != null) moves.Add(def.moves[i].move);
-        }
-        return moves.ToArray();
-    }
-
-    public override MoveDef ChooseMove(GameSim sim, int input)
+    public override MoveDef ChooseMove(int input)
     {
         if (def.moves == null) return null;
         for (int i = 0; i < def.moves.Length; i++)

@@ -27,7 +27,7 @@ public class CharacterDef
         return b == AttackButton.Heavy ? Buttons.Heavy : Buttons.Light;
     }
 
-    // A new character starts with a basic Light and Heavy punch so it is playable immediately.
+    // A new character starts as a copy of Brawler so it is playable immediately.
     public static CharacterDef CreateDefault()
     {
         CharacterDef d = new CharacterDef();

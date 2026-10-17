@@ -1,17 +1,9 @@
 using System;
 
-// New states go at the END so the numbers of the old ones (used in the desync hash) stay the same.
-public enum FighterStateId { Idle, Walk, Attack, Hitstun, KO, Blockstun }
+public enum FighterStateId { Idle, Walk, Attack, Hitstun, KO }
 
-// The engine-level base class for every character. It owns the state machine, movement,
-// blocking and getting hit. You normally do NOT subclass this directly:
-//   - code characters extend BaseFighter (Characters/BaseFighter.cs), the character template
-//   - inspector characters are played by DataFighter
-// See Characters/CHARACTERS.md for the full guide.
-//
-// BLOCKING: hold the direction AWAY from the opponent while standing or walking. A blocked hit
-// does no damage, still pushes you back, and puts you in Blockstun (shorter than hitstun) where
-// you can't act but keep blocking. Blocking works the same for every character, so it lives here.
+// Base class for every character. It owns the state machine, movement and getting hit.
+// A new character = a new subclass that fills in the abstract members (see Brawler.cs).
 //
 // TICKS: everything is counted in ticks (1 tick = 1/60 s). `stateTick` is how many ticks the
 // fighter has been in the current state; it is 0 on the first tick of a state.
@@ -28,20 +20,13 @@ public abstract class Fighter
     public int facing = 1;          // 1 = facing right, -1 = facing left
     public FighterStateId state;
     public int stateTick;
-    public int stunTicks;           // how long the current Hitstun or Blockstun lasts
-    public bool holdingBack;        // this tick's input holds away from the opponent (see IsBlocking)
+    public int hitstunTicks;
     public MoveDef move;            // the move being performed while state == Attack
 
     // ---------- fill these in per character ----------
     public abstract int MaxHp { get; }
     public abstract int WalkSpeed { get; }               // milli-units per tick
-    // Which move does this input start? null = none. `sim` is there so a character can check the
-    // match (for example "is my fireball still on screen?"). Read it, never change it here.
-    public abstract MoveDef ChooseMove(GameSim sim, int input);
-
-    // Every move this character can do. NOT used by the fight; editor tools read it, e.g. to make
-    // one Animator state per move. If you add moves outside LightAttack/HeavyAttack, list them too.
-    public virtual MoveDef[] ListMoves() { return new MoveDef[0]; }
+    public abstract MoveDef ChooseMove(int input);       // which move does this input start? null = none
 
     // The body. Override to make a character taller / shorter, or change it while crouching.
     public virtual Box Hurtbox
@@ -50,15 +35,7 @@ public abstract class Fighter
     }
 
     // ---------- optional hooks for theme mechanics / modifiers ----------
-    // Change this tick's input before the fighter uses it. Return 0 to ignore the player
-    // completely (Sandbag), or swap bits for a "reversed controls" effect.
-    protected virtual int FilterInput(int input) { return input; }
-
-    // false = a hit that would KO refills health instead (training dummies).
-    public virtual bool CanBeKnockedOut { get { return true; } }
-
     public virtual void OnTick(GameSim sim) { }
-    // Called for blocked hits too; check hit.blocked if your mechanic should only count real hits.
     public virtual void OnHitDealt(GameSim sim, Fighter victim, HitboxInstance hit) { }
     public virtual void OnHitReceived(GameSim sim, Fighter attacker, HitboxInstance hit) { }
 
@@ -66,22 +43,7 @@ public abstract class Fighter
     // a cooldown), mix it in here so the desync check can see it:  return meter * 31 + cooldown;
     public virtual int HashExtra() { return 0; }
 
-    // Blocking tuning, shared by every character.
-    public const int BlockstunPercent = 60;    // blockstun = this % of the move's hitstun
-    public const int BlockPushPercent = 100;   // pushback on block = this % of the move's knockback
-
     // ---------- helpers ----------
-    // True if a hit landing right now would be blocked.
-    public bool IsBlocking
-    {
-        get
-        {
-            bool canBlockInState = state == FighterStateId.Idle || state == FighterStateId.Walk
-                                || state == FighterStateId.Blockstun;
-            return canBlockInState && holdingBack;
-        }
-    }
-
     public Box HurtboxWorld()
     {
         return Hurtbox.ToWorld(x, y, facing);
@@ -96,8 +58,7 @@ public abstract class Fighter
         hp = MaxHp;
         facing = fighterIndex == 0 ? 1 : -1;
         move = null;
-        stunTicks = 0;
-        holdingBack = false;
+        hitstunTicks = 0;
         EnterState(FighterStateId.Idle);
     }
 
@@ -110,7 +71,6 @@ public abstract class Fighter
     // ---------- phase 1 of a tick: decide what to do ----------
     public void Think(GameSim sim, int input)
     {
-        input = FilterInput(input);
         stateTick++;
         OnTick(sim);
 
@@ -126,8 +86,7 @@ public abstract class Fighter
                 break;
 
             case FighterStateId.Hitstun:
-            case FighterStateId.Blockstun:
-                if (stateTick >= stunTicks - 1)
+                if (stateTick >= hitstunTicks - 1)
                 {
                     vx = 0;
                     EnterState(FighterStateId.Idle);
@@ -138,10 +97,6 @@ public abstract class Fighter
                 vx = 0;
                 break;
         }
-
-        // Done after the switch so it uses this tick's facing (ThinkGrounded may have turned us).
-        int back = facing > 0 ? Buttons.Left : Buttons.Right;
-        holdingBack = (input & back) != 0;
     }
 
     void ThinkGrounded(GameSim sim, int input)
@@ -149,7 +104,7 @@ public abstract class Fighter
         Fighter other = sim.fighters[1 - index];
         facing = x <= other.x ? 1 : -1;
 
-        MoveDef chosen = ChooseMove(sim, input);
+        MoveDef chosen = ChooseMove(input);
         if (chosen != null)
         {
             move = chosen;
@@ -200,24 +155,13 @@ public abstract class Fighter
     }
 
     // ---------- getting hit ----------
-    // GameSim decides whether the hit was blocked (hit.blocked) before anything changes, so two
-    // hits on the same tick are treated the same way.
     public void TakeHit(GameSim sim, HitboxInstance hit)
     {
-        int away = sim.fighters[hit.owner].x <= x ? 1 : -1;
-
-        if (hit.blocked)
-        {
-            vx = away * hit.def.knockback * BlockPushPercent / 100;
-            stunTicks = Math.Max(1, hit.def.hitstun * BlockstunPercent / 100);
-            EnterState(FighterStateId.Blockstun);
-            return;
-        }
-
         hp -= hit.def.damage;
-        if (hp <= 0 && !CanBeKnockedOut) hp = MaxHp;
         move = null;
         sim.RemoveFollowHitboxes(index);   // being hit cancels your own melee hitboxes
+
+        int away = sim.fighters[hit.owner].x <= x ? 1 : -1;
         vx = away * hit.def.knockback;
 
         if (hp <= 0)
@@ -228,7 +172,7 @@ public abstract class Fighter
         }
         else
         {
-            stunTicks = hit.def.hitstun;
+            hitstunTicks = hit.def.hitstun;
             EnterState(FighterStateId.Hitstun);
         }
     }
