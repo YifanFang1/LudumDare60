@@ -12,6 +12,12 @@ using UnityEngine;
 /// If something else moved the camera in between (WorldView frames it when a match starts), that
 /// new position simply becomes the resting point.
 /// </para>
+/// <para>
+/// Hill tilt: when a fighter lands a hit, the camera tilts so their side of the screen is uphill and
+/// they are fighting down the hill. Hits in a row by the same fighter make the hill steeper; a hit by
+/// the other fighter swings it their way. It eases to the new angle, and levels out again once nobody
+/// has landed a hit for JuiceProfile.hillTiltHoldTime seconds. It also resets when a match starts or ends.
+/// </para>
 /// </summary>
 public class JuiceScreenShake
 {
@@ -26,6 +32,9 @@ public class JuiceScreenShake
 
     float trauma;
     float time;
+    float tilt;                 // hill tilt in degrees right now (+ = left side up)
+    float targetTilt;           // the angle the hill tilt is easing towards
+    float tiltHoldLeft;         // seconds until the hill levels out again
 
     Vector3 appliedOffset;      // what we added to the camera last frame
     float appliedRoll;          // degrees we rolled the camera last frame
@@ -52,16 +61,34 @@ public class JuiceScreenShake
         trauma = Mathf.Clamp01(trauma + amount);
     }
 
-    /// <summary>Stops shaking. The camera returns to rest on the next Tick.</summary>
+    /// <summary>
+    /// Tilts the hill so the attacker's side is uphill. <paramref name="attackerSide"/> is -1 when the
+    /// attacker is on the left of the screen and +1 on the right. If the hill already favours them it
+    /// gets steeper; if it favoured the other fighter it flips to their side.
+    /// </summary>
+    public void AddHillTilt(int attackerSide)
+    {
+        // A positive camera roll makes the left side of the screen look higher.
+        float sign = attackerSide < 0 ? 1f : -1f;
+        float alreadyOurWay = Mathf.Max(0f, targetTilt * sign);
+        targetTilt = sign * Mathf.Min(alreadyOurWay + profile.hillTiltPerHit, profile.maxHillTilt);
+        tiltHoldLeft = profile.hillTiltHoldTime;
+    }
+
+    /// <summary>Stops shaking and levels the hill. The camera returns to rest on the next Tick.</summary>
     public void Clear()
     {
         trauma = 0f;
+        tilt = 0f;
+        targetTilt = 0f;
     }
 
     /// <summary>Puts the camera back where it would be without shake (call when the manager is disabled).</summary>
     public void Restore()
     {
         trauma = 0f;
+        tilt = 0f;
+        targetTilt = 0f;
         Apply(Vector3.zero, 0f);
     }
     #endregion
@@ -74,10 +101,18 @@ public class JuiceScreenShake
         time += dt;
         trauma = Mathf.Max(0f, trauma - profile.traumaDecay * dt);
 
+        // No hits for a while: let the hill level out. A hold time of 0 means it never does.
+        if (tiltHoldLeft > 0f)
+        {
+            tiltHoldLeft -= dt;
+            if (tiltHoldLeft <= 0f) targetTilt = 0f;
+        }
+        tilt = Mathf.Lerp(tilt, targetTilt, 1f - Mathf.Exp(-profile.hillTiltSpeed * dt));   // smooth, frame-rate independent
+
         float strength = Mathf.Pow(trauma, profile.traumaExponent) * profile.shakeMultiplier;
         if (strength <= 0f)
         {
-            Apply(Vector3.zero, 0f);
+            Apply(Vector3.zero, tilt);
             return;
         }
 
@@ -88,7 +123,7 @@ public class JuiceScreenShake
             0f);
         float roll = profile.maxShakeRoll * strength * Noise(SeedRoll, t);
 
-        Apply(offset, roll);
+        Apply(offset, tilt + roll);
     }
     #endregion
 
@@ -108,11 +143,12 @@ public class JuiceScreenShake
 
         // Where the camera rests without our shake. If someone else moved it since our last frame,
         // their position is the new rest point; otherwise take our own offset back off.
-        bool untouched = hasApplied
-                         && (tr.position - lastPosition).sqrMagnitude < 1e-8f
-                         && Quaternion.Angle(tr.rotation, lastRotation) < 0.001f;
-        Vector3 restPosition = untouched ? tr.position - appliedOffset : tr.position;
-        Quaternion restRotation = untouched ? tr.rotation * Quaternion.Euler(0f, 0f, -appliedRoll) : tr.rotation;
+        // Position and rotation are checked separately: FightCamera moves the camera every frame but
+        // never rotates it, and checking them together baked our roll in, leaving the camera tilted.
+        bool positionUntouched = hasApplied && (tr.position - lastPosition).sqrMagnitude < 1e-8f;
+        bool rotationUntouched = hasApplied && Quaternion.Angle(tr.rotation, lastRotation) < 0.001f;
+        Vector3 restPosition = positionUntouched ? tr.position - appliedOffset : tr.position;
+        Quaternion restRotation = rotationUntouched ? tr.rotation * Quaternion.Euler(0f, 0f, -appliedRoll) : tr.rotation;
 
         if (!hasApplied && offset == Vector3.zero && roll == 0f) return;   // nothing to undo, nothing to do
 

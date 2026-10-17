@@ -39,6 +39,17 @@ public class JuiceProfile : ScriptableObject
     [Tooltip("Scales every shake. Set to 0 to turn screen shake off (e.g. an accessibility option).")]
     [Range(0f, 2f)] public float shakeMultiplier = 1f;
 
+    [Header("Hill tilt: the attacker's side of the screen goes uphill on each hit")]
+    [Tooltip("Degrees the hill gets steeper per hit. 0 = no hill tilt.")]
+    [Range(0f, 30f)] public float hillTiltPerHit = 4f;
+    [Tooltip("The hill never gets steeper than this many degrees. Set it equal to Hill Tilt Per Hit " +
+             "to snap to one fixed angle instead of building up.")]
+    [Range(0f, 90f)] public float maxHillTilt = 20f;
+    [Tooltip("How fast the camera swings to the new hill angle. Higher = snappier.")]
+    [Range(0.5f, 30f)] public float hillTiltSpeed = 6f;
+    [Tooltip("Seconds without a hit before the hill levels out again. 0 = it stays tilted until the match ends.")]
+    [Range(0f, 10f)] public float hillTiltHoldTime = 2f;
+
     [Header("Durations (ticks, 60 = 1 second)")]
     public int flashTicks = 4;
     public int impactTicks = 3;

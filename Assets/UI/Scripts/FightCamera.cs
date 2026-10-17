@@ -24,6 +24,7 @@ public class FightCamera : MonoBehaviour
     IMatchSession match;
     float xVelocity;
     float sizeVelocity;
+    float x = float.NaN;    // our own x, so screen shake (added on top) doesn't nudge where we aim
 
     void Awake()
     {
@@ -37,7 +38,7 @@ public class FightCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        if (match.Phase != MatchPhase.Playing) return;
+        if (match.Phase != MatchPhase.Playing) { x = float.NaN; return; }   // next match starts from WorldView's framing
         Camera cam = Camera.main;
         if (cam == null) return;
 
@@ -51,7 +52,8 @@ public class FightCamera : MonoBehaviour
 
         float limit = Mathf.Max(0f, stageHalfWidth - size * cam.aspect);
         float targetX = Mathf.Clamp((x0 + x1) / 2f, -limit, limit);
-        float x = Mathf.SmoothDamp(cam.transform.position.x, targetX, ref xVelocity, smoothTime);
+        if (float.IsNaN(x)) x = cam.transform.position.x;
+        x = Mathf.SmoothDamp(x, targetX, ref xVelocity, smoothTime);
 
         cam.orthographicSize = size;
         cam.transform.position = new Vector3(x, size - floorMargin, cam.transform.position.z);
