@@ -18,6 +18,7 @@ public class NetClient
     public Action<int, int, int> OnStart;   // slot, seed, delay
     public Action<int, int> OnInput;        // tick, bits   (other player's)
     public Action<int, int> OnHash;         // tick, hash   (other player's)
+    public Action<string> OnName;           // the other player's display name
     public Action<int> OnCharacter;         // character id (other player's pick)
     public Action<string> OnStatus;         // "full", "badversion", "left", "closed", "error: ..."
 
@@ -61,6 +62,7 @@ public class NetClient
         OnInput = null;
         OnHash = null;
         OnCharacter = null;
+        OnName = null;
         OnStatus = null;
         if (ws != null)
         {
@@ -89,6 +91,10 @@ public class NetClient
         else if (p[0] == "h" && p.Length >= 3)
         {
             if (OnHash != null) OnHash(int.Parse(p[1]), int.Parse(p[2]));
+        }
+        else if (p[0] == "n" && p.Length >= 2)
+        {
+            if (OnName != null) OnName(text.Substring(2));
         }
         else if (p[0] == "c" && p.Length >= 2)
         {

@@ -108,6 +108,9 @@ check("input forwarded A -> B", (await b.waitFor("i,5,16")) !== null);
 b.ws.send("h,30,12345");
 check("hash forwarded B -> A", (await a.waitFor("h,30,12345")) !== null);
 
+a.ws.send("n,Yifan Fang");
+check("player name forwarded A -> B", (await b.waitFor("n,Yifan Fang")) !== null);
+
 const c = connect(code);
 await c.open;
 check("third player gets full", (await c.waitFor("full")) !== null);

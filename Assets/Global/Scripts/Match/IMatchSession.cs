@@ -21,6 +21,10 @@ public interface IMatchSession
     string Warning { get; }         // "" normally; text to show if something is wrong (e.g. desync)
     string Status { get; }          // last message for the lobby ("Room is full", ...)
 
+    // Names shown above the fighters and under the health bars.
+    string LocalName { get; set; }     // your own name (remembered between sessions)
+    string NameOf(int slot);           // the name to show for fighter 0 or 1
+
     // Character ids (see CharacterList). For Play vs AI: yours and the AI's.
     // Online, only LocalCharacter is yours to set; the opponent picks their own.
     int LocalCharacter { get; set; }

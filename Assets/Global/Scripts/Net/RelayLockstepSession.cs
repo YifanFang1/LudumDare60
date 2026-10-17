@@ -16,7 +16,7 @@ public class RelayLockstepSession : MatchSessionBase
     // Bump this whenever the sim or the message format changes. The hash of the inspector-made
     // character data is added automatically, so changed characters are refused too.
     // Players on different versions are refused by the relay instead of silently desyncing.
-    const string Version = "5";
+    const string Version = "6";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 
@@ -41,6 +41,7 @@ public class RelayLockstepSession : MatchSessionBase
     // From the relay's start message, kept until both players have picked a character.
     int pendingSlot, pendingSeed, pendingDelay;
     int myPick, theirPick;
+    string theirName = "";
     bool haveTheirPick;
 
     protected override void Awake()
@@ -177,6 +178,7 @@ public class RelayLockstepSession : MatchSessionBase
         net.OnOpen = () => { Status = "Connected. Waiting for an opponent..."; };
         net.OnStart = BeginCharacterSelect;
         net.OnCharacter = OnTheirCharacter;
+        net.OnName = (name) => { theirName = name; };
         net.OnStatus = HandleStatus;
         net.Connect(relayUrl, code, Version + "-" + CharacterList.DataHash(), isPublic);
     }
@@ -189,6 +191,7 @@ public class RelayLockstepSession : MatchSessionBase
         pendingDelay = delay;
         haveTheirPick = false;
         EnterCharacterSelect(false);
+        net.Send("n," + LocalName.Trim());   // the relay passes it on; the opponent shows it above your fighter
     }
 
     public override void ConfirmCharacter()
@@ -236,6 +239,7 @@ public class RelayLockstepSession : MatchSessionBase
         setup.p0Character = slot == 0 ? myPick : theirPick;
         setup.p1Character = slot == 0 ? theirPick : myPick;
         StartMatch(setup, first, second, pendingDelay, slot, true);
+        SetName(1 - slot, theirName);
     }
 
     void CloseNet()

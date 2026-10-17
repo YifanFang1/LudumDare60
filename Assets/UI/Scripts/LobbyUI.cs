@@ -36,7 +36,11 @@ public class LobbyUI : MonoBehaviour
 
     void DrawLobby()
     {
-        GUILayout.BeginArea(new Rect(20, 20, 320, 450));
+        GUILayout.BeginArea(new Rect(20, 20, 320, 500));
+        GUILayout.Label("Your name");
+        match.LocalName = GUILayout.TextField(match.LocalName, PlayerNames.MaxLength);
+        GUILayout.Space(10);
+
         if (match.SupportsRooms)
         {
             GUILayout.Label("Server");

@@ -23,6 +23,25 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     public string Status { get; protected set; }
     public string RoomCode { get; protected set; }
 
+    string localName;
+    string[] names = { "P1", "P2" };
+
+    // Your name. Cleaned and saved so it is still there next time.
+    public string LocalName
+    {
+        get { if (localName == null) localName = PlayerNames.Load(); return localName; }
+        set { localName = PlayerNames.Clean(value); }
+    }
+
+    public string NameOf(int slot) { return names[slot]; }
+
+    // For subclasses: the opponent's name arrived (empty names are ignored).
+    protected void SetName(int slot, string name)
+    {
+        string clean = PlayerNames.Clean(name).Trim();
+        if (clean.Length > 0) names[slot] = clean;
+    }
+
     public int LocalCharacter { get; set; }
     public int OpponentCharacter { get; set; }
     public bool ChoosesOpponent { get; protected set; }
@@ -104,6 +123,11 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     {
         LocalSlot = localSlot;
         IsOnline = online;
+        string mine = LocalName.Trim();
+        if (mine.Length == 0) mine = "Player";
+        PlayerNames.Save(mine);
+        names[localSlot] = mine;
+        names[1 - localSlot] = online ? "P" + (2 - localSlot) : "AI";
         Warning = "";
         sim.Reset(setup.seed, CharacterList.Create(setup.p0Character), CharacterList.Create(setup.p1Character));
 
