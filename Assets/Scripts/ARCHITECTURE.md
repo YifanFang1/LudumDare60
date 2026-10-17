@@ -15,7 +15,8 @@ Each folder is its own assembly (asmdef). The arrows are the ONLY allowed depend
 - **Net** (LD.Net.Relay): the Cloudflare relay session; also downloads the published character file. Nothing outside this folder references it. Delete the folder and swap `RelayLockstepSession` for `LocalMatchSession` on the GameObject to ship without online play.
 - **View**: `WorldView` (fighters as GameObjects), `FightView` (HUD), `LobbyUI`, `ControlsUI`, `CharacterPreview`.
 - **Tests** (`Assets/Tests/EditMode`, LD.Tests.EditMode): sim-only checks of the character framework. Window > General > Test Runner > EditMode > Run All.
-- Juice (screen shake, sparks) and audio are removed for now. They only listen to `IMatchSession` events, so they can be added back later without touching the sim.
+- **Audio**: `AudioManager` on the GameManager object. It plays fight sounds from `IMatchSession.SimEventRaised` and picks music from the match phase; menus call `AudioManager.Click()` / `Confirm()`, which do nothing if there is no AudioManager. Every clip slot is optional.
+- Juice (screen shake, sparks) is removed for now. It would only listen to `IMatchSession` events too, so it can be added back later without touching the sim.
 
 ## Making a character (no code)
 1. Project window: right click `Assets/Resources/Characters` > Create > Fight > Character. Name the file.
@@ -50,4 +51,4 @@ ints only, no float/Time/Random/UnityEngine, state changes only inside `GameSim.
 **Blocking** is in `Fighter` and works the same for every character: hold away from the opponent while standing or walking. A blocked hit does no damage, pushes back, and causes `Blockstun` (60% of the hitstun). `GameSim` decides `hit.blocked` before applying any hit, and sends a `Block` event instead of `Hit`.
 
 ## Online
-Online play does not exchange character choices yet (both players are Brawler). The network version includes a hash of all character data, so two builds with different characters refuse to match instead of desyncing.
+Character select happens after both players are in the room: each player picks their own character and presses Ready, which sends `c,<characterId>` through the relay (it forwards any message untouched, so the relay needs no change). When both picks have arrived, both machines start the match with the picks ordered by slot. Vs AI uses the same screen, and you pick the AI's character too. The network version includes a hash of all character data, so two builds with different characters refuse to match instead of desyncing.

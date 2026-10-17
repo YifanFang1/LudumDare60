@@ -38,6 +38,11 @@ public class RelayLockstepSession : MatchSessionBase
     Dictionary<int, int> myHashes = new Dictionary<int, int>();
     Dictionary<int, int> theirHashes = new Dictionary<int, int>();
 
+    // From the relay's start message, kept until both players have picked a character.
+    int pendingSlot, pendingSeed, pendingDelay;
+    int myPick, theirPick;
+    bool haveTheirPick;
+
     protected override void Awake()
     {
         base.Awake();
@@ -93,16 +98,49 @@ public class RelayLockstepSession : MatchSessionBase
 
     // ---------- commands ----------
 
+    // Joins a waiting public room, or hosts a new public one if nobody is waiting.
+    public override void QuickMatch()
+    {
+        if (CharactersLoading) { Status = "Still loading characters, try again in a moment"; return; }
+        if (quickBusy) return;
+        StartCoroutine(QuickMatchRoutine());
+    }
+
+    bool quickBusy;
+
+    IEnumerator QuickMatchRoutine()
+    {
+        quickBusy = true;
+        Status = "Finding a match...";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(HttpBase(relayUrl) + "/quick"))
+        {
+            yield return request.SendWebRequest();
+
+            string code = request.result == UnityWebRequest.Result.Success ? request.downloadHandler.text.Trim().ToUpper() : "";
+            if (code.Length != 4)
+            {
+                Status = "Could not reach the server for quick match";
+            }
+            else if (Phase == MatchPhase.Lobby)   // the player may have started something else meanwhile
+            {
+                StartOnline(code, true);   // quick match rooms are always public
+            }
+        }
+
+        quickBusy = false;
+    }
+
     public override void CreateRoom()
     {
         if (CharactersLoading) { Status = "Still loading characters, try again in a moment"; return; }
-        StartOnline(RandomCode());
+        StartOnline(RandomCode(), PublicRoom);
     }
 
     public override void JoinRoom(string code)
     {
         if (CharactersLoading) { Status = "Still loading characters, try again in a moment"; return; }
-        StartOnline(code);
+        StartOnline(code, false);   // joining: the room is already public or private, the host decided
     }
 
     public override void Leave()
@@ -113,7 +151,7 @@ public class RelayLockstepSession : MatchSessionBase
 
     // ---------- internals ----------
 
-    void StartOnline(string code)
+    void StartOnline(string code, bool isPublic)
     {
         if (code.Length != 4)
         {
@@ -137,13 +175,48 @@ public class RelayLockstepSession : MatchSessionBase
 
         net = new NetClient();
         net.OnOpen = () => { Status = "Connected. Waiting for an opponent..."; };
-        net.OnStart = BeginOnlineMatch;
+        net.OnStart = BeginCharacterSelect;
+        net.OnCharacter = OnTheirCharacter;
         net.OnStatus = HandleStatus;
-        net.Connect(relayUrl, code, Version + "-" + CharacterList.DataHash());
+        net.Connect(relayUrl, code, Version + "-" + CharacterList.DataHash(), isPublic);
     }
 
-    void BeginOnlineMatch(int slot, int seed, int delay)
+    // Both players are in: pick characters before the fight starts.
+    void BeginCharacterSelect(int slot, int seed, int delay)
     {
+        pendingSlot = slot;
+        pendingSeed = seed;
+        pendingDelay = delay;
+        haveTheirPick = false;
+        EnterCharacterSelect(false);
+    }
+
+    public override void ConfirmCharacter()
+    {
+        if (net == null) { base.ConfirmCharacter(); return; }   // Play vs AI on this component
+        if (Phase != MatchPhase.CharacterSelect || CharacterConfirmed) return;
+
+        CharacterConfirmed = true;
+        myPick = LocalCharacter;
+        net.Send("c," + myPick);
+        Status = "Waiting for opponent to pick...";
+        TryBeginOnlineMatch();
+    }
+
+    void OnTheirCharacter(int id)
+    {
+        theirPick = id;
+        haveTheirPick = true;
+        if (!CharacterConfirmed) Status = "Opponent is ready";
+        TryBeginOnlineMatch();
+    }
+
+    void TryBeginOnlineMatch()
+    {
+        if (!CharacterConfirmed || !haveTheirPick) return;
+
+        int slot = pendingSlot;
+        OpponentCharacter = theirPick;
         myHashes.Clear();
         theirHashes.Clear();
         Status = "";
@@ -158,8 +231,11 @@ public class RelayLockstepSession : MatchSessionBase
         IInputSource second = slot == 0 ? (IInputSource)remote : local;
 
         MatchSetup setup = new MatchSetup();
-        setup.seed = seed;   // character ids are not exchanged yet: both players are Brawler (id 0)
-        StartMatch(setup, first, second, delay, slot, true);
+        // Both machines must build the same fight, so order the picks by slot, not by "mine".
+        setup.seed = pendingSeed;
+        setup.p0Character = slot == 0 ? myPick : theirPick;
+        setup.p1Character = slot == 0 ? theirPick : myPick;
+        StartMatch(setup, first, second, pendingDelay, slot, true);
     }
 
     void CloseNet()

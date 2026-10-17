@@ -25,8 +25,11 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
 
     public int LocalCharacter { get; set; }
     public int OpponentCharacter { get; set; }
+    public bool ChoosesOpponent { get; protected set; }
+    public bool CharacterConfirmed { get; protected set; }
 
     public virtual bool SupportsRooms { get { return false; } }
+    public bool PublicRoom { get; set; }
     public virtual string ServerAddress { get { return ""; } set { } }
 
     public event Action<GameSim> MatchStarted;
@@ -59,6 +62,15 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     public virtual void PlayVsAI()
     {
         Leave();
+        EnterCharacterSelect(true);
+    }
+
+    // Vs AI both picks are made on this machine, so confirming starts the match.
+    public virtual void ConfirmCharacter()
+    {
+        if (Phase != MatchPhase.CharacterSelect || CharacterConfirmed) return;
+        CharacterConfirmed = true;
+
         MatchSetup setup = new MatchSetup();
         setup.seed = 12345;
         setup.p0Character = LocalCharacter;
@@ -67,6 +79,7 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     }
 
     // Subclasses that have no online mode just say so.
+    public virtual void QuickMatch() { Status = "Online play is not available in this build"; }
     public virtual void CreateRoom() { Status = "Online play is not available in this build"; }
     public virtual void JoinRoom(string code) { Status = "Online play is not available in this build"; }
 
@@ -76,6 +89,14 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     }
 
     // ---------- for subclasses ----------
+
+    protected void EnterCharacterSelect(bool choosesOpponent)
+    {
+        ChoosesOpponent = choosesOpponent;
+        CharacterConfirmed = false;
+        Status = "";
+        Phase = MatchPhase.CharacterSelect;
+    }
 
     // Build the fighters, reset the sim, and start ticking. `delay` is the input delay in ticks
     // (0 offline, a few ticks online).
