@@ -3,7 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // The fight HUD: health bars, player and character names, info lines, the result panel, and the
-// player names that float above the fighters. Talks only to IMatchSession.
+// player names that float above the fighters. Also the shared-kit parts (Design/SHARED_KIT.md):
+// Ultimate meters, round pips, ROUND / K.O. banners and the Ultimate flash. Talks only to
+// IMatchSession. Every reference is optional: an empty slot is skipped. For a FightUI built
+// before these existed, run  Fight > Add Meter And Round HUD.
 public class HudScreen : MonoBehaviour
 {
     [Header("Health bars (Image with Type = Filled)")]
@@ -35,11 +38,38 @@ public class HudScreen : MonoBehaviour
     public Color localNameColor = new Color(1f, 0.92f, 0.4f);
     public Color otherNameColor = Color.white;
 
+    [Header("Ultimate meters (Image with Type = Filled)")]
+    public Image leftMeter;
+    public Image rightMeter;
+    public Color meterColor = new Color(0.9f, 0.75f, 0.1f);
+    public Color meterFullColor = Color.white;   // a full meter pulses between the two colours
+    public TMP_Text leftUltimateReady;           // shown only while that meter is full
+    public TMP_Text rightUltimateReady;
+
+    [Header("Rounds won: one Image per round (RoundsToWin), first round first")]
+    public Image[] leftRoundPips;
+    public Image[] rightRoundPips;
+    public Color pipWonColor = new Color(1f, 0.85f, 0.2f);
+    public Color pipEmptyColor = new Color(0.25f, 0.25f, 0.3f);
+
+    [Header("Banners")]
+    public TMP_Text bannerText;                  // ROUND 1 / FINAL ROUND, then K.O.
+    public float bannerSeconds = 1.5f;
+
+    [Header("Ultimate flash (while the match freezes for an Ultimate)")]
+    public Image superFlash;                     // a full-screen Image; its alpha follows the freeze
+    public float superFlashMaxAlpha = 0.45f;
+    public TMP_Text superFlashText;              // "<name>: ULTIMATE!"
+
     IMatchSession match;
     bool wired;
+    int shownRound;                              // the round whose banner was last shown (0 = none)
+    float bannerUntil;
+    string bannerRound = "";
 
     void OnEnable()
     {
+        shownRound = 0;   // this screen is switched on for each match, so ROUND 1 is shown again
         match = SessionFinder.Find();
         if (match == null) return;
         if (!wired && resultButton != null)
@@ -85,10 +115,91 @@ public class HudScreen : MonoBehaviour
         if (over)
         {
             int winner = sim.Winner;
-            SetText(resultText, winner == 2 ? "Draw" : match.NameOf(winner) + " wins");
+            SetText(resultText, winner == 2 ? "Draw" : match.NameOf(winner) + " wins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
         }
 
         UpdateWorldNames(sim);
+        UpdateMeters(sim);
+        UpdateRoundPips(sim);
+        UpdateBanner(sim);
+        UpdateSuperFlash(sim);
+    }
+
+    void UpdateMeters(GameSim sim)
+    {
+        float pulse = Mathf.PingPong(Time.unscaledTime * 3f, 1f);
+        Image[] meters = { leftMeter, rightMeter };
+        TMP_Text[] ready = { leftUltimateReady, rightUltimateReady };
+        for (int i = 0; i < 2; i++)
+        {
+            Fighter f = sim.fighters[i];
+            bool full = f.meter >= Fighter.MeterMax;
+            if (meters[i] != null)
+            {
+                meters[i].fillAmount = Mathf.Clamp01(f.meter / (float)Fighter.MeterMax);
+                meters[i].color = full ? Color.Lerp(meterColor, meterFullColor, pulse) : meterColor;
+            }
+            if (ready[i] != null && ready[i].gameObject.activeSelf != full) ready[i].gameObject.SetActive(full);
+        }
+    }
+
+    void UpdateRoundPips(GameSim sim)
+    {
+        Image[][] pips = { leftRoundPips, rightRoundPips };
+        for (int i = 0; i < 2; i++)
+        {
+            if (pips[i] == null) continue;
+            for (int r = 0; r < pips[i].Length; r++)
+            {
+                if (pips[i][r] != null) pips[i][r].color = r < sim.roundsWon[i] ? pipWonColor : pipEmptyColor;
+            }
+        }
+    }
+
+    // Worked out from the sim's round number rather than from events, because this screen is only
+    // switched on once the match is already running and could miss the first one.
+    void UpdateBanner(GameSim sim)
+    {
+        if (bannerText == null) return;
+        if (sim.round != shownRound)
+        {
+            shownRound = sim.round;
+            bool final = sim.roundsWon[0] == GameSim.RoundsToWin - 1 && sim.roundsWon[1] == GameSim.RoundsToWin - 1;
+            bannerRound = final ? "FINAL ROUND" : "ROUND " + sim.round;
+            bannerUntil = Time.unscaledTime + bannerSeconds;
+        }
+
+        string text = "";
+        if (sim.roundOverTicks > 0 || sim.IsOver) text = "K.O.";
+        else if (Time.unscaledTime < bannerUntil) text = bannerRound;
+        bool show = text != "";
+        if (bannerText.gameObject.activeSelf != show) bannerText.gameObject.SetActive(show);
+        SetText(bannerText, text);
+    }
+
+    // A white flash that fades out over the Ultimate's freeze, and whose Ultimate it is. Driven by
+    // the sim's freeze counter, so it lasts exactly as long as the freeze.
+    void UpdateSuperFlash(GameSim sim)
+    {
+        bool frozen = sim.freezeTicks > 0;
+        if (superFlash != null)
+        {
+            if (superFlash.enabled != frozen) superFlash.enabled = frozen;
+            Color c = superFlash.color;
+            c.a = frozen ? superFlashMaxAlpha * sim.freezeTicks / GameSim.SuperFlashTicks : 0f;
+            superFlash.color = c;
+        }
+        if (superFlashText == null) return;
+
+        string who = "";
+        for (int i = 0; i < 2 && frozen; i++)
+        {
+            Fighter f = sim.fighters[i];
+            if (f.move != null && f.move.ultimate && f.state == FighterStateId.Attack) who = match.NameOf(i);
+        }
+        bool show = who != "";
+        if (superFlashText.gameObject.activeSelf != show) superFlashText.gameObject.SetActive(show);
+        if (show) SetText(superFlashText, who + ": ULTIMATE!");
     }
 
     // Debug lines: hidden when Match Screens > Show Debug UI is off.

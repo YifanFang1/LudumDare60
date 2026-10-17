@@ -60,7 +60,7 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     {
         // Lockstep needs both windows to keep running even when one is not focused.
         Application.runInBackground = true;
-        sim.Reset(0, CharacterList.Create(0), CharacterList.Create(0));   // so Sim is never empty
+        sim.Reset(0, CharacterList.Factory(0), CharacterList.Factory(0));   // so Sim is never empty
         Phase = MatchPhase.Lobby;
         Warning = "";
         Status = "";
@@ -130,7 +130,7 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
         names[localSlot] = mine;
         names[1 - localSlot] = online ? "P" + (2 - localSlot) : "AI";
         Warning = "";
-        sim.Reset(setup.seed, CharacterList.Create(setup.p0Character), CharacterList.Create(setup.p1Character));
+        sim.Reset(setup.seed, CharacterList.Factory(setup.p0Character), CharacterList.Factory(setup.p1Character));
 
         runner.OnTick = OnTickDone;
         runner.Begin(sim, p0, p1, delay);

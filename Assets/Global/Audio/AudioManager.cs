@@ -15,11 +15,15 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] hitSounds;        // a normal hit lands
     public AudioClip[] heavyHitSounds;   // a hit doing at least heavyHitDamage (empty = use hitSounds)
     public AudioClip[] blockSounds;      // a hit is blocked
+    public AudioClip[] grabSounds;       // a grab lands (empty = use hitSounds)
+    public AudioClip[] dashSounds;       // a dash starts
+    public AudioClip superFlashSound;    // an Ultimate starts (the freeze)
     public AudioClip koSound;
     public int heavyHitDamage = 10;      // Brawler: Light does 5, Heavy does 12
 
     [Header("Match")]
     public AudioClip fightStart;         // "Ready... Fight!" when a match begins
+    public AudioClip roundStart;         // when round 2 or 3 begins (empty = use fightStart)
     public AudioClip winJingle;          // from your side: you won
     public AudioClip loseJingle;
     public AudioClip drawJingle;
@@ -132,8 +136,20 @@ public class AudioManager : MonoBehaviour
             case SimEventType.Block:
                 PlaySfx(blockSounds);
                 break;
+            case SimEventType.Grab:
+                PlaySfx(grabSounds != null && grabSounds.Length > 0 ? grabSounds : hitSounds);
+                break;
+            case SimEventType.Dash:
+                PlaySfx(dashSounds);
+                break;
+            case SimEventType.SuperFlash:
+                PlayUI(superFlashSound);
+                break;
             case SimEventType.KO:
                 PlayUI(koSound);
+                break;
+            case SimEventType.RoundStart:
+                PlayUI(roundStart != null ? roundStart : fightStart);
                 break;
         }
     }

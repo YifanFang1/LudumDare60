@@ -8,6 +8,8 @@ using UnityEngine;
 //              to its hurtbox (blockout mode, no art needed). The art comes from the character's
 //              CharacterData, or its CodeCharacterArt for characters written in code.
 //   Hitboxes:  translucent yellow boxes while they exist (switch off with showHitboxes).
+//   Projectiles: the owner's projectile sprite for the move's `visual` name (CharacterLook.
+//              projectileSprites), drawn ALWAYS, not only with the debug toggle.
 //   Gizmos:    green hurtbox and red hitbox outlines, in the Scene view while the game runs.
 //
 // Scale: 1000 sim milli-units = 1 Unity unit, so a 1000 x 2000 body is 1 x 2 units.
@@ -37,6 +39,7 @@ public class WorldView : MonoBehaviour
     GameObject worldRoot;
     FighterView[] views = new FighterView[2];
     List<SpriteRenderer> hitboxQuads = new List<SpriteRenderer>();
+    List<SpriteRenderer> projectileArt = new List<SpriteRenderer>();
 
     void Awake()
     {
@@ -125,6 +128,7 @@ public class WorldView : MonoBehaviour
         views[0] = null;
         views[1] = null;
         hitboxQuads.Clear();
+        projectileArt.Clear();
     }
 
     SpriteRenderer NewQuad(string objectName, int sortingOrder)
@@ -158,6 +162,7 @@ public class WorldView : MonoBehaviour
             UpdateFighter(views[i], sim.fighters[i], i);
         }
         UpdateHitboxes(sim);
+        UpdateProjectileArt(sim);
     }
 
     void UpdateFighter(FighterView v, Fighter f, int index)
@@ -167,6 +172,7 @@ public class WorldView : MonoBehaviour
             Color c = v.data != null ? v.data.placeholderColor
                     : (index == 0 ? new Color(0.3f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
             if (f.state == FighterStateId.Attack) c = Color.Lerp(c, Color.white, 0.5f);
+            if (f.state == FighterStateId.Dash) c = Color.Lerp(c, Color.white, 0.25f);
             if (f.state == FighterStateId.Hitstun) c = Color.Lerp(c, Color.black, 0.35f);
             if (f.state == FighterStateId.Blockstun) c = Color.Lerp(c, Color.cyan, 0.5f);
             if (f.state == FighterStateId.KO) c = Color.gray;
@@ -210,6 +216,10 @@ public class WorldView : MonoBehaviour
             case FighterStateId.Walk:
                 stateName = "Walk";
                 t = Loop(tick, v.data.walkLoopTicks);
+                break;
+            case FighterStateId.Dash:
+                stateName = f.IsDashingForward ? "DashForward" : "DashBack";
+                t = tick / (float)Mathf.Max(1, f.dashTicks);
                 break;
             case FighterStateId.Attack:
                 if (f.move != null)
@@ -271,6 +281,37 @@ public class WorldView : MonoBehaviour
                 hitboxQuads[i].enabled = false;
             }
         }
+    }
+
+    // Projectile sprites, centred on the projectile's hitbox and flipped to its direction. The size
+    // comes from the sprite's import settings (Pixels Per Unit), like the fighters' art.
+    void UpdateProjectileArt(GameSim sim)
+    {
+        int used = 0;
+        for (int i = 0; i < sim.hitboxes.Count; i++)
+        {
+            HitboxInstance h = sim.hitboxes[i];
+            if (h.def.followOwner || string.IsNullOrEmpty(h.def.visual)) continue;
+            FighterView owner = views[h.owner];
+            Sprite sprite = owner != null && owner.data != null ? owner.data.FindProjectileSprite(h.def.visual) : null;
+            if (sprite == null) continue;
+
+            if (used == projectileArt.Count)
+            {
+                GameObject go = new GameObject("Projectile");
+                go.transform.SetParent(worldRoot.transform, false);
+                SpriteRenderer created = go.AddComponent<SpriteRenderer>();
+                created.sortingOrder = 8;
+                projectileArt.Add(created);
+            }
+            SpriteRenderer sr = projectileArt[used++];
+            sr.enabled = true;
+            sr.sprite = sprite;
+            Box b = h.World(sim);
+            sr.transform.position = new Vector3((b.x + b.w / 2f) * Scale, (b.y + b.h / 2f) * Scale, 0f);
+            sr.transform.localScale = new Vector3(h.facing, 1f, 1f);   // art faces right
+        }
+        for (int i = used; i < projectileArt.Count; i++) projectileArt[i].enabled = false;
     }
 
     static void Place(SpriteRenderer sr, Box b, Color c)

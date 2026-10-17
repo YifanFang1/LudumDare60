@@ -31,7 +31,8 @@ MatchScreens            shows the screen for the current phase (Lobby / Waiting 
   LobbyScreen           name, server, quick match, rooms, play vs AI
   WaitingScreen         room code + cancel
   CharacterSelectScreen tabs (vs AI), character grid, ready / fight
-  HudScreen             health bars, names, info, result, names above fighters
+  HudScreen             health bars, names, info, result, names above fighters,
+                        Ultimate meters, round pips, ROUND / K.O. banners, the Ultimate flash
 ```
 
 Every screen talks only to `IMatchSession`, never to networking, so the UI works with any session
@@ -49,6 +50,14 @@ To go back to the old OnGUI screens: untick **Replace Imgui UI** on Match Screen
 - Already built a FightUI? Run `Fight > Add Start Menu And Controls Pages` (keeps your edits). Otherwise `Fight > Build Default UI Canvas` makes everything.
 - `Match Screens > Start On Main Menu` turns the start screen off if you want to land in the lobby.
 - Quit is hidden in WebGL builds.
+
+## Meters, rounds and the Ultimate flash
+
+The HUD also shows the shared moveset's state (see `Design/SHARED_KIT.md`): an Ultimate meter for each player (bottom corners, with "ULTIMATE READY" above it when full), one pip per round won beside each health bar, a ROUND 1 / FINAL ROUND / K.O. banner, and a white flash with "<name>: ULTIMATE!" while the match freezes for an Ultimate.
+
+- A new canvas from **Fight > Build Default UI Canvas** has them already.
+- A FightUI you already built and edited: run **Fight > Add Meter And Round HUD**. It adds only the missing parts and leaves your edits alone. Save the scene afterwards.
+- Restyle or move them like anything else. On `HudScreen`: the meter colours, pip colours, banner time and flash strength. The meter `Fill` Image must stay Type = Filled. Delete a part you don't want; an empty slot is skipped.
 
 ## Play flow
 
