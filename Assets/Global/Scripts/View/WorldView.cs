@@ -11,6 +11,8 @@ using UnityEngine;
 //   Projectiles: the owner's projectile sprite for the move's `visual` name (CharacterLook.
 //              projectileSprites), drawn ALWAYS, not only with the debug toggle.
 //   Gizmos:    green hurtbox and red hitbox outlines, in the Scene view while the game runs.
+//   Fighter info: text over each fighter's head (state, move, keys held, blocking or not) and a
+//              log of the last hits, blocks and grabs, bottom right. Debug UI only.
 //
 // Scale: 1000 sim milli-units = 1 Unity unit, so a 1000 x 2000 body is 1 x 2 units.
 public class WorldView : MonoBehaviour
@@ -42,6 +44,10 @@ public class WorldView : MonoBehaviour
     List<SpriteRenderer> hitboxQuads = new List<SpriteRenderer>();
     List<SpriteRenderer> projectileArt = new List<SpriteRenderer>();
 
+    const int LogLines = 8;
+    List<string> eventLog = new List<string>();   // newest last
+    GUIStyle infoStyle;
+
     void Awake()
     {
         match = GetComponent<IMatchSession>();
@@ -57,6 +63,7 @@ public class WorldView : MonoBehaviour
         if (match == null) return;
         match.MatchStarted += Build;
         match.MatchEnded += Clear;
+        match.SimEventRaised += LogEvent;
     }
 
     void OnDisable()
@@ -64,6 +71,7 @@ public class WorldView : MonoBehaviour
         if (match == null) return;
         match.MatchStarted -= Build;
         match.MatchEnded -= Clear;
+        match.SimEventRaised -= LogEvent;
         Clear();
     }
 
@@ -150,6 +158,7 @@ public class WorldView : MonoBehaviour
         views[1] = null;
         hitboxQuads.Clear();
         projectileArt.Clear();
+        eventLog.Clear();
     }
 
     SpriteRenderer NewQuad(string objectName, int sortingOrder)
@@ -350,13 +359,28 @@ public class WorldView : MonoBehaviour
 
         float width, height;
         GuiDraw.BeginVirtualScreen(out width, out height);
+
+        if (showFighterInfo && views[0] != null)
+        {
+            if (infoStyle == null)
+            {
+                infoStyle = new GUIStyle(GUI.skin.label);
+                infoStyle.fontSize = 11;
+                infoStyle.alignment = TextAnchor.UpperCenter;
+                infoStyle.normal.textColor = Color.white;
+            }
+            for (int i = 0; i < 2; i++) DrawFighterInfo(match.Sim.fighters[i], height);
+            DrawEventLog(width, height);
+        }
+
         // A titled panel so it's easy to spot. Hitboxes only exist for the few ticks an attack is
         // active, so with "Hitboxes" on you see a yellow flash exactly when a move can hit.
         // Offline only, the panel also gets a cheat button, so it is taller.
-        float panelHeight = match.IsOnline ? 84 : 112;
+        float panelHeight = match.IsOnline ? 106 : 134;
         GUILayout.BeginArea(new Rect(12, height - panelHeight - 12, 230, panelHeight), "Debug boxes", GUI.skin.window);
         showHurtboxes = GUILayout.Toggle(showHurtboxes, " Hurtboxes (green: bodies)");
         showHitboxes = GUILayout.Toggle(showHitboxes, " Hitboxes (yellow: attacks)");
+        showFighterInfo = GUILayout.Toggle(showFighterInfo, " Fighter info + hit log");
 
         // Testing cheat: fill both Ultimate meters. This changes the sim from outside Step(), which
         // would desync an online match, so the button only exists vs the AI.
@@ -365,6 +389,128 @@ public class WorldView : MonoBehaviour
             match.Sim.fighters[0].meter = Fighter.MeterMax;
             match.Sim.fighters[1].meter = Fighter.MeterMax;
         }
+        GUILayout.EndArea();
+    }
+
+    // ================= fighter info + hit log =================
+
+    // A small box above the fighter's head: what they're doing, which keys they hold this tick,
+    // and whether a hit landing right now would be blocked (Fighter.IsBlocking).
+    void DrawFighterInfo(Fighter f, float height)
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        Box body = f.HurtboxWorld();
+        Vector3 head = cam.WorldToScreenPoint(new Vector3((body.x + body.w / 2f) * Scale, (body.y + body.h) * Scale, 0f));
+        // Screen y counts up from the bottom in real pixels; OnGUI y counts down from the top in
+        // virtual pixels (see GuiDraw.BeginVirtualScreen).
+        float s = Screen.height / height;
+        float gx = head.x / s;
+        float gy = (Screen.height - head.y) / s;
+
+        string text = "P" + (f.index + 1) + "  " + StateText(f)
+                    + "\nkeys: " + KeysText(f.prevInput)
+                    + "\nHP " + f.hp + "   meter " + (f.meter * 100 / Fighter.MeterMax) + "%";
+        Color back = new Color(0f, 0f, 0f, 0.6f);
+        if (f.IsBlocking)
+        {
+            text += "\nBLOCKING";
+            back = new Color(0f, 0.35f, 0.45f, 0.75f);
+        }
+        else if (f.holdingBack)
+        {
+            text += "\nholding back, but can't block now";
+        }
+
+        int lines = text.Split('\n').Length;
+        Rect r = new Rect(gx - 110, gy - lines * 14 - 12, 220, lines * 14 + 6);
+        GuiDraw.Fill(r.x, r.y, r.width, r.height, back);
+        GUI.Label(r, text, infoStyle);
+    }
+
+    static string StateText(Fighter f)
+    {
+        int t = Mathf.Max(0, f.stateTick) + 1;   // 1-based, so "3/12" means the 3rd tick of 12
+        switch (f.state)
+        {
+            case FighterStateId.Attack:
+                return f.move != null ? f.move.name + " " + t + "/" + f.move.totalTicks : "Attack";
+            case FighterStateId.Hitstun:
+            case FighterStateId.Blockstun:
+                return f.state + " " + t + "/" + f.stunTicks;
+            case FighterStateId.Dash:
+                return f.IsDashingForward ? "Dash forward" : "Dash back";
+            default:
+                return f.state.ToString();
+        }
+    }
+
+    static string KeysText(int input)
+    {
+        string s = "";
+        if ((input & Buttons.Left) != 0) s += "Left ";
+        if ((input & Buttons.Right) != 0) s += "Right ";
+        if ((input & Buttons.Down) != 0) s += "Down ";
+        if ((input & Buttons.Light) != 0) s += "Light ";
+        if ((input & Buttons.Heavy) != 0) s += "Heavy ";
+        if ((input & Buttons.Grab) != 0) s += "Grab ";
+        if ((input & Buttons.Special) != 0) s += "Special ";
+        if ((input & Buttons.Ultimate) != 0) s += "Ult ";
+        return s.Length > 0 ? s.TrimEnd() : "-";
+    }
+
+    // Turns sim events into one readable line each. Several ticks can run in one frame, so this
+    // collects them as they come instead of looking at the sim once per frame.
+    void LogEvent(SimEvent e)
+    {
+        GameSim sim = match.Sim;
+        string line;
+        switch (e.type)
+        {
+            case SimEventType.Hit:
+                line = P(e.a) + " " + MoveName(sim, e.a) + " HIT " + P(e.b) + " for " + e.amount;
+                break;
+            case SimEventType.Block:
+                line = P(e.b) + " BLOCKED " + P(e.a) + "'s " + MoveName(sim, e.a);
+                break;
+            case SimEventType.Grab:
+                line = P(e.a) + " GRABBED " + P(e.b) + " for " + e.amount + " (grabs can't be blocked)";
+                break;
+            case SimEventType.Dash:
+                line = P(e.a) + (e.amount == 1 ? " dashed forward" : " dashed back");
+                break;
+            case SimEventType.SuperFlash:
+                line = P(e.a) + " started their ULTIMATE";
+                break;
+            case SimEventType.RoundEnd:
+                line = e.a == 2 ? "Round " + e.amount + ": double KO" : "Round " + e.amount + " won by " + P(e.a);
+                break;
+            default:
+                return;   // AttackStart is shown over the fighter's head instead
+        }
+        eventLog.Add("[tick " + sim.tick + "] " + line);
+        if (eventLog.Count > LogLines) eventLog.RemoveAt(0);
+    }
+
+    static string P(int index)
+    {
+        return "P" + (index + 1);
+    }
+
+    // The attacker's current move. A projectile can land after its move ended, so that case
+    // just says "projectile".
+    static string MoveName(GameSim sim, int attacker)
+    {
+        Fighter f = sim.fighters[attacker];
+        return f.state == FighterStateId.Attack && f.move != null ? f.move.name : "projectile";
+    }
+
+    void DrawEventLog(float width, float height)
+    {
+        float boxHeight = LogLines * 15 + 30;
+        GUILayout.BeginArea(new Rect(width - 342, height - boxHeight - 12, 330, boxHeight), "Hit log", GUI.skin.window);
+        for (int i = 0; i < eventLog.Count; i++) GUILayout.Label(eventLog[i], GUILayout.Height(15));
         GUILayout.EndArea();
     }
 
