@@ -8,7 +8,7 @@ using UnityEngine;
 /// shows up for both players with no networking code.
 /// </para>
 /// <para>
-/// Call from anywhere:   JuiceManager.Shake(0.5f);
+/// Call from anywhere:   JuiceManager.Shake(0.5f);   JuiceManager.Burst("Sparks", pos);
 /// Every call does nothing if there is no JuiceManager in the scene, so it can never crash
 /// another scene or tool.
 /// </para>
@@ -17,49 +17,53 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class JuiceManager : MonoBehaviour
 {
-    static JuiceManager instance;
-
+    #region Settings
     [Tooltip("Tuning values. Leave empty to use the defaults.")]
     [SerializeField] JuiceProfile profile;
 
     [Tooltip("Log every juice call to the console. Handy while the effects are still stubs.")]
     [SerializeField] bool logCalls = true;
 
-    IMatchSession match;
+    [Header("Testing (while playing: right click this component's title)")]
+    [Tooltip("Effect name used by the Test menu items.")]
+    [SerializeField] string testEffect = "Sparks";
+    #endregion
 
+    #region State
+    static JuiceManager instance;
+
+    IMatchSession match;
     JuiceParticles particles;
     readonly JuiceHandle[] lowHealthAura = new JuiceHandle[2];
 
-    [Header("Testing (while playing: right click this component's title)")]
-    [SerializeField] JuiceParticleType testEffect = JuiceParticleType.Sparks;
-
-    // Same as FightControls: "Enter Play Mode without domain reload" keeps statics alive.
+    /// <summary>Same as FightControls: "Enter Play Mode without domain reload" keeps statics alive.</summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics()
     {
         instance = null;
     }
+    #endregion
 
     #region Lifecycle
     void Awake()
     {
         if (instance != null && instance != this)
         {
-            Debug.LogWarning("[JuiceManager] More than one JuiceManager in the scene. Only the first one is used.", this);
+            Debug.LogWarning("[Juice] More than one JuiceManager in the scene. Only the first one is used.", this);
             enabled = false;
             return;
         }
         instance = this;
 
         if (profile == null) profile = ScriptableObject.CreateInstance<JuiceProfile>();
-        particles = new JuiceParticles(profile, transform);
+        particles = new JuiceParticles(transform);
 
         // Found the same way FightView and LobbyUI find it. Without it the API still works,
         // there are just no automatic reactions to the fight.
         match = GetComponent<IMatchSession>();
         if (match == null)
         {
-            Debug.LogWarning("JuiceManager found no IMatchSession on this object, so it will not react to fights.", this);
+            Debug.LogWarning("[Juice] JuiceManager found no IMatchSession on this object, so it will not react to fights.", this);
         }
     }
 
@@ -84,8 +88,10 @@ public class JuiceManager : MonoBehaviour
         if (instance == this) instance = null;
     }
 
-    // Effects run on real time, not sim ticks: they are visual only, and they keep playing
-    // while the sim is stalled waiting for the other player or frozen in hit stop.
+    /// <summary>
+    /// Effects run on real time, not sim ticks: they are visual only, and they keep playing
+    /// while the sim is stalled waiting for the other player or frozen in hit stop.
+    /// </summary>
     void Update()
     {
         float dt = Time.unscaledDeltaTime;
@@ -95,19 +101,18 @@ public class JuiceManager : MonoBehaviour
         // TODO: count down the impact frame
     }
 
-    // After the sim has ticked (in Update), so attached effects sit exactly where WorldView draws the fighters.
+    /// <summary>Runs after the sim has ticked (in Update), so attached effects sit exactly where WorldView draws the fighters.</summary>
     void LateUpdate()
     {
         GameSim sim = match != null && match.Phase == MatchPhase.Playing ? match.Sim : null;
         if (sim != null) UpdateCharacterAuras(sim);
         particles.Tick(Time.unscaledDeltaTime, sim);
     }
-
     #endregion
 
     #region Public API
     /// <summary>
-    /// Hits add trauma, which decays over time, so rapid hits stack instead of restarting.
+    /// Shakes the screen. Hits add trauma, which decays over time, so rapid hits stack instead of restarting.
     /// </summary>
     /// <param name="trauma">Intensity of the screen shake that decays over time, values range within 0-1.</param>
     public static void Shake(float trauma)
@@ -127,19 +132,22 @@ public class JuiceManager : MonoBehaviour
     }
 
     /// <summary>Plays a particle effect once at a point. It cleans itself up.</summary>
+    /// <param name="effect">Effect name (a JuiceEffect prefab in Assets/Resources/Juice). Not case sensitive. Empty = nothing.</param>
     /// <param name="pos">Unity units (use SimToWorld for sim positions).</param>
     /// <param name="facing">1 = right, -1 = left. Mirrors effects with Flip With Facing ticked.</param>
     /// <param name="scale">Size multiplier.</param>
-    public static void Burst(JuiceParticleType effect, Vector2 pos, int facing = 1, float scale = 1f)
+    public static void Burst(string effect, Vector2 pos, int facing = 1, float scale = 1f)
     {
         if (instance) instance.DoBurst(effect, pos, facing, scale);
     }
 
     /// <summary>Plays a particle effect that follows a fighter.</summary>
+    /// <param name="effect">Effect name (a JuiceEffect prefab in Assets/Resources/Juice). Not case sensitive. Empty = nothing.</param>
     /// <param name="fighter">Sim index (0 or 1).</param>
     /// <param name="ticks">How long it emits (60 = 1 second). 0 = until Stop is called.</param>
+    /// <param name="scale">Size multiplier.</param>
     /// <returns>A handle for Stop / IsPlaying. Safe to keep after the effect has ended.</returns>
-    public static JuiceHandle Attach(JuiceParticleType effect, int fighter, int ticks = 0, float scale = 1f)
+    public static JuiceHandle Attach(string effect, int fighter, int ticks = 0, float scale = 1f)
     {
         return instance ? instance.DoAttach(effect, fighter, ticks, scale) : JuiceHandle.None;
     }
@@ -150,12 +158,20 @@ public class JuiceManager : MonoBehaviour
         if (instance) instance.particles.Stop(handle);
     }
 
+    /// <summary>True while the effect behind this handle is still emitting.</summary>
     public static bool IsPlaying(JuiceHandle handle)
     {
         return instance && instance.particles.IsPlaying(handle);
     }
 
-    // Full-screen contrast flash for big hits. ticks: 60 = 1 second.
+    /// <summary>True if a particle effect with this name exists in Assets/Resources/Juice.</summary>
+    public static bool HasEffect(string effect)
+    {
+        return instance && instance.particles.Has(effect);
+    }
+
+    /// <summary>Full-screen contrast flash for big hits.</summary>
+    /// <param name="ticks">Duration: 60 ticks = 1 second.</param>
     public static void ImpactFrame(int ticks)
     {
         if (instance) instance.DoImpactFrame(ticks);
@@ -163,12 +179,13 @@ public class JuiceManager : MonoBehaviour
     #endregion
 
     #region Helpers
-    // Sim positions are in milli-units (1000 = 1 Unity unit).
+    /// <summary>Converts a sim position (milli-units, 1000 = 1 Unity unit) to Unity units.</summary>
     public static Vector2 SimToWorld(int x, int y)
     {
         return new Vector2(x * WorldView.Scale, y * WorldView.Scale);
     }
 
+    /// <summary>Converts sim ticks (60 per second) to seconds.</summary>
     public static float TicksToSeconds(int ticks)
     {
         return ticks * LockstepRunner.TickTime;
@@ -186,8 +203,10 @@ public class JuiceManager : MonoBehaviour
         ResetAll();
     }
 
-    // Events arrive right after the tick that produced them. Several ticks can run in one
-    // frame, so several events can arrive at once.
+    /// <summary>
+    /// Turns sim events into juice. Events arrive right after the tick that produced them.
+    /// Several ticks can run in one frame, so several events can arrive at once.
+    /// </summary>
     void OnSimEvent(SimEvent e)
     {
         GameSim sim = match.Sim;
@@ -200,9 +219,19 @@ public class JuiceManager : MonoBehaviour
                 bool heavy = e.amount >= profile.heavyThreshold;
                 int facing = sim.fighters[e.b].x >= sim.fighters[e.a].x ? 1 : -1;   // away from the attacker
                 CharacterJuiceProfile attacker = profile.ForCharacter(sim.fighters[e.a].characterId);
-                JuiceParticleType spark = attacker == null ? JuiceParticleType.Sparks
-                                    : heavy ? attacker.heavyAttack : attacker.lightAttack;
+                string spark = attacker == null ? "Sparks"
+                             : heavy ? attacker.heavyAttack : attacker.lightAttack;
                 Burst(spark, SimToWorld(e.x, e.y), facing);
+                break;
+            }
+
+            case SimEventType.Block:
+            {
+                // a = attacker, b = blocker, (x, y) = centre of the overlap
+                CharacterJuiceProfile blocker = profile.ForCharacter(sim.fighters[e.b].characterId);
+                if (blocker == null) break;
+                int facing = sim.fighters[e.b].x >= sim.fighters[e.a].x ? 1 : -1;   // away from the attacker
+                Burst(blocker.block, SimToWorld(e.x, e.y), facing);
                 break;
             }
 
@@ -217,7 +246,7 @@ public class JuiceManager : MonoBehaviour
             case SimEventType.AttackStart:
             {
                 // a = attacker, (x, y) = attacker's feet
-                Burst(JuiceParticleType.Spawn, SimToWorld(e.x, e.y), sim.fighters[e.a].facing);
+                Burst("Spawn", SimToWorld(e.x, e.y), sim.fighters[e.a].facing);
                 break;
             }
         }
@@ -237,20 +266,30 @@ public class JuiceManager : MonoBehaviour
         // TODO: needs the fighter's renderers from WorldView; drive _FlashColor / _FlashAmount via MaterialPropertyBlock
     }
 
-    void DoBurst(JuiceParticleType effect, Vector2 pos, int facing, float scale)
+    void DoBurst(string effect, Vector2 pos, int facing, float scale)
     {
+        if (string.IsNullOrEmpty(effect)) return;   // empty slot in a profile: nothing to play
         Log("Burst " + effect + " at " + pos + " facing " + facing);
         particles.Burst(effect, pos, facing, scale);
     }
 
-    JuiceHandle DoAttach(JuiceParticleType effect, int fighter, int ticks, float scale)
+    JuiceHandle DoAttach(string effect, int fighter, int ticks, float scale)
     {
+        if (string.IsNullOrEmpty(effect)) return JuiceHandle.None;
         Log("Attach " + effect + " to fighter " + fighter + (ticks > 0 ? " for " + ticks + " ticks" : " until stopped"));
         return particles.Attach(effect, fighter, ticks, scale, match != null ? match.Sim : null);
     }
 
-    // Example of a persistent effect driven by a condition: start the character's low-health
-    // aura when HP drops to the threshold, stop it if HP is above it or the fighter is KO'd.
+    void DoImpactFrame(int ticks)
+    {
+        Log("ImpactFrame for " + ticks + " ticks");
+        // TODO: full-screen quad behind the fighters + fighters flashed solid black
+    }
+
+    /// <summary>
+    /// Example of a persistent effect driven by a condition: starts the character's low-health
+    /// aura when HP drops to the threshold, stops it if HP is above it or the fighter is KO'd.
+    /// </summary>
     void UpdateCharacterAuras(GameSim sim)
     {
         for (int i = 0; i < 2; i++)
@@ -258,7 +297,7 @@ public class JuiceManager : MonoBehaviour
             Fighter f = sim.fighters[i];
             CharacterJuiceProfile cj = profile.ForCharacter(f.characterId);
 
-            bool want = cj != null && cj.lowHealthAura != JuiceParticleType.None
+            bool want = cj != null && !string.IsNullOrEmpty(cj.lowHealthAura)
                         && f.hp > 0 && f.hp * 100 <= f.MaxHp * cj.lowHealthPercent;
             bool has = particles.IsPlaying(lowHealthAura[i]);
 
@@ -267,6 +306,22 @@ public class JuiceManager : MonoBehaviour
         }
     }
 
+    void ResetAll()
+    {
+        Log("ResetAll");
+        particles.StopAll();
+        lowHealthAura[0] = JuiceHandle.None;
+        lowHealthAura[1] = JuiceHandle.None;
+        // TODO: clear trauma, flashes, impact frame
+    }
+
+    void Log(string message)
+    {
+        if (logCalls) Debug.Log("[Juice] " + message, this);
+    }
+    #endregion
+
+    #region Testing
     [ContextMenu("Test: Burst test effect at centre")]
     void TestBurst()
     {
@@ -277,26 +332,6 @@ public class JuiceManager : MonoBehaviour
     void TestAttach()
     {
         if (Application.isPlaying) DoAttach(testEffect, 0, 120, 1f);
-    }
-
-    void DoImpactFrame(int ticks)
-    {
-        Log("ImpactFrame for " + ticks + " ticks");
-        // TODO: full-screen quad behind the fighters + fighters flashed solid black
-    }
-
-    void ResetAll()
-    {
-        Log("ResetAll");
-        particles.StopAll();
-        lowHealthAura[0] = JuiceHandle.None;
-        lowHealthAura[1] = JuiceHandle.None;
-        // TODO: clear trauma, flashes, impact frame; return pooled particles
-    }
-
-    void Log(string message)
-    {
-        if (logCalls) Debug.Log("[Juice] " + message, this);
     }
     #endregion
 }

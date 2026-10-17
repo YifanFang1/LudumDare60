@@ -1,15 +1,24 @@
 using UnityEngine;
 
 /// <summary>
+/// Put this on the ROOT of every particle effect prefab, next to its ParticleSystem, and save the
+/// prefab in Assets/Resources/Juice so JuiceManager finds it automatically.
+/// <para>
 /// The ParticleSystem decides how the effect LOOKS: sprite, lifetime, speed, direction, colour...
-/// This component decides how JuiceManager PLACES it, and forces the few settings every effect
-/// must share so pooling works no matter how the ParticleSystem was set up.
+/// This component gives the effect its name and decides how JuiceManager PLACES it. It also forces
+/// the few settings every effect must share, so pooling works no matter how the ParticleSystem was set up.
+/// </para>
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(ParticleSystem))]
 public class JuiceEffect : MonoBehaviour
 {
+    /// <summary>Whether the effect draws over or under the fighters.</summary>
     public enum DrawLayer { InFrontOfFighters, BehindFighters }
+
+    #region Settings
+    [Tooltip("The name code and profiles use to play this effect, e.g. \"Sparks\". Not case sensitive. Leave empty to use the prefab's file name.")]
+    public string effectName;
 
     [Tooltip("Where the effect sits relative to the point it is played at, in Unity units. X is forward (the way the fighter faces).")]
     public Vector2 offset;
@@ -22,7 +31,9 @@ public class JuiceEffect : MonoBehaviour
 
     [Tooltip("Safety net for LOOPING effects played with Burst: they stop emitting after this many ticks (60 = 1 second). Non-looping effects end on their own.")]
     [Min(1)] public int burstMaxTicks = 60;
+    #endregion
 
+    #region State
     // WorldView draws the ground at -1, fighters at 0, hurtbox overlays at 5 and hitbox overlays at 10.
     const int FrontOrder = 20;
     const int BackOrder = -5;
@@ -31,10 +42,24 @@ public class JuiceEffect : MonoBehaviour
     ParticleSystemRenderer[] renderers;
     Quaternion baseRotation;
     Vector3 baseScale;
+    #endregion
 
+    #region Properties
+    /// <summary>
+    /// The name this effect is played by: Effect Name, or the prefab's file name when that is empty.
+    /// Read it on the prefab; pooled copies are renamed "FX ...".
+    /// </summary>
+    public string EffectName { get { return string.IsNullOrEmpty(effectName) ? name : effectName; } }
+
+    /// <summary>True while the effect is emitting or still has particles on screen.</summary>
     public bool IsAlive { get { return root.IsAlive(true); } }
+    #endregion
 
-    // Called once by JuiceParticles right after the prefab is instantiated.
+    #region Control (used by JuiceParticles)
+    /// <summary>
+    /// Called once by JuiceParticles right after the prefab is instantiated. Forces the shared
+    /// settings on every ParticleSystem in the prefab and leaves the effect stopped and empty.
+    /// </summary>
     public void Init()
     {
         root = GetComponent<ParticleSystem>();
@@ -61,6 +86,10 @@ public class JuiceEffect : MonoBehaviour
         Kill();
     }
 
+    /// <summary>Moves, mirrors and sizes the effect.</summary>
+    /// <param name="pos">Where it is played, in Unity units. Offset is added on top.</param>
+    /// <param name="facing">1 = right, -1 = left.</param>
+    /// <param name="scale">Size multiplier on top of the prefab's own scale.</param>
     public void Place(Vector2 pos, int facing, float scale)
     {
         float forward = facing < 0 ? -1f : 1f;
@@ -80,11 +109,13 @@ public class JuiceEffect : MonoBehaviour
         }
     }
 
+    /// <summary>Starts the effect, including child systems.</summary>
     public void Play() { root.Play(true); }
 
-    // Stop making new particles; the ones already out finish their lifetime.
+    /// <summary>Stops making new particles; the ones already out finish their lifetime.</summary>
     public void StopEmitting() { root.Stop(true, ParticleSystemStopBehavior.StopEmitting); }
 
-    // Remove everything immediately.
+    /// <summary>Removes every particle immediately.</summary>
     public void Kill() { root.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); }
+    #endregion
 }
