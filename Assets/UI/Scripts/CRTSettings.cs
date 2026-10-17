@@ -22,6 +22,8 @@ using UnityEngine.Rendering.Universal;
 //
 //  To change the effect from any other script:
 //      CRTSettings.Instance.profile.waveAmount = 0.01f;
+//  For a short burst that fades by itself (and never changes the asset):
+//      CRTSettings.Instance.Glitch(0.5f);
 // ============================================================================
 
 [ExecuteAlways] // also runs in the editor, so you can see changes without pressing Play
@@ -55,6 +57,10 @@ public class CRTSettings : MonoBehaviour
     // The material made from CRT.shader, and the pass that draws it.
     Material material;
     CRTRenderPass pass;
+
+    // The current glitch: how long it lasts and how much is left (seconds).
+    float glitchTime;
+    float glitchLeft;
 
     // ------------------------------------------------------------------------
     //  AUTOMATIC STARTUP
@@ -132,7 +138,20 @@ public class CRTSettings : MonoBehaviour
     // scripts show up right away.
     void Update()
     {
+        if (glitchLeft > 0f) glitchLeft = Mathf.Max(0f, glitchLeft - Time.unscaledDeltaTime);
         ApplySettings();
+    }
+
+    // ------------------------------------------------------------------------
+    //  A short burst of extra colour split, wobble and full-strength effect
+    //  in the middle of the screen, fading back to normal over `seconds`.
+    //  Added on top of the profile's values, so the asset is never changed.
+    // ------------------------------------------------------------------------
+    public void Glitch(float seconds)
+    {
+        if (seconds <= 0f) return;
+        glitchTime = seconds;
+        glitchLeft = seconds;
     }
 
     // ------------------------------------------------------------------------
@@ -142,14 +161,16 @@ public class CRTSettings : MonoBehaviour
     {
         if (profile == null) return;
         CRTProfile p = profile;
+        float glitch = glitchLeft > 0f ? glitchLeft / glitchTime : 0f;   // 1 at the start, fading to 0
+        glitch *= glitch;                                                // fast drop, short tail
 
         Shader.SetGlobalFloat(IntensityID, p.intensity);
-        Shader.SetGlobalFloat(InnerIntensityID, p.innerIntensity);
+        Shader.SetGlobalFloat(InnerIntensityID, Mathf.Lerp(p.innerIntensity, 1f, glitch));
         Shader.SetGlobalFloat(OuterIntensityID, p.outerIntensity);
         Shader.SetGlobalFloat(EdgeFalloffID, p.edgeFalloff);
         Shader.SetGlobalFloat(TintStrengthID, p.tintStrength);
-        Shader.SetGlobalFloat(ColorSplitID, p.colorSplit);
-        Shader.SetGlobalFloat(WaveAmountID, p.waveAmount);
+        Shader.SetGlobalFloat(ColorSplitID, p.colorSplit + p.glitchColorSplit * glitch);
+        Shader.SetGlobalFloat(WaveAmountID, p.waveAmount + p.glitchWaveAmount * glitch);
         Shader.SetGlobalFloat(WaveFrequencyID, p.waveFrequency);
         Shader.SetGlobalFloat(WaveSpeedID, p.waveSpeed);
         Shader.SetGlobalFloat(ScanlineScrollSpeedID, p.scanlineScrollSpeed);

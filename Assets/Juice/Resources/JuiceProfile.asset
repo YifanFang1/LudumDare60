@@ -27,8 +27,17 @@ MonoBehaviour:
   maxHillTilt: 2
   hillTiltSpeed: 6
   hillTiltHoldTime: 2
-  flashTicks: 4
-  impactTicks: 3
-  koImpactTicks: 6
+  impactOnBlockedUltimate: 1
+  impactBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+  impactSilhouetteColor: {r: 1, g: 1, b: 1, a: 1}
+  impactInvertSparks: 1
+  impactSparkColor: {r: 1, g: 1, b: 1, a: 1}
+  impactInvertedTicks: 2
+  zoomPunchAmount: 0.25
+  zoomPunchPull: 0.5
+  zoomPunchReturnTime: 0.35
+  crtGlitchTime: 0.5
+  flashTicks: 8
+  impactTicks: 16
   defaultCharacter: {fileID: 11400000, guid: 9d2f1c8d73e87e1429d238994f9bde76, type: 2}
   characters: []

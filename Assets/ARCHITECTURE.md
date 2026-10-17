@@ -94,6 +94,8 @@ ints only, no float/Time/Random/UnityEngine, state changes only inside `GameSim.
 
 **Meter and Ultimate:** `Fighter.meter` (0-1000) fills by hitting (damage x 7), getting hit (x 4) and blocked hits (x 2 for both). A move with `ultimate` set needs a full bar and a **fresh** press, spends the whole bar, and freezes the match for `GameSim.SuperFlashTicks` (`freezeTicks`, a `SuperFlash` event). Its hits give no meter.
 
+**Hit stop:** when a hit lands, the whole match pauses for `GameSim.hitStopTicks` (counted down first in `Step`, like the superflash). It is `HitStopBase + damage / HitStopPerDamage` ticks, capped at `HitStopMax`; blocked hits pause `BlockStop` and a KO pauses `KOStop` before the round-over pause. The constants are in `GameSim.cs`. `hitStopOn` is a rule switch that the EditMode test harness turns off so older tests can count ticks simply; `HitStopTests` covers it.
+
 **Pushboxes:** after moving, overlapping bodies are pushed apart, so fighters can't walk through each other. The tie-break when two fighters stand on the same spot is fixed (player 1 goes left), never "whoever comes first".
 
 **Rounds:** best of 3 (`GameSim.RoundsToWin`). A KO ends the round; after `RoundEndDelay` ticks (no hits allowed) the next round starts with **fresh fighter objects** from the factories given to `GameSim.Reset`, so per-round state can never leak. Only the meter carries over. A double KO gives both players the round, and the match can end in a draw. `IsOver` means the *match* is over.
