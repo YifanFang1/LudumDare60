@@ -8,6 +8,14 @@ using System.Collections.Generic;
 //                 0  Brawler   (also the fallback for unknown ids, never remove it)
 //                 1  Shooter
 //                 2  Sandbag   (training dummy)
+//                 3-9          free, for more test characters
+//                10  Samurai          the launch roster (Design/README.md). For now all six
+//                11  Painter          are placeholders with the standard moveset.
+//                12  Cowboy           ("Black and White Cowboy")
+//                13  Elephant
+//                14  Executioner
+//                15  PlagueDoctor     ("Plague Doctor")
+//                16+          free, for new roster characters
 //   other ids   characters made in the Unity inspector (CharacterData assets). They get a big
 //               random id and register themselves at startup, so nobody edits this file for them.
 //
@@ -32,6 +40,13 @@ public static class CharacterList
         Add(Brawler.Id, "Brawler", delegate { return new Brawler(); }, null);
         Add(Shooter.Id, "Shooter", delegate { return new Shooter(); }, null);
         Add(Sandbag.Id, "Sandbag", delegate { return new Sandbag(); }, null);
+
+        Add(Samurai.Id, "Samurai", delegate { return new Samurai(); }, null);
+        Add(Painter.Id, "Painter", delegate { return new Painter(); }, null);
+        Add(Cowboy.Id, "Black and White Cowboy", delegate { return new Cowboy(); }, null);
+        Add(Elephant.Id, "Elephant", delegate { return new Elephant(); }, null);
+        Add(Executioner.Id, "Executioner", delegate { return new Executioner(); }, null);
+        Add(PlagueDoctor.Id, "Plague Doctor", delegate { return new PlagueDoctor(); }, null);
     }
 
     // For characters written in code. Pick an id that is not used yet.
@@ -110,6 +125,13 @@ public static class CharacterList
         Fighter f = e.make();
         f.characterId = e.id;
         return f;
+    }
+
+    // A recipe for building this character, for GameSim.Reset: the sim builds a FRESH fighter
+    // from it at the start of every round, so no per-round state can leak into the next one.
+    public static Func<Fighter> Factory(int id)
+    {
+        return delegate { return Create(id); };
     }
 
     // Fingerprint of all inspector-made characters. Added to the network version, so two players

@@ -46,7 +46,10 @@ public static class FightControls
             Make("Down",  Buttons.Down,  "<Keyboard>/s"),
             Make("Light", Buttons.Light, "<Keyboard>/j"),
             Make("Heavy", Buttons.Heavy, "<Keyboard>/k"),
-            Make("Block", Buttons.Block, "<Keyboard>/l"),
+            Make("Grab", Buttons.Grab, "<Keyboard>/l"),
+            Make("Special", Buttons.Special, "<Keyboard>/i"),
+            Make("Ultimate", Buttons.Ultimate, "<Keyboard>/o"),
+            // No "Block" line: blocking is holding away from the opponent, so the Block bit is unused.
         };
 
         string saved = PlayerPrefs.GetString(PrefsKey, "");
@@ -80,11 +83,13 @@ public static class FightControls
         return bits;
     }
 
-    // Short text for the on-screen hint, e.g. "A/D move   J light   K heavy".
+    // Short text for the on-screen hint, e.g. "A/D move   J light   K heavy   L grab ...".
+    // The numbers are positions in the entries list above.
     public static string Hint()
     {
         EnsureCreated();
-        return BindingOf(0) + "/" + BindingOf(1) + " move   " + BindingOf(3) + " light   " + BindingOf(4) + " heavy";
+        return BindingOf(0) + "/" + BindingOf(1) + " move (tap twice: dash)   " + BindingOf(3) + " light   " + BindingOf(4) + " heavy   "
+             + BindingOf(5) + " grab   " + BindingOf(6) + " special   " + BindingOf(7) + " ultimate";
     }
 
     // ---------- used by the settings screen ----------

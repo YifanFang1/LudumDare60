@@ -267,6 +267,7 @@ public class JuiceManager : MonoBehaviour
 
         switch (e.type)
         {
+            case SimEventType.Grab:   // a landed grab: same fields as a hit, so the same juice
             case SimEventType.Hit:
             {
                 // a = attacker, b = victim, (x, y) = centre of the overlap, amount = damage
