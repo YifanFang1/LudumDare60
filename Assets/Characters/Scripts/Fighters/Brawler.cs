@@ -1,8 +1,9 @@
 // BRAWLER: a close-range test character, and the simplest example of BaseFighter.
-// Tough and stocky, walks in fast, hits hard, but has no way to hurt you from far away.
+// Tough and stocky, walks in fast and hits hard up close.
 //
 //   Light (J)  Jab        fast, short, safe
 //   Heavy (K)  Haymaker   slow start, long reach, big damage and knockback
+//   Grab, Special, Ultimate and dashes: the template's standard ones (see BaseFighter).
 //
 // Id 0. It is also the fallback when a character id is unknown, so it must always exist.
 // To make your own character, copy this file (or Shooter.cs for a ranged one) and follow
