@@ -9,6 +9,7 @@ using UnityEngine;
 /// </para>
 /// <para>
 /// Call from anywhere:   JuiceManager.Shake(0.5f);   JuiceManager.Burst("Sparks", pos);
+///                       JuiceManager.Attach("Aura", fighter, 120, anchor: JuiceAnchor.Center);
 /// Every call does nothing if there is no JuiceManager in the scene, so it can never crash
 /// another scene or tool.
 /// </para>
@@ -154,20 +155,44 @@ public class JuiceManager : MonoBehaviour
     /// <param name="pos">Unity units (use SimToWorld for sim positions).</param>
     /// <param name="facing">1 = right, -1 = left. Mirrors effects with Flip With Facing ticked.</param>
     /// <param name="scale">Size multiplier.</param>
-    public static void Burst(string effect, Vector2 pos, int facing = 1, float scale = 1f)
+    /// <param name="offset">Extra nudge in Unity units (X = forward), added to the prefab's own offset.</param>
+    public static void Burst(string effect, Vector2 pos, int facing = 1, float scale = 1f, Vector2 offset = default)
     {
-        if (instance) instance.DoBurst(effect, pos, facing, scale);
+        if (instance) instance.DoBurst(effect, pos, facing, scale, offset);
     }
 
-    /// <summary>Plays a particle effect that follows a fighter.</summary>
+    /// <summary>
+    /// Plays a particle effect once at a point on a fighter (feet, centre or head), facing the way
+    /// they face. It stays where it was played; use Attach to follow the fighter.
+    /// <code>JuiceManager.BurstOnFighter("Dust", fighter);                          // prefab's anchor (feet for dust)
+    /// JuiceManager.BurstOnFighter("Stars", fighter, JuiceAnchor.Head, new Vector2(0f, 0.3f));</code>
+    /// </summary>
+    /// <param name="effect">Effect name (a JuiceEffect prefab in Assets/Resources/Juice). Not case sensitive. Empty = nothing.</param>
+    /// <param name="fighter">Sim index (0 or 1).</param>
+    /// <param name="anchor">Where on the fighter. Default = the anchor set on the prefab.</param>
+    /// <param name="offset">Extra nudge from the anchor in Unity units (X = forward), added to the prefab's own offset.</param>
+    /// <param name="scale">Size multiplier.</param>
+    public static void BurstOnFighter(string effect, int fighter, JuiceAnchor anchor = JuiceAnchor.Default, Vector2 offset = default, float scale = 1f)
+    {
+        if (instance) instance.DoBurstOnFighter(effect, fighter, anchor, offset, scale);
+    }
+
+    /// <summary>
+    /// Plays a particle effect that follows a point on a fighter (feet, centre or head).
+    /// <code>JuiceManager.Attach("Aura", fighter, 120, anchor: JuiceAnchor.Center);    // 2 seconds from the chest
+    /// JuiceHandle h = JuiceManager.Attach("Embers", fighter);                    // until JuiceManager.Stop(h)</code>
+    /// </summary>
     /// <param name="effect">Effect name (a JuiceEffect prefab in Assets/Resources/Juice). Not case sensitive. Empty = nothing.</param>
     /// <param name="fighter">Sim index (0 or 1).</param>
     /// <param name="ticks">How long it emits (60 = 1 second). 0 = until Stop is called.</param>
     /// <param name="scale">Size multiplier.</param>
+    /// <param name="anchor">Where on the fighter. Default = the anchor set on the prefab.</param>
+    /// <param name="offset">Extra nudge from the anchor in Unity units (X = forward), added to the prefab's own offset.</param>
     /// <returns>A handle for Stop / IsPlaying. Safe to keep after the effect has ended.</returns>
-    public static JuiceHandle Attach(string effect, int fighter, int ticks = 0, float scale = 1f)
+    public static JuiceHandle Attach(string effect, int fighter, int ticks = 0, float scale = 1f,
+                                     JuiceAnchor anchor = JuiceAnchor.Default, Vector2 offset = default)
     {
-        return instance ? instance.DoAttach(effect, fighter, ticks, scale) : JuiceHandle.None;
+        return instance ? instance.DoAttach(effect, fighter, ticks, scale, anchor, offset) : JuiceHandle.None;
     }
 
     /// <summary>Stops an attached effect. Particles already out fade normally.</summary>
@@ -201,6 +226,17 @@ public class JuiceManager : MonoBehaviour
     public static Vector2 SimToWorld(int x, int y)
     {
         return new Vector2(x * WorldView.Scale, y * WorldView.Scale);
+    }
+
+    /// <summary>
+    /// A point on a fighter in Unity units: Feet (on the ground), Center (middle of the body) or
+    /// Head (top of the body). Handy for Burst at a custom spot. Returns zero with no match running.
+    /// </summary>
+    /// <param name="fighter">Sim index (0 or 1).</param>
+    public static Vector2 FighterPoint(int fighter, JuiceAnchor anchor)
+    {
+        if (!instance || instance.match == null || fighter < 0 || fighter > 1) return Vector2.zero;
+        return JuiceParticles.FighterPoint(instance.match.Sim.fighters[fighter], anchor);
     }
 
     /// <summary>Converts sim ticks (60 per second) to seconds.</summary>
@@ -286,18 +322,25 @@ public class JuiceManager : MonoBehaviour
         // TODO: needs the fighter's renderers from WorldView; drive _FlashColor / _FlashAmount via MaterialPropertyBlock
     }
 
-    void DoBurst(string effect, Vector2 pos, int facing, float scale)
+    void DoBurst(string effect, Vector2 pos, int facing, float scale, Vector2 offset)
     {
         if (string.IsNullOrEmpty(effect)) return;   // empty slot in a profile: nothing to play
         Log("Burst " + effect + " at " + pos + " facing " + facing);
-        particles.Burst(effect, pos, facing, scale);
+        particles.Burst(effect, pos, facing, scale, offset);
     }
 
-    JuiceHandle DoAttach(string effect, int fighter, int ticks, float scale)
+    void DoBurstOnFighter(string effect, int fighter, JuiceAnchor anchor, Vector2 offset, float scale)
+    {
+        if (string.IsNullOrEmpty(effect)) return;
+        Log("Burst " + effect + " on fighter " + fighter + " (" + anchor + ")");
+        particles.BurstOnFighter(effect, fighter, anchor, offset, scale, match != null ? match.Sim : null);
+    }
+
+    JuiceHandle DoAttach(string effect, int fighter, int ticks, float scale, JuiceAnchor anchor, Vector2 offset)
     {
         if (string.IsNullOrEmpty(effect)) return JuiceHandle.None;
-        Log("Attach " + effect + " to fighter " + fighter + (ticks > 0 ? " for " + ticks + " ticks" : " until stopped"));
-        return particles.Attach(effect, fighter, ticks, scale, match != null ? match.Sim : null);
+        Log("Attach " + effect + " to fighter " + fighter + " (" + anchor + ")" + (ticks > 0 ? " for " + ticks + " ticks" : " until stopped"));
+        return particles.Attach(effect, fighter, ticks, scale, anchor, offset, match != null ? match.Sim : null);
     }
 
     void DoImpactFrame(int ticks)
@@ -321,7 +364,7 @@ public class JuiceManager : MonoBehaviour
                         && f.hp > 0 && f.hp * 100 <= f.MaxHp * cj.lowHealthPercent;
             bool has = particles.IsPlaying(lowHealthAura[i]);
 
-            if (want && !has) lowHealthAura[i] = particles.Attach(cj.lowHealthAura, i, 0, 1f, sim);
+            if (want && !has) lowHealthAura[i] = particles.Attach(cj.lowHealthAura, i, 0, 1f, JuiceAnchor.Default, Vector2.zero, sim);
             else if (!want && has) particles.Stop(lowHealthAura[i]);
         }
     }
@@ -346,13 +389,31 @@ public class JuiceManager : MonoBehaviour
     [ContextMenu("Test: Burst test effect at centre")]
     void TestBurst()
     {
-        if (Application.isPlaying) DoBurst(testEffect, new Vector2(0f, 1f), 1, 1f);
+        if (Application.isPlaying) DoBurst(testEffect, new Vector2(0f, 1f), 1, 1f, Vector2.zero);
     }
 
-    [ContextMenu("Test: Attach test effect to P1 for 2 seconds")]
+    [ContextMenu("Test: Attach test effect to P1 for 2 seconds (prefab anchor)")]
     void TestAttach()
     {
-        if (Application.isPlaying) DoAttach(testEffect, 0, 120, 1f);
+        if (Application.isPlaying) DoAttach(testEffect, 0, 120, 1f, JuiceAnchor.Default, Vector2.zero);
+    }
+
+    [ContextMenu("Test: Burst test effect on P1 at Feet")]
+    void TestBurstFeet()
+    {
+        if (Application.isPlaying) DoBurstOnFighter(testEffect, 0, JuiceAnchor.Feet, Vector2.zero, 1f);
+    }
+
+    [ContextMenu("Test: Burst test effect on P1 at Center")]
+    void TestBurstCenter()
+    {
+        if (Application.isPlaying) DoBurstOnFighter(testEffect, 0, JuiceAnchor.Center, Vector2.zero, 1f);
+    }
+
+    [ContextMenu("Test: Burst test effect on P1 at Head")]
+    void TestBurstHead()
+    {
+        if (Application.isPlaying) DoBurstOnFighter(testEffect, 0, JuiceAnchor.Head, Vector2.zero, 1f);
     }
 
     [ContextMenu("Test: Shake (light hit)")]

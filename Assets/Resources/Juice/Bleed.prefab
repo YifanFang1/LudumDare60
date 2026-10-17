@@ -136,6 +136,10 @@ PrefabInstance:
       propertyPath: InitialModule.gravityModifier.maxCurve.m_Curve.Array.data[1].outWeight
       value: 0.33333334
       objectReference: {fileID: 0}
+    - target: {fileID: 7702130591948858292, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: anchor
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 9174532261645434826, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

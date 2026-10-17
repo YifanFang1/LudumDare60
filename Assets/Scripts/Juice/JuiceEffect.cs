@@ -1,6 +1,22 @@
 using UnityEngine;
 
 /// <summary>
+/// Which point on a fighter an effect is attached to or played at. Measured from the fighter's
+/// body (hurtbox), so it adapts to tall and short characters.
+/// </summary>
+public enum JuiceAnchor
+{
+    /// <summary>Use the anchor set on the effect's prefab (Feet if that is Default too).</summary>
+    Default = 0,
+    /// <summary>On the ground under the fighter. Dust, landing puffs.</summary>
+    Feet = 1,
+    /// <summary>Middle of the body. Auras, power-ups.</summary>
+    Center = 2,
+    /// <summary>Top of the body. Status effects, stun stars.</summary>
+    Head = 3,
+}
+
+/// <summary>
 /// Put this on the ROOT of every particle effect prefab, next to its ParticleSystem, and save the
 /// prefab in Assets/Resources/Juice so JuiceManager finds it automatically.
 /// <para>
@@ -20,7 +36,10 @@ public class JuiceEffect : MonoBehaviour
     [Tooltip("The name code and profiles use to play this effect, e.g. \"Sparks\". Not case sensitive. Leave empty to use the prefab's file name.")]
     public string effectName;
 
-    [Tooltip("Where the effect sits relative to the point it is played at, in Unity units. X is forward (the way the fighter faces).")]
+    [Tooltip("Where on a fighter this effect sits when it is attached to one (Attach, BurstOnFighter, profile slots). Calls can override it. Default = Feet.")]
+    public JuiceAnchor anchor = JuiceAnchor.Feet;
+
+    [Tooltip("Extra nudge from the point it is played at (after the anchor), in Unity units. X is forward (the way the fighter faces). Calls can add their own offset on top.")]
     public Vector2 offset;
 
     [Tooltip("Mirror the effect when the fighter faces left.")]
@@ -87,15 +106,17 @@ public class JuiceEffect : MonoBehaviour
     }
 
     /// <summary>Moves, mirrors and sizes the effect.</summary>
-    /// <param name="pos">Where it is played, in Unity units. Offset is added on top.</param>
+    /// <param name="pos">Where it is played, in Unity units. The prefab's offset and <paramref name="extraOffset"/> are added on top.</param>
     /// <param name="facing">1 = right, -1 = left.</param>
     /// <param name="scale">Size multiplier on top of the prefab's own scale.</param>
-    public void Place(Vector2 pos, int facing, float scale)
+    /// <param name="extraOffset">Per-call nudge in Unity units, X forward. Added to the prefab's offset.</param>
+    public void Place(Vector2 pos, int facing, float scale, Vector2 extraOffset)
     {
         float forward = facing < 0 ? -1f : 1f;
         bool flip = flipWithFacing && facing < 0;
+        Vector2 total = offset + extraOffset;
 
-        transform.position = new Vector3(pos.x + offset.x * forward, pos.y + offset.y, 0f);
+        transform.position = new Vector3(pos.x + total.x * forward, pos.y + total.y, 0f);
         transform.rotation = (flip ? Quaternion.Euler(0f, 180f, 0f) : Quaternion.identity) * baseRotation;
         transform.localScale = baseScale * scale;
 
