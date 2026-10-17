@@ -1,11 +1,16 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-// The lobby and waiting screens. Talks only to IMatchSession; has no networking code.
+// The lobby, waiting and character select screens. Talks only to IMatchSession; has no networking code.
 // Room and server controls are hidden when the session does not support rooms.
 public class LobbyUI : MonoBehaviour
 {
+    const float Cell = 120;   // size of one character button on the select screen
+
     IMatchSession match;
     string codeInput = "";
+    bool pickingOpponent;     // vs AI: the grid is choosing the AI's character
+    Vector2 scroll;
 
     void Awake()
     {
@@ -25,6 +30,7 @@ public class LobbyUI : MonoBehaviour
         GuiDraw.BeginVirtualScreen(out width, out height);
 
         if (match.Phase == MatchPhase.Lobby) DrawLobby();
+        else if (match.Phase == MatchPhase.CharacterSelect) DrawCharacterSelect(width, height);
         else DrawWaiting();
     }
 
@@ -52,17 +58,9 @@ public class LobbyUI : MonoBehaviour
             GUILayout.Space(10);
         }
 
-        GUILayout.Label("Play vs AI (click to change character)");
-        if (GUILayout.Button("You: " + CharacterList.NameOf(match.LocalCharacter)))
-        {
-            match.LocalCharacter = NextCharacter(match.LocalCharacter);
-        }
-        if (GUILayout.Button("Opponent: " + CharacterList.NameOf(match.OpponentCharacter)))
-        {
-            match.OpponentCharacter = NextCharacter(match.OpponentCharacter);
-        }
         if (GUILayout.Button("Play vs AI"))
         {
+            pickingOpponent = false;
             match.PlayVsAI();
         }
 
@@ -71,11 +69,82 @@ public class LobbyUI : MonoBehaviour
         GUILayout.EndArea();
     }
 
-    static int NextCharacter(int current)
+    // Vs AI you pick both characters (tabs switch between yours and the AI's). Online you pick
+    // only your own, press Ready, and the fight starts when the opponent has picked too.
+    void DrawCharacterSelect(float width, float height)
     {
-        System.Collections.Generic.IList<int> ids = CharacterList.Ids;
-        int index = ids.IndexOf(current);
-        return ids[(index + 1) % ids.Count];
+        bool forOpponent = match.ChoosesOpponent && pickingOpponent;
+
+        GUILayout.BeginArea(new Rect(20, 20, width - 40, height - 40));
+        if (match.ChoosesOpponent)
+        {
+            GUILayout.Label("Choose characters");
+            string[] tabs = {
+                "You: " + CharacterList.NameOf(match.LocalCharacter),
+                "Opponent: " + CharacterList.NameOf(match.OpponentCharacter)
+            };
+            pickingOpponent = GUILayout.Toolbar(pickingOpponent ? 1 : 0, tabs, GUILayout.Width(400)) == 1;
+        }
+        else
+        {
+            GUILayout.Label("Choose your character");
+        }
+
+        GUILayout.Space(10);
+        scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(height - 160));
+        GUI.enabled = !match.CharacterConfirmed;
+
+        int current = forOpponent ? match.OpponentCharacter : match.LocalCharacter;
+        int columns = Mathf.Max(1, (int)((width - 70) / (Cell + 8)));
+        IList<int> ids = CharacterList.Ids;
+        for (int i = 0; i < ids.Count; i++)
+        {
+            if (i % columns == 0) GUILayout.BeginHorizontal();
+
+            int id = ids[i];
+            if (DrawCharacterButton(id, id == current) && id != current)
+            {
+                if (forOpponent) match.OpponentCharacter = id;
+                else match.LocalCharacter = id;
+            }
+
+            if (i % columns == columns - 1 || i == ids.Count - 1) GUILayout.EndHorizontal();
+        }
+
+        GUI.enabled = true;
+        GUILayout.EndScrollView();
+
+        GUILayout.Space(10);
+        GUILayout.BeginHorizontal();
+        if (!match.CharacterConfirmed && GUILayout.Button(match.ChoosesOpponent ? "Fight!" : "Ready", GUILayout.Width(120)))
+        {
+            match.ConfirmCharacter();
+        }
+        if (GUILayout.Button(match.ChoosesOpponent ? "Back" : "Leave room", GUILayout.Width(120)))
+        {
+            match.Leave();
+        }
+        GUILayout.EndHorizontal();
+        GUILayout.Label(match.Status);
+        GUILayout.EndArea();
+    }
+
+    // One square button: the character's sprite and name, or a strip of its placeholder colour
+    // when it has no sprite. Returns true while it is the selected one.
+    static bool DrawCharacterButton(int id, bool selected)
+    {
+        CharacterData art = CharacterRegistry.Get(id);   // null for characters written in code
+        Texture portrait = art != null && art.sprite != null ? art.sprite.texture : null;
+
+        GUIContent content = new GUIContent(CharacterList.NameOf(id), portrait);
+        bool on = GUILayout.Toggle(selected, content, GUI.skin.button, GUILayout.Width(Cell), GUILayout.Height(Cell));
+
+        if (portrait == null && art != null && Event.current.type == EventType.Repaint)
+        {
+            Rect r = GUILayoutUtility.GetLastRect();
+            GuiDraw.Fill(r.x + 8, r.y + 8, r.width - 16, 6, art.placeholderColor);
+        }
+        return on;
     }
 
     void DrawWaiting()

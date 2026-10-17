@@ -21,7 +21,7 @@ public class ControlsUI : MonoBehaviour
 
     void OnGUI()
     {
-        if (match.Phase == MatchPhase.Playing) return;
+        if (match.Phase == MatchPhase.Playing || match.Phase == MatchPhase.CharacterSelect) return;
 
         float width, height;
         GuiDraw.BeginVirtualScreen(out width, out height);
