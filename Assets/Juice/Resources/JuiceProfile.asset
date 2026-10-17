@@ -15,7 +15,18 @@ MonoBehaviour:
   heavyThreshold: 10
   lightHitTrauma: 0.2
   heavyHitTrauma: 0.5
+  blockTrauma: 0.1
   koTrauma: 1
+  maxShakeOffset: 0.35
+  maxShakeRoll: 1.5
+  shakeFrequency: 25
+  traumaDecay: 1.5
+  traumaExponent: 2
+  shakeMultiplier: 1
+  hillTiltPerHit: 0.25
+  maxHillTilt: 2
+  hillTiltSpeed: 6
+  hillTiltHoldTime: 2
   flashTicks: 4
   impactTicks: 3
   koImpactTicks: 6

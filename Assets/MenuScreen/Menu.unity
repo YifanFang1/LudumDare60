@@ -8569,6 +8569,21 @@ MonoBehaviour:
   nameHeightAboveHead: 0.35
   localNameColor: {r: 1, g: 0.92, b: 0.4, a: 1}
   otherNameColor: {r: 1, g: 1, b: 1, a: 1}
+  leftMeter: {fileID: 0}
+  rightMeter: {fileID: 0}
+  meterColor: {r: 0.9, g: 0.75, b: 0.1, a: 1}
+  meterFullColor: {r: 1, g: 1, b: 1, a: 1}
+  leftUltimateReady: {fileID: 0}
+  rightUltimateReady: {fileID: 0}
+  leftRoundPips: []
+  rightRoundPips: []
+  pipWonColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  pipEmptyColor: {r: 0.25, g: 0.25, b: 0.3, a: 1}
+  bannerText: {fileID: 0}
+  bannerSeconds: 1.5
+  superFlash: {fileID: 0}
+  superFlashMaxAlpha: 0.45
+  superFlashText: {fileID: 0}
 --- !u!224 &1473034863
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13160,9 +13175,13 @@ MonoBehaviour:
   hitSounds: []
   heavyHitSounds: []
   blockSounds: []
+  grabSounds: []
+  dashSounds: []
+  superFlashSound: {fileID: 0}
   koSound: {fileID: 0}
   heavyHitDamage: 10
   fightStart: {fileID: 0}
+  roundStart: {fileID: 0}
   winJingle: {fileID: 0}
   loseJingle: {fileID: 0}
   drawJingle: {fileID: 0}
