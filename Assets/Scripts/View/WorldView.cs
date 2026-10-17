@@ -4,8 +4,9 @@ using UnityEngine;
 // Draws the fight as real GameObjects (so you can see and select them in the Scene view).
 // It only READS the sim; it never changes it.
 //
-//   Fighters:  a character's view prefab if it has one, otherwise a coloured box sized to its
-//              hurtbox (blockout mode, no art needed).
+//   Fighters:  a character's view prefab if it has one, else its sprite, else a coloured box sized
+//              to its hurtbox (blockout mode, no art needed). The art comes from the character's
+//              CharacterData, or its CodeCharacterArt for characters written in code.
 //   Hitboxes:  translucent yellow boxes while they exist (switch off with showHitboxes).
 //   Gizmos:    green hurtbox and red hitbox outlines, in the Scene view while the game runs.
 //
@@ -17,7 +18,7 @@ public class WorldView : MonoBehaviour
     public bool frameCamera = true;        // set the main camera to see the whole arena
     public bool showHurtboxes = true;      // translucent green body boxes (the coloured box itself when there is no art)
     public bool showHitboxes = true;       // translucent yellow attack boxes
-    public bool showToggles = true;        // little on-screen checkboxes for the two above while playing
+    public bool showToggles = true;        // the "Debug boxes" panel (bottom left) with checkboxes for the two above
     public Material placeholderMaterial;   // optional. If boxes look black, use an Unlit sprite material
 
     class FighterView
@@ -25,9 +26,9 @@ public class WorldView : MonoBehaviour
         public GameObject root;
         public Animator animator;
         public SpriteRenderer placeholder;   // blockout mode: coloured box, no art
-        public SpriteRenderer art;           // sprite mode: CharacterData.sprite
+        public SpriteRenderer art;           // sprite mode: CharacterLook.sprite
         public SpriteRenderer hurt;          // translucent hurtbox overlay (prefab and sprite modes)
-        public CharacterData data;
+        public CharacterLook data;           // null = no art for this character in this build
     }
 
     static Sprite whiteSprite;   // 1x1 white, pivot bottom-left, so scale = size
@@ -89,7 +90,7 @@ public class WorldView : MonoBehaviour
         for (int i = 0; i < 2; i++)
         {
             FighterView v = new FighterView();
-            v.data = CharacterRegistry.Get(sim.fighters[i].characterId);
+            v.data = CharacterRegistry.GetLook(sim.fighters[i].characterId);
 
             if (v.data != null && v.data.viewPrefab != null)
             {
@@ -167,24 +168,19 @@ public class WorldView : MonoBehaviour
                     : (index == 0 ? new Color(0.3f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
             if (f.state == FighterStateId.Attack) c = Color.Lerp(c, Color.white, 0.5f);
             if (f.state == FighterStateId.Hitstun) c = Color.Lerp(c, Color.black, 0.35f);
+            if (f.state == FighterStateId.Blockstun) c = Color.Lerp(c, Color.cyan, 0.5f);
             if (f.state == FighterStateId.KO) c = Color.gray;
             v.placeholder.enabled = showHurtboxes;   // with no art the box IS the body
             Place(v.placeholder, f.HurtboxWorld(), c);
             return;
         }
 
-        if (v.art != null)
-        {
-            CharacterData d = v.data;
-            v.root.transform.position = new Vector3(f.x * Scale + f.facing * d.spriteOffsetX, f.y * Scale + d.spriteOffsetY, 0f);
-            v.root.transform.localScale = new Vector3(f.facing * d.spriteScale, d.spriteScale, 1f);   // art faces right
-        }
-        else
-        {
-            v.root.transform.position = new Vector3(f.x * Scale, f.y * Scale, 0f);
-            v.root.transform.localScale = new Vector3(f.facing, 1f, 1f);   // art faces right
-            Pose(v, f);
-        }
+        // Sprite or prefab: both use the look's offset / scale sliders, so art can be lined up with
+        // the hurtbox the same way in either mode.
+        CharacterLook d = v.data;
+        v.root.transform.position = new Vector3(f.x * Scale + f.facing * d.spriteOffsetX, f.y * Scale + d.spriteOffsetY, 0f);
+        v.root.transform.localScale = new Vector3(f.facing * d.spriteScale, d.spriteScale, 1f);   // art faces right
+        if (v.art == null) Pose(v, f);
 
         if (v.hurt != null)
         {
@@ -223,7 +219,11 @@ public class WorldView : MonoBehaviour
                 break;
             case FighterStateId.Hitstun:
                 stateName = "Hitstun";
-                t = tick / (float)Mathf.Max(1, f.hitstunTicks);
+                t = tick / (float)Mathf.Max(1, f.stunTicks);
+                break;
+            case FighterStateId.Blockstun:
+                stateName = "Blockstun";
+                t = tick / (float)Mathf.Max(1, f.stunTicks);
                 break;
             case FighterStateId.KO:
                 stateName = "KO";
@@ -231,6 +231,12 @@ public class WorldView : MonoBehaviour
                 break;
         }
 
+        // A half-finished Animator still works: a missing state shows Idle instead.
+        if (!v.animator.HasState(0, Animator.StringToHash(stateName)))
+        {
+            stateName = "Idle";
+            t = Loop(tick, v.data.idleLoopTicks);
+        }
         if (v.animator.HasState(0, Animator.StringToHash(stateName)))
         {
             v.animator.Play(stateName, 0, Mathf.Clamp01(t));
@@ -281,9 +287,11 @@ public class WorldView : MonoBehaviour
 
         float width, height;
         GuiDraw.BeginVirtualScreen(out width, out height);
-        GUILayout.BeginArea(new Rect(20, height - 70, 220, 60));
-        showHurtboxes = GUILayout.Toggle(showHurtboxes, "Show hurtboxes");
-        showHitboxes = GUILayout.Toggle(showHitboxes, "Show hitboxes");
+        // A titled panel so it's easy to spot. Hitboxes only exist for the few ticks an attack is
+        // active, so with "Hitboxes" on you see a yellow flash exactly when a move can hit.
+        GUILayout.BeginArea(new Rect(12, height - 96, 230, 84), "Debug boxes", GUI.skin.window);
+        showHurtboxes = GUILayout.Toggle(showHurtboxes, " Hurtboxes (green: bodies)");
+        showHitboxes = GUILayout.Toggle(showHitboxes, " Hitboxes (yellow: attacks)");
         GUILayout.EndArea();
     }
 

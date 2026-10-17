@@ -3,9 +3,13 @@ using System.Collections.Generic;
 
 // The roster: every character the game can create, looked up by id.
 //
-//   id 0        Brawler, written in code (the example for special mechanics)
-//   other ids   characters made in the Unity inspector (CharacterData assets). They register
-//               themselves at startup, so nobody edits this file to add a character.
+//   ids 0-999   characters written in code (BaseFighter subclasses), listed in the static
+//               constructor below. Take the next free number and add ONE line there.
+//                 0  Brawler   (also the fallback for unknown ids, never remove it)
+//                 1  Shooter
+//                 2  Sandbag   (training dummy)
+//   other ids   characters made in the Unity inspector (CharacterData assets). They get a big
+//               random id and register themselves at startup, so nobody edits this file for them.
 //
 // A character's id is what gets stored for character select and sent over the network.
 public static class CharacterList
@@ -18,12 +22,16 @@ public static class CharacterList
         public CharacterDef def;     // null for characters written in code
     }
 
+    public const int FirstDataId = 1000;   // ids below this are reserved for code characters
+
     static readonly Dictionary<int, Entry> entries = new Dictionary<int, Entry>();
     static readonly List<int> sortedIds = new List<int>();
 
     static CharacterList()
     {
-        Add(0, "Brawler", delegate { return new Brawler(); }, null);
+        Add(Brawler.Id, "Brawler", delegate { return new Brawler(); }, null);
+        Add(Shooter.Id, "Shooter", delegate { return new Shooter(); }, null);
+        Add(Sandbag.Id, "Sandbag", delegate { return new Sandbag(); }, null);
     }
 
     // For characters written in code. Pick an id that is not used yet.
@@ -79,6 +87,13 @@ public static class CharacterList
     public static IList<int> Ids { get { return sortedIds; } }   // sorted by name, for menus
     public static int Count { get { return entries.Count; } }
     public static bool Contains(int id) { return entries.ContainsKey(id); }
+
+    // True for characters written in code (BaseFighter subclasses), false for inspector ones.
+    public static bool IsCodeCharacter(int id)
+    {
+        Entry e;
+        return entries.TryGetValue(id, out e) && e.def == null;
+    }
 
     public static string NameOf(int id)
     {
