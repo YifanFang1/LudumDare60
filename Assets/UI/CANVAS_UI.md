@@ -1,0 +1,55 @@
+# Canvas UI
+
+The menus and HUD are normal Unity UI (Canvas, Button, TextMeshPro, Image). You edit them in the
+editor like any other UI. The scripts only connect them to the match.
+
+## First time
+
+1. Window > TextMeshPro > Import TMP Essential Resources (once per project).
+2. Open the Fight scene (it needs a GameManager with LocalMatchSession or RelayLockstepSession).
+3. Menu: **Fight > Build Default UI Canvas**. This creates `FightUI` in the scene and
+   `Assets/UI/Prefabs/CharacterButton.prefab`.
+4. Press Play. The canvas replaces the old OnGUI lobby and HUD automatically.
+
+## Designing a screen
+
+Select `FightUI`. On **Match Screens**, change **Editor Preview** to Lobby / Waiting / CharacterSelect /
+Hud. Only that screen is shown while the game is stopped, so you can move, resize and restyle it.
+
+- Fonts: make a TMP font asset (Window > TextMeshPro > Font Asset Creator), then set it on any text
+  or as the default in Project Settings > TextMeshPro.
+- Buttons and panels: swap the Image sprite, colours and Button colour tints as usual.
+- Character buttons: edit the `CharacterButton` prefab once and every button changes.
+- Health bars: the `Fill` Image under LeftHealth / RightHealth. Keep Image Type = Filled.
+- Delete anything you do not want. Empty references are skipped.
+- Extra `OnClick` events added in the Inspector still run next to the built-in behaviour.
+
+## How it fits together
+
+```
+MatchScreens            shows the screen for the current phase (Lobby / Waiting / CharacterSelect / Playing)
+  LobbyScreen           name, server, quick match, rooms, play vs AI
+  WaitingScreen         room code + cancel
+  CharacterSelectScreen tabs (vs AI), character grid, ready / fight
+  HudScreen             health bars, names, info, result, names above fighters
+```
+
+Every screen talks only to `IMatchSession`, never to networking, so the UI works with any session
+(offline, relay, or a future one). Nothing here touches the sim.
+
+`ControlsUI` (key rebinding) is still the old OnGUI panel and keeps working on top of the canvas.
+The hurtbox / hitbox toggles in `WorldView` are also still OnGUI (they are debug tools).
+
+To go back to the old OnGUI screens: untick **Replace Imgui UI** on Match Screens or delete `FightUI`.
+
+## Start menu and controls page
+
+- `MainMenuScreen` (Play / Controls / Quit) is the first thing shown. Play opens the lobby; the lobby has a Back button.
+- `ControlsScreen` lists every action from `FightControls`; click a row, press a key (Esc cancels). Reset and Back buttons included. Row look = `Assets/UI/Prefabs/ControlRow.prefab`.
+- Already built a FightUI? Run `Fight > Add Start Menu And Controls Pages` (keeps your edits). Otherwise `Fight > Build Default UI Canvas` makes everything.
+- `Match Screens > Start On Main Menu` turns the start screen off if you want to land in the lobby.
+- Quit is hidden in WebGL builds.
+
+## Play flow
+
+Main menu > Play > **Mode** (name, Online, Offline vs AI, Back). Online opens the lobby page (quick match, create/join room); Offline starts a match vs the AI. After a match you land back on the lobby (online) or the mode page (offline). `Fight > Add Start Menu And Controls Pages` also adds the mode page to an existing FightUI.
