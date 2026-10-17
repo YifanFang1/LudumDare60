@@ -16,7 +16,7 @@ public class RelayLockstepSession : MatchSessionBase
     // Bump this whenever the sim or the message format changes. The hash of the inspector-made
     // character data is added automatically, so changed characters are refused too.
     // Players on different versions are refused by the relay instead of silently desyncing.
-    const string Version = "4";
+    const string Version = "5";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 
