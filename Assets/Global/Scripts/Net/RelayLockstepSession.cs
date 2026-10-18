@@ -24,7 +24,8 @@ public class RelayLockstepSession : MatchSessionBase
     // grabs, the seven characters' movesets) and the air dash + Dash button. 11: the merge of both,
     // so a build with only one of them can never match a build with both.
     // 12: rematch ("r" message) and keepalive ("p").
-    const string Version = "12";
+    // 13: synchronized pre-round countdown.
+    const string Version = "13";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 

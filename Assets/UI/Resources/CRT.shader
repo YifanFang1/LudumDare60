@@ -28,6 +28,7 @@ Shader "Hidden/LD/CRT"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 
             // Set by CRTSettings.ApplySettings()
+            float _DefeatGrey;
             float _Intensity;
             float _InnerIntensity;
             float _OuterIntensity;
@@ -93,7 +94,9 @@ Shader "Hidden/LD/CRT"
                 float vignette = 1.0 - _VignetteStrength * smoothstep(0.5, 1.5, length(curved));
                 col *= vignette;
 
-                return half4(lerp(original, col, saturate(strength)), 1);
+                half3 result = lerp(original, col, saturate(strength));
+                half grey = dot(result, half3(0.2126, 0.7152, 0.0722));
+                return half4(lerp(result, grey.xxx, saturate(_DefeatGrey)), 1);
             }
             ENDHLSL
         }
