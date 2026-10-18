@@ -42,7 +42,7 @@ These are `BaseFighter`'s defaults, stored as `static readonly` moves (`Standard
 | Back dash | - | - | 16 | - | - | speed 110 | - | Travels ~1.8 units |
 | Jump Light (W, then J) | 3 | 8 | 14 | 5 | 14 | 30 | `Box(200, 0, 800, 700)` | Air only, once per jump |
 | Jump Heavy (W, then K) | 6 | 6 | 24 | 10 | 20 | 60 | `Box(100, 0, 1000, 900)` | Air only, once per jump |
-| Jump | - | - | 37 | - | - | up 180, forward 50 | - | Peaks ~1.7 units, travels ~1.8 units |
+| Jump | - | - | 40 | - | - | up 210, forward 50, air control 3 | - | Peaks ~2.1 units, travels ~2 units |
 | Perks | - | - | - | - | - | - | - | None for now (D-12, D-29) |
 
 These match the scale of the test characters (Brawler's Jab and Haymaker, Shooter's Fireball), so everything can be tested against Brawler, Shooter and Sandbag.
@@ -86,7 +86,8 @@ New state `FighterStateId.Dash` (appended **at the end** of the enum so the old 
 New state `FighterStateId.Jump` (appended at the end of the enum).
 
 - **Input:** Up **held** while in Idle or Walk (holding it keeps jumping each time you land). Attacks are checked first, then dashes, then the jump. Up alone goes straight up; Up + Left/Right jumps that way.
-- **The arc is fixed:** `vy = JumpArc.up`, `vx = direction * JumpArc.forward`. Every tick in the air `y += vy; vy -= Gravity` (`Gravity = 10`). `IsAirborne` is `y > 0 || vy > 0`. No steering, no turning around, no blocking.
+- **The arc:** `vy = JumpArc.up`, `vx = direction * JumpArc.forward`. Every tick in the air `y += vy; vy -= Gravity` (`Gravity = 11`). `IsAirborne` is `y > 0 || vy > 0`. No turning around, no blocking.
+- **A little air control:** while jumping or doing an air attack (not in hitstun), holding left or right moves `vx` toward `±JumpArc.forward` by `AirControl` (3) per tick. Holding nothing keeps your momentum. You can drift a neutral jump or shorten a forward one, but you can't go faster than a normal jump or reverse instantly.
 - **Air attacks:** once per jump (`usedAirMove`, reset on landing), `ChooseAirMove(sim, input)` picks one. `BaseFighter` gives Heavy > Light: `JumpHeavyAttack` / `JumpLightAttack`. An air attack that ends before landing goes back to `Jump`; landing during one cancels it and removes its hitboxes. Ultimates are ground-only.
 - **Landing:** `y = 0`, then `Jump` or an air attack becomes `Idle`. There's no landing recovery yet.
 - **Getting hit in the air:** the fighter stops rising (`vy` capped at 0) and falls. Hitstun can't end while airborne, so it lasts at least until landing. A fighter KO'd in the air falls too.

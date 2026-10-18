@@ -18,7 +18,8 @@
 //   Jump + J       StandardJumpLight: quick air kick    JumpLightAttack (one air attack per jump)
 //   Jump + K       StandardJumpHeavy: big jump-in       JumpHeavyAttack
 //   Dashes         about 1.8 units                      ForwardDash / BackDash (in Fighter)
-//   Jump (W)       about 1.7 units high                 JumpArc (in Fighter)
+//   Jump (W)       about 2.1 units high, a little       JumpArc / AirControl (in Fighter)
+//                  steering in the air
 //   Move rules     one Special projectile at a time     CanUseMove   (e.g. "one fireball at a time")
 //
 // Everything every fighter shares (walking, blocking by holding back, dashing, hitstun, KO, the
