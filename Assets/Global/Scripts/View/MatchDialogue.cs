@@ -20,6 +20,7 @@ public static class MatchDialogue
     public static string Result(GameSim sim, int localSlot, bool finalMatch)
     {
         int winner = finalMatch ? sim.Winner :
+            sim.roundWinner >= 0 ? sim.roundWinner :
             sim.fighters[0].hp <= 0 && sim.fighters[1].hp <= 0 ? 2 :
             sim.fighters[0].hp > 0 ? 0 : 1;
         if (winner == 2) return "DRAW!";

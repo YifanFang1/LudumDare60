@@ -204,9 +204,9 @@ public class FightView : MonoBehaviour
     void DrawBanner(GameSim sim, float width)
     {
         string text = null;
-        if (sim.IsOver) text = "K.O.";
+        if (sim.IsOver) text = sim.timeUp ? "TIME!" : "K.O.";
         else if (sim.roundOverTicks > 0)
-            text = sim.hitStopTicks > 0 || sim.roundOverTicks > 90 ? "K.O." : MatchDialogue.Result(sim, match.LocalSlot, false);
+            text = sim.hitStopTicks > 0 || sim.roundOverTicks > 90 ? (sim.timeUp ? "TIME!" : "K.O.") : MatchDialogue.Result(sim, match.LocalSlot, false);
         else if (MatchDialogue.Start(sim) != "") text = MatchDialogue.Start(sim);
         else if (Time.unscaledTime < bannerUntil) text = banner;
         if (text != null) GUI.Label(new Rect(0, 200, width, 100), text, bigText);

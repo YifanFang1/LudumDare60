@@ -42,7 +42,7 @@ public static class CharacterList
         Add(Samurai.Id, "Ruy", delegate { return new Samurai(); }, null);
         Add(Painter.Id, "Paintress", delegate { return new Painter(); }, null);
         Add(Cowboy.Id, "Noir", delegate { return new Cowboy(); }, null);
-        Add(Elephant.Id, "Room", delegate { return new Elephant(); }, null);
+        Add(Elephant.Id, "Ŕ̶̝͇̤͛̎Ȍ̴̢̪̗͇͂̈́̆̀̿̿̈́̀͐͗̓͠ͅO̵̯̲͕̗͐̐̌͂͗̓̆̍͊͗M̷̧̤̲̲̖͑̿", delegate { return new Elephant(); }, null);
         Add(Executioner.Id, "The Executioner", delegate { return new Executioner(); }, null);
         Add(PlagueDoctor.Id, "Dr. Remy", delegate { return new PlagueDoctor(); }, null);
         Add(Nek.Id, "Nek", delegate { return new Nek(); }, null);

@@ -25,7 +25,7 @@ public class RelayLockstepSession : MatchSessionBase
     // so a build with only one of them can never match a build with both.
     // 12: rematch ("r" message) and keepalive ("p").
     // 13: synchronized pre-round countdown.
-    const string Version = "13";
+    const string Version = "14";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 
