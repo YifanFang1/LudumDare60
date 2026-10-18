@@ -43,7 +43,7 @@ public class AudioManager : MonoBehaviour
     [Header("Music")]
     public AudioClip menuMusic;          // lobby and waiting for an opponent
     public AudioClip characterSelectMusic;   // empty = keep the menu music playing
-    public AudioClip fightMusic;
+    public AudioClip fightMusic;         // round 1, and later rounds if the winner has no theme
 
     [Header("Volume")]
     [Range(0f, 1f)] public float sfxVolume = 1f;
@@ -58,6 +58,10 @@ public class AudioManager : MonoBehaviour
     AudioSource ui;       // clicks and jingles, normal pitch
     AudioSource music;
     bool resultPlayed;    // the win/lose jingle for this match has played; the fight music stops
+    // Character themes: round 1 plays fightMusic, then each new round plays the theme of whoever
+    // won the round before (a drawn round keeps the current music).
+    int themeSlot = -1;          // fighter slot whose theme is playing, -1 = fightMusic
+    int lastRoundWinner = -1;    // remembered during the pause after a KO, used when the next round starts
 
     void Awake()
     {
@@ -105,6 +109,9 @@ public class AudioManager : MonoBehaviour
             resultPlayed = true;
             PlayResult(match.Sim.Winner);
         }
+        // The sim clears roundWinner when the next round starts, so note it while the KO pause lasts.
+        if (match.Phase == MatchPhase.Playing && match.Sim.roundWinner >= 0)
+            lastRoundWinner = match.Sim.roundWinner;
 
         music.volume = musicVolume;
         SetMusic(MusicFor(match.Phase));
@@ -127,6 +134,8 @@ public class AudioManager : MonoBehaviour
     void OnMatchStarted(GameSim sim)
     {
         resultPlayed = false;
+        themeSlot = -1;
+        lastRoundWinner = -1;
         PlayUI(fightStart);
     }
 
@@ -188,6 +197,8 @@ public class AudioManager : MonoBehaviour
                 break;
             case SimEventType.RoundStart:
                 PlayUI(roundStart != null ? roundStart : fightStart);
+                if (lastRoundWinner == 0 || lastRoundWinner == 1) themeSlot = lastRoundWinner;
+                lastRoundWinner = -1;
                 break;
             case SimEventType.Reflect:
                 PlaySfx(Pick(c != null ? c.reflect : null, reflectSounds));
@@ -247,10 +258,17 @@ public class AudioManager : MonoBehaviour
             case MatchPhase.CharacterSelect:
                 return characterSelectMusic != null ? characterSelectMusic : menuMusic;
             case MatchPhase.Playing:
-                return resultPlayed ? null : fightMusic;   // silence so the jingle stands out
+                return resultPlayed ? null : FightMusic();   // silence so the jingle stands out
             default:
                 return menuMusic;
         }
+    }
+
+    // The theme of the fighter in themeSlot, or fightMusic if none is set (or that character has none).
+    AudioClip FightMusic()
+    {
+        CharacterSfx c = themeSlot >= 0 ? SfxOf(themeSlot) : null;
+        return c != null && c.theme != null ? c.theme : fightMusic;
     }
 
     void SetMusic(AudioClip clip)
