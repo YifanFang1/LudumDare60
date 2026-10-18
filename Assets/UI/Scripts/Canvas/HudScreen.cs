@@ -107,6 +107,7 @@ public class HudScreen : MonoBehaviour
         if (!wired && resultButton != null)
         {
             MakeRematchButton();
+            MakeExitButton();
             resultButton.onClick.AddListener(() =>
             {
                 AudioManager.Click();
@@ -179,6 +180,25 @@ public class HudScreen : MonoBehaviour
         }
     }
 
+    // Vs AI there is no room to leave, so a small Exit button sits at the bottom centre during the fight
+    // (Escape does the same). Online matches don't show it: leaving there is a forfeit.
+    Button exitButton;
+
+    void MakeExitButton()
+    {
+        exitButton = Instantiate(resultButton, transform);
+        exitButton.name = "ExitButton";
+        exitButton.onClick.RemoveAllListeners();
+        RectTransform rt = (RectTransform)exitButton.transform;
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0f);
+        rt.sizeDelta = new Vector2(200f, 60f);
+        rt.anchoredPosition = new Vector2(0f, 24f);
+        TMP_Text label = exitButton.GetComponentInChildren<TMP_Text>(true);
+        if (label != null) label.text = "Exit";
+        exitButton.onClick.AddListener(() => { AudioManager.Click(); match.Leave(); });
+        exitButton.gameObject.SetActive(false);
+    }
+
     // Copies the Back button: Rematch on the left, Back on the right.
     void MakeRematchButton()
     {
@@ -228,6 +248,16 @@ public class HudScreen : MonoBehaviour
         ShowDebug(tickText, "tick " + sim.tick + "   " + sim.fighters[match.LocalSlot].state);
         SetText(stalledText, match.Stalled ? "waiting for opponent input..." : "");
         SetText(warningText, match.Warning);
+
+        // exit (vs AI only, while the fight is on)
+        bool canExit = !match.IsOnline && !sim.IsOver;
+        if (exitButton != null && exitButton.gameObject.activeSelf != canExit) exitButton.gameObject.SetActive(canExit);
+        if (canExit && UnityEngine.InputSystem.Keyboard.current != null &&
+            UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            match.Leave();
+            return;
+        }
 
         // result
         bool over = sim.IsOver;
