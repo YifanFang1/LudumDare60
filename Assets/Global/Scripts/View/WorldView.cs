@@ -126,7 +126,21 @@ public class WorldView : MonoBehaviour
                 v.root = v.placeholder.gameObject;
             }
             if (v.placeholder == null) v.hurt = NewQuad("Hurtbox" + i, 5);
+            if (outlineFighters && v.placeholder == null) AddOutlines(v.root, i == match.LocalSlot);
             views[i] = v;
+        }
+    }
+
+    // Outlines every sprite of a fighter's art. The fighter this machine controls gets the Player
+    // colours and the other one the Enemy colours, so online each player sees themselves as "Player".
+    static void AddOutlines(GameObject root, bool isLocalPlayer)
+    {
+        foreach (SpriteRenderer sr in root.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            SpriteOutline outline = sr.GetComponent<SpriteOutline>();
+            if (outline == null) outline = sr.gameObject.AddComponent<SpriteOutline>();
+            outline.style = isLocalPlayer ? SpriteOutline.Style.Player : SpriteOutline.Style.Enemy;
+            outline.Apply();
         }
     }
 
@@ -201,7 +215,7 @@ public class WorldView : MonoBehaviour
         // the hurtbox the same way in either mode.
         CharacterLook d = v.data;
         v.root.transform.position = new Vector3(f.x * Scale + f.facing * d.spriteOffsetX, f.y * Scale + d.spriteOffsetY, 0f);
-        v.root.transform.localScale = new Vector3(f.facing * d.spriteScale, d.spriteScale, 1f);   // art faces right
+        v.root.transform.localScale = new Vector3(f.facing * d.SpriteFlip * d.spriteScale, d.spriteScale, 1f);   // art faces right (or is flipped to)
         if (v.art == null) Pose(v, f);
 
         if (v.hurt != null)
