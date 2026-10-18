@@ -49,6 +49,18 @@ public class CharacterButtonUI : MonoBehaviour
         if (selectedMark != null && selectedMark.activeSelf != selected) selectedMark.SetActive(selected);
     }
 
+    // Greyed out but still clickable (used by the Random picker for characters that are not in the draw).
+    public void SetDimmed(bool dimmed)
+    {
+        CanvasGroup group = GetComponent<CanvasGroup>();
+        if (group == null)
+        {
+            if (!dimmed) return;
+            group = gameObject.AddComponent<CanvasGroup>();
+        }
+        group.alpha = dimmed ? 0.35f : 1f;
+    }
+
     public void SetInteractable(bool interactable)
     {
         if (button != null) button.interactable = interactable;

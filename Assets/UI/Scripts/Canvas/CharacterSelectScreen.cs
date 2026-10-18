@@ -32,6 +32,10 @@ public class CharacterSelectScreen : MonoBehaviour
     bool wired;
     bool pickingOpponent;
     bool randomYou, randomOpponent;
+    // Random picker: with Random on, click characters to put them in the draw. Nothing picked = everyone
+    // (except Sandbag). Picking Sandbag here is the only way it can come up.
+    readonly HashSet<int> poolYou = new HashSet<int>();
+    readonly HashSet<int> poolOpponent = new HashSet<int>();
     readonly List<CharacterButtonUI> buttons = new List<CharacterButtonUI>();
     readonly List<int> builtIds = new List<int>();
 
@@ -41,6 +45,8 @@ public class CharacterSelectScreen : MonoBehaviour
         if (match == null) return;
         pickingOpponent = false;
         randomYou = randomOpponent = false;
+        poolYou.Clear();
+        poolOpponent.Clear();
         if (!wired) { Wire(); wired = true; }
         Rebuild();
     }
@@ -63,11 +69,28 @@ public class CharacterSelectScreen : MonoBehaviour
         bool forOpponent = choosesOpponent && pickingOpponent;
         int current = forOpponent ? match.OpponentCharacter : match.LocalCharacter;
         bool randomNow = forOpponent ? randomOpponent : randomYou;
+        HashSet<int> pool = forOpponent ? poolOpponent : poolYou;
 
         for (int i = 0; i < buttons.Count; i++)
         {
             bool isRandomTile = buttons[i].CharacterId == RandomId;
-            buttons[i].SetSelected(isRandomTile ? randomNow : !randomNow && buttons[i].CharacterId == current);
+            if (isRandomTile)
+            {
+                buttons[i].SetSelected(randomNow);
+                buttons[i].SetDimmed(false);
+            }
+            else if (randomNow)
+            {
+                // in the draw = highlighted, everything else greyed (none picked = all of them are in)
+                bool inDraw = pool.Contains(buttons[i].CharacterId);
+                buttons[i].SetSelected(inDraw);
+                buttons[i].SetDimmed(!inDraw);
+            }
+            else
+            {
+                buttons[i].SetSelected(buttons[i].CharacterId == current);
+                buttons[i].SetDimmed(false);
+            }
             buttons[i].SetInteractable(!match.CharacterConfirmed);
         }
 
@@ -75,8 +98,8 @@ public class CharacterSelectScreen : MonoBehaviour
         // The tab you are on is switched off, so its "disabled" look doubles as the selected look.
         if (youTab != null) youTab.interactable = pickingOpponent;
         if (opponentTab != null) opponentTab.interactable = !pickingOpponent;
-        if (youTabLabel != null) youTabLabel.text = "You: " + (randomYou ? "Random" : CharacterList.NameOf(match.LocalCharacter));
-        if (opponentTabLabel != null) opponentTabLabel.text = "Opponent: " + (randomOpponent ? "Random" : CharacterList.NameOf(match.OpponentCharacter));
+        if (youTabLabel != null) youTabLabel.text = "You: " + (randomYou ? RandomLabel(poolYou) : CharacterList.NameOf(match.LocalCharacter));
+        if (opponentTabLabel != null) opponentTabLabel.text = "Opponent: " + (randomOpponent ? RandomLabel(poolOpponent) : CharacterList.NameOf(match.OpponentCharacter));
 
         if (titleText != null)
         {
@@ -134,18 +157,26 @@ public class CharacterSelectScreen : MonoBehaviour
     // Online the result is what gets sent to the opponent, so both sides agree.
     void ResolveRandom()
     {
-        if (randomYou) match.LocalCharacter = RandomCharacter();
-        if (randomOpponent && match.ChoosesOpponent) match.OpponentCharacter = RandomCharacter();
+        if (randomYou) match.LocalCharacter = RandomCharacter(poolYou);
+        if (randomOpponent && match.ChoosesOpponent) match.OpponentCharacter = RandomCharacter(poolOpponent);
         randomYou = randomOpponent = false;
+        poolYou.Clear();
+        poolOpponent.Clear();
     }
 
-    static int RandomCharacter()
+    static string RandomLabel(HashSet<int> picked)
+    {
+        return picked.Count == 0 ? "Random" : "Random (" + picked.Count + ")";
+    }
+
+    // picked = the characters the player ticked; empty means everyone except Sandbag.
+    static int RandomCharacter(HashSet<int> picked)
     {
         System.Collections.Generic.IList<int> ids = CharacterList.Ids;
         System.Collections.Generic.List<int> pool = new System.Collections.Generic.List<int>();
         for (int i = 0; i < ids.Count; i++)
         {
-            if (ids[i] != Sandbag.Id) pool.Add(ids[i]);
+            if (picked.Count > 0 ? picked.Contains(ids[i]) : ids[i] != Sandbag.Id) pool.Add(ids[i]);
         }
         if (pool.Count == 0) return ids.Count > 0 ? ids[0] : 0;
         return pool[Random.Range(0, pool.Count)];
@@ -156,12 +187,22 @@ public class CharacterSelectScreen : MonoBehaviour
         if (match.CharacterConfirmed) return;
         AudioManager.Click();
         bool forOpponent = match.ChoosesOpponent && pickingOpponent;
+        HashSet<int> pool = forOpponent ? poolOpponent : poolYou;
+        bool randomOn = forOpponent ? randomOpponent : randomYou;
         if (id == RandomId)
         {
-            if (forOpponent) randomOpponent = true; else randomYou = true;
+            // Random toggles: on = everyone is greyed, click characters to put them in the draw
+            randomOn = !randomOn;
+            if (randomOn) pool.Clear();
+            if (forOpponent) randomOpponent = randomOn; else randomYou = randomOn;
             return;
         }
-        if (forOpponent) { randomOpponent = false; match.OpponentCharacter = id; }
-        else { randomYou = false; match.LocalCharacter = id; }
+        if (randomOn)
+        {
+            if (!pool.Remove(id)) pool.Add(id);
+            return;
+        }
+        if (forOpponent) match.OpponentCharacter = id;
+        else match.LocalCharacter = id;
     }
 }
