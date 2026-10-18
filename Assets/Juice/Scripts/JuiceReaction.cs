@@ -31,7 +31,7 @@ public class JuiceReaction
     [Tooltip("When this plays. Moments: Hit, LightHit, HeavyHit, Hit:<Move>, GotHit, GotLightHit, GotHeavyHit, Grab, " +
              "GotGrabbed, Block, AttackBlocked, AttackStart, AttackStart:<Move>, Dash, DashForward, DashBack, " +
              "SuperFlash, KnockedOut, ScoredKO, RoundStart, RoundEnd, RoundWin, RoundLose, RoundDraw, Enter<State>.\n" +
-             "While (plays as long as true): WhileLowHealth, WhileMeterFull, WhileBlocking, While<State>, WhileAttack:<Move>.\n" +
+             "While (plays as long as true): WhileMoving, WhileLowHealth, WhileMeterFull, WhileBlocking, While<State>, WhileAttack:<Move>.\n" +
              "States: Idle, Walk, Attack, Hitstun, KO, Blockstun, Dash. Moves: Light, Heavy, Grab, Special, Ultimate.\n" +
              "Or any name your own code fires with JuiceManager.Trigger. Turn on Log All Triggers on JuiceManager to see them live.")]
     public string trigger = "";
@@ -51,6 +51,11 @@ public class JuiceReaction
     [Tooltip("Moment triggers only, On Self / On Opponent only: 0 = play once where the fighter is, " +
              "N = follow the fighter for N ticks (60 = 1 second). While... triggers ignore this: they follow until the condition ends.")]
     [Min(0)] public int ticks;
+
+    [Tooltip("While... triggers only. 0 = one effect that follows the fighter for as long as the condition holds. " +
+             "N = play the effect once every N ticks (60 = 1 second) while it holds, e.g. footstep dust every 15 ticks " +
+             "with WhileMoving. Each one plays where the fighter is at that moment and stays there.")]
+    [Min(0)] public int everyTicks;
 
     [Tooltip("Size multiplier. 0 counts as 1.")]
     [Min(0f)] public float scale = 1f;
@@ -143,6 +148,9 @@ public static class JuiceTriggers
     public const string WhileMeterFull = "WhileMeterFull";
     /// <summary>Holding back, so a hit right now would be blocked.</summary>
     public const string WhileBlocking = "WhileBlocking";
+    /// <summary>Sliding sideways for any reason: walking, dashing or being knocked back. Pair it with
+    /// Every Ticks on the row for footstep dust.</summary>
+    public const string WhileMoving = "WhileMoving";
     #endregion
 
     #region Builders

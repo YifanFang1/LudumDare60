@@ -71,6 +71,11 @@ public class JuiceManager : MonoBehaviour
         new Dictionary<JuiceReaction, JuiceHandle>(),
         new Dictionary<JuiceReaction, JuiceHandle>(),
     };
+    readonly Dictionary<JuiceReaction, int>[] whileNextTick =   // Every Ticks rows: sim tick of the next burst
+    {
+        new Dictionary<JuiceReaction, int>(),
+        new Dictionary<JuiceReaction, int>(),
+    };
     readonly List<JuiceReaction> matched = new List<JuiceReaction>();   // scratch list, reused
 
     /// <summary>Same as FightControls: "Enter Play Mode without domain reload" keeps statics alive.</summary>
@@ -495,6 +500,7 @@ public class JuiceManager : MonoBehaviour
             if (f.hp > 0 && f.hp * 100 <= f.MaxHp * profile.lowHealthPercent) active.Add(JuiceTriggers.WhileLowHealth);
             if (f.meter >= Fighter.MeterMax) active.Add(JuiceTriggers.WhileMeterFull);
             if (f.IsBlocking) active.Add(JuiceTriggers.WhileBlocking);
+            if (f.vx != 0) active.Add(JuiceTriggers.WhileMoving);
 
             // Start or stop each While... row's effect.
             Dictionary<JuiceReaction, JuiceHandle> playing = whilePlaying[i];
@@ -504,6 +510,14 @@ public class JuiceManager : MonoBehaviour
                 if (!row.IsWhile || string.IsNullOrEmpty(row.effect)) continue;
 
                 bool want = active.Contains(row.trigger.Trim());
+
+                // Every Ticks rows don't keep one effect running: they replay it on a rhythm.
+                if (row.everyTicks > 0)
+                {
+                    UpdateRepeating(row, i, want, sim);
+                    continue;
+                }
+
                 JuiceHandle handle;
                 // An invalid handle means "tried, but the effect name doesn't exist": don't retry every
                 // frame. A non-looping effect that finished on its own is started again while true.
@@ -594,6 +608,38 @@ public class JuiceManager : MonoBehaviour
         return DoAttach(row.effect, target, 0, scale, row.anchor, row.offset);   // follows until stopped
     }
 
+    /// <summary>
+    /// A While... row with Every Ticks: plays its effect once as soon as the condition becomes true,
+    /// then again every N ticks while it stays true. Each one is a burst that stays where it was played
+    /// (footstep dust), not an effect that follows the fighter.
+    /// <para>
+    /// Counted in SIM ticks, so the rhythm follows the game: it pauses during hit stop and network
+    /// stalls, and both players see the same rhythm.
+    /// </para>
+    /// </summary>
+    void UpdateRepeating(JuiceReaction row, int owner, bool want, GameSim sim)
+    {
+        Dictionary<JuiceReaction, int> next = whileNextTick[owner];
+        if (!want)
+        {
+            if (next.Remove(row)) Log("While " + row.trigger + " stopped repeating for P" + (owner + 1));
+            return;
+        }
+
+        int due;
+        bool running = next.TryGetValue(row, out due);
+        // Not due yet. (A due tick far in the future means the sim's tick counter was reset, e.g. a new round.)
+        if (running && sim.tick < due && due - sim.tick <= row.everyTicks) return;
+
+        if (!running) Log("While " + row.trigger + " started for P" + (owner + 1) + ": " + row.effect + " every " + row.everyTicks + " ticks");
+        next[row] = sim.tick + row.everyTicks;
+
+        // Straight to the particle player, so the console doesn't get a line per footstep.
+        int target = row.place == JuicePlace.OnOpponent ? 1 - owner : owner;
+        float scale = row.scale > 0f ? row.scale : 1f;
+        particles.BurstOnFighter(row.effect, target, row.anchor, row.offset, scale, sim);
+    }
+
     // The fighter's reaction rows, rebuilt whenever the character in that slot changes.
     List<JuiceReaction> ReactionsFor(int fighter, Fighter f)
     {
@@ -610,6 +656,7 @@ public class JuiceManager : MonoBehaviour
     {
         foreach (KeyValuePair<JuiceReaction, JuiceHandle> pair in whilePlaying[fighter]) particles.Stop(pair.Value);
         whilePlaying[fighter].Clear();
+        whileNextTick[fighter].Clear();
     }
 
     // Name of the melee move the attacker is in, or null (projectile hits, or the attack already ended).
@@ -684,6 +731,7 @@ public class JuiceManager : MonoBehaviour
         {
             whilePlaying[i].Clear();          // their effects were just removed by StopAll
             whileActive[i].Clear();
+            whileNextTick[i].Clear();
             lastState[i] = null;              // the first frame of the next match only records the state
             reactionsFor[i] = int.MinValue;   // re-read the profiles: the characters may have changed
         }
@@ -759,7 +807,8 @@ public class JuiceManager : MonoBehaviour
                   "Moments: Hit, LightHit, HeavyHit, Hit:<Move>, GotHit, GotLightHit, GotHeavyHit, Grab, GotGrabbed, " +
                   "Block, AttackBlocked, AttackStart, AttackStart:<Move>, Dash, DashForward, DashBack, SuperFlash, " +
                   "KnockedOut, ScoredKO, RoundStart, RoundEnd, RoundWin, RoundLose, RoundDraw, Enter<State>\n" +
-                  "While: WhileLowHealth, WhileMeterFull, WhileBlocking, While<State>, WhileAttack:<Move>\n" +
+                  "While: WhileMoving, WhileLowHealth, WhileMeterFull, WhileBlocking, While<State>, WhileAttack:<Move>\n" +
+                  "(a While row with Every Ticks > 0 replays its effect on that rhythm instead of holding one effect)\n" +
                   "States: " + states + "\n" +
                   "Moves (standard moveset): Light, Heavy, Grab, Special, Ultimate\n" +
                   "Plus any name code fires with JuiceManager.Trigger(name, fighter). " +
