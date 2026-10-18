@@ -203,7 +203,7 @@ public class WorldView : MonoBehaviour
             Color c = v.data != null ? v.data.placeholderColor
                     : (index == 0 ? new Color(0.3f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
             if (f.state == FighterStateId.Attack) c = Color.Lerp(c, Color.white, 0.5f);
-            if (f.state == FighterStateId.Dash) c = Color.Lerp(c, Color.white, 0.25f);
+            if (f.state == FighterStateId.Dash || f.state == FighterStateId.Jump) c = Color.Lerp(c, Color.white, 0.25f);
             if (f.state == FighterStateId.Hitstun) c = Color.Lerp(c, Color.black, 0.35f);
             if (f.state == FighterStateId.Blockstun) c = Color.Lerp(c, Color.cyan, 0.5f);
             if (f.state == FighterStateId.KO) c = Color.gray;
@@ -258,6 +258,13 @@ public class WorldView : MonoBehaviour
                     stateName = f.move.name;
                     t = tick / (float)Mathf.Max(1, f.move.totalTicks);
                 }
+                break;
+            case FighterStateId.Jump:
+                // Scrubbed by height: rising plays the first half of the clip, falling the second.
+                // (The jump state starts again after an air attack, so its tick isn't useful here.)
+                stateName = "Jump";
+                float up = Mathf.Max(1, f.JumpArc.up);
+                t = 0.5f - Mathf.Clamp(f.vy / up, -1f, 1f) * 0.5f;
                 break;
             case FighterStateId.Hitstun:
                 stateName = "Hitstun";
@@ -452,6 +459,7 @@ public class WorldView : MonoBehaviour
         string s = "";
         if ((input & Buttons.Left) != 0) s += "Left ";
         if ((input & Buttons.Right) != 0) s += "Right ";
+        if ((input & Buttons.Up) != 0) s += "Up ";
         if ((input & Buttons.Down) != 0) s += "Down ";
         if ((input & Buttons.Light) != 0) s += "Light ";
         if ((input & Buttons.Heavy) != 0) s += "Heavy ";
