@@ -70,6 +70,7 @@ public class WorldView : MonoBehaviour
 
     void Awake()
     {
+        if (GetComponent<DefeatSequence>() == null) gameObject.AddComponent<DefeatSequence>();
         match = GetComponent<IMatchSession>();
         if (match == null)
         {

@@ -34,6 +34,18 @@ public class GameSim
     public int tick;
     public int seed;
 
+    // Sessions enable this; isolated combat tests can start immediately.
+    public bool countdownOn;
+    public const int CountdownTicks = 180;
+    public const int FightBannerTicks = 60;
+    public int countdownTicks;
+    public int fightBannerTicks;
+    public string CountdownText
+    {
+        get { return countdownTicks > 0 ? ((countdownTicks + 59) / 60).ToString()
+            : fightBannerTicks > 0 ? "FIGHT!" : ""; }
+    }
+
     // SUPERFLASH: when an Ultimate starts, the whole match freezes for this many ticks (nobody
     // thinks or moves, hitboxes don't age, input is ignored) while the view plays a flash.
     public const int SuperFlashTicks = 30;
@@ -107,6 +119,8 @@ public class GameSim
 
         round = number;
         roundOverTicks = 0;
+        countdownTicks = countdownOn ? CountdownTicks : 0;
+        fightBannerTicks = 0;
         freezeTicks = 0;
         hitStopTicks = 0;
         hitboxes.Clear();
@@ -139,6 +153,16 @@ public class GameSim
     {
         events.Clear();
         if (IsOver) return;
+
+        // Consume synchronized input ticks without applying them during the countdown.
+        if (countdownTicks > 0)
+        {
+            countdownTicks--;
+            if (countdownTicks == 0) fightBannerTicks = FightBannerTicks;
+            tick++;
+            return;
+        }
+        if (fightBannerTicks > 0) fightBannerTicks--;
 
         // Before the round-over pause, so the KO hit gets its hit stop too.
         if (hitStopTicks > 0)
@@ -753,6 +777,8 @@ public class GameSim
             h = h * 31 + roundsWon[0];
             h = h * 31 + roundsWon[1];
             h = h * 31 + roundOverTicks;
+            h = h * 31 + countdownTicks;
+            h = h * 31 + fightBannerTicks;
             for (int i = 0; i < 2; i++)
             {
                 Fighter f = fighters[i];
