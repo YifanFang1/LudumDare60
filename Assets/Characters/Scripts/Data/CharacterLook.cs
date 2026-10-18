@@ -90,6 +90,8 @@ public class CharacterSfx
     public AudioClip[] heal;
     [Tooltip("A fresh Special press with no ammo left (Noir's empty click).")]
     public AudioClip[] outOfAmmo;
+    [Tooltip("This character's music. Plays in round 2 or 3 after they win a round. Empty = the AudioManager's Fight Music.")]
+    public AudioClip theme;
 
     public AudioClip[] FindMove(string moveName)
     {
