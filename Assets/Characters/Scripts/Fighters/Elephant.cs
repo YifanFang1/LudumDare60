@@ -60,7 +60,7 @@ public class Elephant : BaseFighter
     {
         MoveDef m = Melee("Special",
             totalTicks: 40, spawnTick: 14, activeTicks: 4,
-            box: new Box(-1500, 0, 3000, 2000),
+            box: new Box(-2200, 0, 4400, 2400),
             damage: 8, hitstun: 20, knockback: 100, cooldown: SpecialCooldown);
         m.hitboxes[0].destroysProjectiles = true;
         m.hitboxes[0].stacks = true;

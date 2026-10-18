@@ -20,11 +20,12 @@ public static class MatchDialogue
     public static string Result(GameSim sim, int localSlot, bool finalMatch)
     {
         int winner = finalMatch ? sim.Winner :
+            sim.roundWinner >= 0 ? sim.roundWinner :
             sim.fighters[0].hp <= 0 && sim.fighters[1].hp <= 0 ? 2 :
             sim.fighters[0].hp > 0 ? 0 : 1;
         if (winner == 2) return "DRAW!";
         if (winner != localSlot) return "DEFEAT";
-        Fighter fighter = sim.fighters[winner];
-        return fighter.hp == fighter.MaxHp ? "PERFECT VICTORY!" : "VICTORY!";
+        bool perfect = finalMatch && sim.roundsWon[winner] == 2 && sim.roundsWon[1 - winner] == 0;
+        return perfect ? "PERFECT VICTORY!" : "VICTORY!";
     }
 }

@@ -36,6 +36,11 @@ public class GameSim
 
     // Sessions enable this; isolated combat tests can start immediately.
     public bool countdownOn;
+    // Only the first round introduces each fighter, before the normal countdown.
+    public bool introductionsOn;
+    public const int IntroLineTicks = 240;
+    public int introTicks;
+    public int IntroSlot { get { return introTicks > IntroLineTicks ? 0 : introTicks > 0 ? 1 : -1; } }
     public const int CountdownTicks = 180;
     public const int FightBannerTicks = 60;
     public int countdownTicks;
@@ -69,6 +74,16 @@ public class GameSim
     public const int RoundsToWin = 2;
     public const int RoundEndDelay = 120;   // ticks between the KO and the next round
     public const int StartX = 3000;         // fighters start at -StartX and +StartX
+
+    // ROUND TIMER: a round lasts at most 45 seconds of live fighting (the countdown, hit stop, superflash
+    // and the pause after a KO do not count). When it runs out, whoever has more health wins the round;
+    // equal health is a draw for the round, scored like a double KO. Sessions switch it on like the
+    // countdown; isolated combat tests leave it off.
+    public const int RoundTimeTicks = 45 * 60;
+    public bool roundTimerOn;
+    public int roundTimeTicks;              // counts down from RoundTimeTicks
+    public bool timeUp;                     // the round just ended on the clock, not a KO
+    public int roundWinner = -1;            // who took the round that just ended: 0, 1, or 2 = draw; -1 while it is on
 
     public int round;                       // 1, 2, 3
     public int[] roundsWon = new int[2];
@@ -119,6 +134,10 @@ public class GameSim
 
         round = number;
         roundOverTicks = 0;
+        introTicks = introductionsOn && number == 1 ? IntroLineTicks * 2 : 0;
+        roundTimeTicks = RoundTimeTicks;
+        timeUp = false;
+        roundWinner = -1;
         countdownTicks = countdownOn ? CountdownTicks : 0;
         fightBannerTicks = 0;
         freezeTicks = 0;
@@ -144,7 +163,20 @@ public class GameSim
         if (dead1) roundsWon[0]++;
         if (dead0) roundsWon[1]++;
 
-        int roundWinner = dead0 && dead1 ? 2 : (dead1 ? 0 : 1);
+        roundWinner = dead0 && dead1 ? 2 : (dead1 ? 0 : 1);
+        AddEvent(SimEventType.RoundEnd, roundWinner, -1, 0, 0, round);
+        if (!IsOver) roundOverTicks = RoundEndDelay;
+    }
+
+    // The clock ran out: more health wins the round, equal health is a draw (both are scored).
+    void EndRoundOnTime()
+    {
+        timeUp = true;
+        int hp0 = fighters[0].hp;
+        int hp1 = fighters[1].hp;
+        roundWinner = hp0 > hp1 ? 0 : (hp1 > hp0 ? 1 : 2);
+        if (roundWinner != 1) roundsWon[0]++;
+        if (roundWinner != 0) roundsWon[1]++;
         AddEvent(SimEventType.RoundEnd, roundWinner, -1, 0, 0, round);
         if (!IsOver) roundOverTicks = RoundEndDelay;
     }
@@ -153,6 +185,14 @@ public class GameSim
     {
         events.Clear();
         if (IsOver) return;
+
+        // The intro consumes synchronized ticks too: neither player can act or run the clock.
+        if (introTicks > 0)
+        {
+            introTicks--;
+            tick++;
+            return;
+        }
 
         // Consume synchronized input ticks without applying them during the countdown.
         if (countdownTicks > 0)
@@ -186,6 +226,8 @@ public class GameSim
             return;
         }
 
+        if (roundTimerOn && roundTimeTicks > 0) roundTimeTicks--;
+
         // 1. both fighters decide (nobody has moved yet, so neither has an advantage)
         fighters[0].Think(this, in0);
         fighters[1].Think(this, in1);
@@ -212,6 +254,7 @@ public class GameSim
 
         // 8. a KO ends the round
         if (fighters[0].hp <= 0 || fighters[1].hp <= 0) EndRound();
+        else if (roundTimerOn && roundTimeTicks <= 0) EndRoundOnTime();
 
         tick++;
     }
@@ -777,6 +820,7 @@ public class GameSim
             h = h * 31 + roundsWon[0];
             h = h * 31 + roundsWon[1];
             h = h * 31 + roundOverTicks;
+            h = h * 31 + introTicks;
             h = h * 31 + countdownTicks;
             h = h * 31 + fightBannerTicks;
             for (int i = 0; i < 2; i++)

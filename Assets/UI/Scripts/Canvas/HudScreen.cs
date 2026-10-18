@@ -37,22 +37,27 @@ public class HudScreen : MonoBehaviour
     public RectTransform worldNameLayer;        // stretched over the whole screen, pivot in the middle
     public TMP_Text[] worldNames = new TMP_Text[2];
     public float nameHeightAboveHead = 0.35f;   // Unity units above the top of the fighter's body
-    public Color localNameColor = new Color(1f, 0.92f, 0.4f);
+    public Color localNameColor = new Color(0.75f, 1f, 0.55f);
     public Color otherNameColor = Color.white;
 
     [Header("Ultimate meters (Image with Type = Filled)")]
     public Image leftMeter;
     public Image rightMeter;
-    public Color meterColor = new Color(0.9f, 0.75f, 0.1f);
-    public Color meterFullColor = Color.white;   // a full meter pulses between the two colours
+    public Color meterColor = new Color(0.25f, 0.60f, 1f);
+    public Color meterFullColor = new Color(0.75f, 0.92f, 1f);   // a full meter pulses between the two colours
     public TMP_Text leftUltimateReady;           // shown only while that meter is full
     public TMP_Text rightUltimateReady;
 
     [Header("Rounds won: one Image per round (RoundsToWin), first round first")]
     public Image[] leftRoundPips;
     public Image[] rightRoundPips;
-    public Color pipWonColor = new Color(1f, 0.85f, 0.2f);
-    public Color pipEmptyColor = new Color(0.25f, 0.25f, 0.3f);
+    public Color pipWonColor = new Color(0.62f, 0.95f, 0.35f);
+    public Color pipEmptyColor = new Color(0.07f, 0.09f, 0.08f);
+
+    [Header("Round timer (top middle)")]
+    public TMP_Text timerText;                   // made at run time when empty
+    public Color timerColor = Color.white;
+    public Color timerLowColor = new Color(1f, 0.35f, 0.3f);   // the last 10 seconds
 
     [Header("Banners")]
     public TMP_Text bannerText;                  // ROUND 1 / FINAL ROUND, then K.O.
@@ -64,11 +69,13 @@ public class HudScreen : MonoBehaviour
     public TMP_Text superFlashText;              // "<name>: ULTIMATE!"
 
     IMatchSession match;
+    MatchCinematics cinematic;
     bool wired;
     int shownRound;                              // the round whose banner was last shown (0 = none)
     float bannerUntil;
     string bannerRound = "";
     Vector2 bannerHomePosition;
+    bool bannerHomeStored;
 
     void OnEnable()
     {
@@ -85,17 +92,32 @@ public class HudScreen : MonoBehaviour
             bannerText.fontSizeMax = 96f;
             bannerText.fontStyle = FontStyles.Bold;
             bannerText.alignment = TextAlignmentOptions.Center;
-            bannerText.color = new Color(1f, 0.85f, 0.2f);
+            bannerText.color = new Color(0.80f, 1f, 0.45f);
             bannerText.raycastTarget = false;
             RectTransform rect = bannerText.rectTransform;
             rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
             rect.sizeDelta = new Vector2(900f, 180f);
             rect.anchoredPosition = Vector2.zero;
         }
-        bannerHomePosition = bannerText.rectTransform.anchoredPosition;
+        if (!bannerHomeStored)
+        {
+            bannerHomePosition = bannerText.rectTransform.anchoredPosition;
+            bannerHomeStored = true;
+        }
         shownRound = 0;   // this screen is switched on for each match, so ROUND 1 is shown again
         match = SessionFinder.Find();
         if (match == null) return;
+        Component owner = match as Component;
+        cinematic = owner != null ? owner.GetComponent<MatchCinematics>() : null;
+        if (GetComponentInChildren<CharacterDialogueScreen>(true) == null)
+        {
+            GameObject overlay = new GameObject("CharacterDialogue", typeof(RectTransform));
+            overlay.transform.SetParent(transform, false);
+            RectTransform rect = (RectTransform)overlay.transform;
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+            overlay.AddComponent<CharacterDialogueScreen>();
+        }
         if (resultText != null)
         {
             // long names shrink to fit instead of running off the panel
@@ -104,6 +126,7 @@ public class HudScreen : MonoBehaviour
             resultText.fontSizeMax = 60f;
         }
         EnsureMeters();
+        EnsureTimerAndPips();
         if (!wired && resultButton != null)
         {
             MakeRematchButton();
@@ -143,7 +166,7 @@ public class HudScreen : MonoBehaviour
             bgRt.sizeDelta = new Vector2(520f, 24f);
             Image bgImage = bg.GetComponent<Image>();
             bgImage.sprite = whiteSprite;
-            bgImage.color = new Color(0.15f, 0.15f, 0.18f, 1f);
+            bgImage.color = new Color(0.06f, 0.14f, 0.10f, 1f);
 
             GameObject fillGo = new GameObject("Fill", typeof(RectTransform), typeof(Image));
             fillGo.transform.SetParent(bg.transform, false);
@@ -199,6 +222,101 @@ public class HudScreen : MonoBehaviour
         exitButton.gameObject.SetActive(false);
     }
 
+    static Sprite circleSprite;
+
+    static Sprite Circle()
+    {
+        if (circleSprite != null) return circleSprite;
+        const int n = 64;
+        Texture2D t = new Texture2D(n, n, TextureFormat.RGBA32, false);
+        Color32[] px = new Color32[n * n];
+        float r = n * 0.5f - 1f;
+        for (int y = 0; y < n; y++)
+        {
+            for (int x = 0; x < n; x++)
+            {
+                float d = Mathf.Sqrt((x - n * 0.5f + 0.5f) * (x - n * 0.5f + 0.5f) + (y - n * 0.5f + 0.5f) * (y - n * 0.5f + 0.5f));
+                byte a = (byte)(255f * Mathf.Clamp01(r - d + 1f));
+                px[y * n + x] = new Color32(255, 255, 255, a);
+            }
+        }
+        t.SetPixels32(px);
+        t.Apply();
+        t.filterMode = FilterMode.Bilinear;
+        circleSprite = Sprite.Create(t, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f));
+        return circleSprite;
+    }
+
+    // The round timer at the top middle, and the rounds-won indicators beside it: two black spheres per
+    // player, and the one for each round won lights up in the middle. Built here when the scene has none.
+    void EnsureTimerAndPips()
+    {
+        TMP_Text sample = leftName != null ? leftName : rightName;
+        if (timerText == null)
+        {
+            GameObject go = new GameObject("TimerText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            go.transform.SetParent(transform, false);
+            RectTransform rt = (RectTransform)go.transform;
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(0f, -14f);
+            rt.sizeDelta = new Vector2(200f, 84f);
+            timerText = go.GetComponent<TextMeshProUGUI>();
+            if (sample != null) timerText.font = sample.font;
+            timerText.fontSize = 72f;
+            timerText.fontStyle = FontStyles.Bold;
+            timerText.alignment = TextAlignmentOptions.Center;
+            timerText.color = timerColor;
+            timerText.raycastTarget = false;
+        }
+
+        for (int side = 0; side < 2; side++)
+        {
+            bool right = side == 1;
+            Image[] have = right ? rightRoundPips : leftRoundPips;
+            if (have != null && have.Length > 0) continue;
+            Image[] made = new Image[GameSim.RoundsToWin];
+            for (int r = 0; r < made.Length; r++)
+            {
+                GameObject outer = new GameObject((right ? "RightPip" : "LeftPip") + (r + 1), typeof(RectTransform), typeof(Image));
+                outer.transform.SetParent(transform, false);
+                RectTransform ort = (RectTransform)outer.transform;
+                ort.anchorMin = ort.anchorMax = ort.pivot = new Vector2(0.5f, 1f);
+                float step = 44f;
+                float x = 100f + step * r;               // the first round won sits nearest the timer
+                ort.anchoredPosition = new Vector2(right ? x : -x, -50f);
+                ort.sizeDelta = new Vector2(34f, 34f);
+                Image shell = outer.GetComponent<Image>();
+                shell.sprite = Circle();
+                shell.color = new Color(0.02f, 0.03f, 0.03f, 1f);   // the black sphere
+                shell.raycastTarget = false;
+
+                GameObject inner = new GameObject("Light", typeof(RectTransform), typeof(Image));
+                inner.transform.SetParent(outer.transform, false);
+                RectTransform irt = (RectTransform)inner.transform;
+                irt.anchorMin = irt.anchorMax = irt.pivot = new Vector2(0.5f, 0.5f);
+                irt.anchoredPosition = Vector2.zero;
+                irt.sizeDelta = new Vector2(16f, 16f);
+                Image light = inner.GetComponent<Image>();
+                light.sprite = Circle();
+                light.color = pipEmptyColor;
+                light.raycastTarget = false;
+                made[r] = light;
+            }
+            if (right) rightRoundPips = made; else leftRoundPips = made;
+        }
+    }
+
+    void UpdateTimer(GameSim sim)
+    {
+        if (timerText == null) return;
+        bool show = sim.roundTimerOn;
+        if (timerText.gameObject.activeSelf != show) timerText.gameObject.SetActive(show);
+        if (!show) return;
+        int seconds = Mathf.CeilToInt(Mathf.Max(0, sim.roundTimeTicks) / 60f);
+        SetText(timerText, seconds.ToString());
+        timerText.color = seconds <= 10 ? timerLowColor : timerColor;
+    }
+
     // Copies the Back button: Rematch on the left, Back on the right.
     void MakeRematchButton()
     {
@@ -228,6 +346,11 @@ public class HudScreen : MonoBehaviour
         if (match == null) return;
         GameSim sim = match.Sim;
         if (sim == null || sim.fighters[0] == null || sim.fighters[1] == null) return;
+        if (cinematic == null)
+        {
+            Component owner = match as Component;
+            cinematic = owner != null ? owner.GetComponent<MatchCinematics>() : null;
+        }
 
         // health
         if (leftBar != null) leftBar.fillAmount = Mathf.Clamp01(sim.fighters[0].hp / (float)sim.fighters[0].MaxHp);
@@ -260,14 +383,14 @@ public class HudScreen : MonoBehaviour
         }
 
         // result
-        bool over = sim.IsOver;
+        bool over = sim.IsOver && (cinematic == null || cinematic.ResultsReady);
         if (resultPanel != null && resultPanel.activeSelf != over) resultPanel.SetActive(over);
         if (over)
         {
             int winner = sim.Winner;
             string outcome = MatchDialogue.Result(sim, match.LocalSlot, true);
             SetText(resultText, winner == 2 ? outcome : outcome + "\n" + match.NameOf(winner) +
-                " wins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
+                "\nwins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
             if (rematchButton != null)
             {
                 rematchButton.interactable = !match.RematchRequested;
@@ -278,6 +401,7 @@ public class HudScreen : MonoBehaviour
         UpdateWorldNames(sim);
         UpdateMeters(sim);
         UpdateRoundPips(sim);
+        UpdateTimer(sim);
         UpdateBanner(sim);
         UpdateSuperFlash(sim);
     }
@@ -323,6 +447,11 @@ public class HudScreen : MonoBehaviour
     void UpdateBanner(GameSim sim)
     {
         if (bannerText == null) return;
+        if (cinematic != null && (cinematic.Active || (sim.IsOver && !cinematic.ResultsReady)))
+        {
+            bannerText.gameObject.SetActive(false);
+            return;
+        }
         if (sim.round != shownRound)
         {
             shownRound = sim.round;
@@ -331,9 +460,9 @@ public class HudScreen : MonoBehaviour
         }
 
         string text = "";
-        if (sim.IsOver) text = "K.O.";
+        if (sim.IsOver) text = sim.timeUp ? "TIME!" : "K.O.";
         else if (sim.roundOverTicks > 0)
-            text = sim.hitStopTicks > 0 || sim.roundOverTicks > 90 ? "K.O." : MatchDialogue.Result(sim, match.LocalSlot, false);
+            text = sim.hitStopTicks > 0 || sim.roundOverTicks > 90 ? (sim.timeUp ? "TIME!" : "K.O.") : MatchDialogue.Result(sim, match.LocalSlot, false);
         else if (MatchDialogue.Start(sim) != "") text = MatchDialogue.Start(sim);
         else if (Time.unscaledTime < bannerUntil) text = bannerRound;
         // Keep the final K.O. above the result panel, clear of the winner and buttons.

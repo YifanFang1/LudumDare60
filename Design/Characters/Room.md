@@ -38,7 +38,7 @@ A huge, slow tank who **can't block** and wins by soaking damage. He walks in th
 
 | Startup | Active | Total | Dmg | Hitstun | KB | Box | Visual key |
 |---|---|---|---|---|---|---|---|
-| 14 | 4 | 40 | 8 | 20 | 100 | `Box(-1500, 0, 3000, 2000)` (around him, both sides) | (melee, no projectile art) |
+| 14 | 4 | 40 | 8 | 20 | 100 | `Box(-2200, 0, 4400, 2400)` (around him, both sides) | (melee, no projectile art) |
 
 - **Destroys projectiles:** any enemy projectile touching the boom's box while it's active is removed. Traps and the Guillotine aren't projectiles and stay.
 - **Stacking (confirmed):** it stacks with **his Ultimate copies' booms**. If N booms hit the victim on the same tick, the damage is multiplied: 2 booms = ×2, 3 = ×4, so `8 × 2^(N-1)`. **Capped at ×4** (confirmed), so the worst case is 32 damage.

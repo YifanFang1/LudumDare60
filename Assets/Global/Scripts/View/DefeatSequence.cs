@@ -15,6 +15,7 @@ public class DefeatSequence : MonoBehaviour
     readonly List<Burn> burning = new List<Burn>();
     IMatchSession match;
     WorldView world;
+    MatchCinematics cinematic;
     GameSim previousSim;
     int round;
     bool started;
@@ -24,6 +25,7 @@ public class DefeatSequence : MonoBehaviour
     {
         match = GetComponent<IMatchSession>();
         world = GetComponent<WorldView>();
+        cinematic = GetComponent<MatchCinematics>();
     }
 
     void LateUpdate()
@@ -41,6 +43,8 @@ public class DefeatSequence : MonoBehaviour
             previousSim = sim;
             round = sim.round;
         }
+        // Let the losing character finish speaking before applying the death / burn effect.
+        if (sim.IsOver && cinematic != null && !cinematic.LoserLineFinished) return;
         if (!started && (sim.roundOverTicks > 0 || sim.IsOver))
         {
             started = true;
@@ -70,7 +74,7 @@ public class DefeatSequence : MonoBehaviour
         elapsed += Time.unscaledDeltaTime;
         // The screen only drains of colour when YOU lost (or drew); a win keeps full colour.
         int local = Mathf.Clamp(match.LocalSlot, 0, 1);
-        float grey = sim.fighters[local].hp <= 0 ? Mathf.SmoothStep(0f, 1f, elapsed / 0.8f) : 0f;
+        float grey = (sim.fighters[local].hp <= 0 || (sim.timeUp && sim.roundWinner != local)) ? Mathf.SmoothStep(0f, 1f, elapsed / 0.8f) : 0f;
         Shader.SetGlobalFloat("_DefeatGrey", grey);
         float progress = Mathf.Clamp01((elapsed - 0.15f) / 1.35f);
         foreach (Burn burn in burning)

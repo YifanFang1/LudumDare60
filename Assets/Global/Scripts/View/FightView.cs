@@ -12,6 +12,7 @@ public class FightView : MonoBehaviour
     const float BannerSeconds = 1.5f;
 
     IMatchSession match;
+    MatchCinematics cinematic;
     string banner = "";        // "ROUND 1", "FINAL ROUND"... shown for BannerSeconds
     float bannerUntil;
     GUIStyle bigText;
@@ -73,12 +74,27 @@ public class FightView : MonoBehaviour
         }
 
         GameSim sim = match.Sim;
+        if (cinematic == null) cinematic = GetComponent<MatchCinematics>();
         DrawSuperFlash(sim, width, height);
         DrawWorldNames(sim);
         DrawBars(sim, width);
         DrawInfo(sim, width);
-        DrawBanner(sim, width);
-        DrawResult(sim, width);
+        if (cinematic != null && cinematic.Active)
+        {
+            GuiDraw.Fill(0, 0, width, height * 0.08f, Color.black);
+            GuiDraw.Fill(0, height * 0.7f, width, height * 0.3f, new Color(0.02f, 0.04f, 0.03f, 0.97f));
+            GUI.Label(new Rect(36, height * 0.72f, width - 72, 34), cinematic.Speaker, Style(TextAnchor.UpperLeft, 24, FontStyle.Bold));
+            string line = cinematic.Text;
+            int visible = Mathf.Clamp(Mathf.FloorToInt((cinematic.LineElapsed - 0.2f) * 48f), 0, line.Length);
+            GUIStyle quote = Style(TextAnchor.UpperLeft, 22, FontStyle.Normal);
+            quote.wordWrap = true;
+            GUI.Label(new Rect(36, height * 0.8f, width - 72, height * 0.18f), line.Substring(0, visible), quote);
+        }
+        else if (cinematic == null || !sim.IsOver || cinematic.ResultsReady)
+        {
+            DrawBanner(sim, width);
+            DrawResult(sim, width);
+        }
     }
 
     void DrawBars(GameSim sim, float width)
@@ -204,9 +220,9 @@ public class FightView : MonoBehaviour
     void DrawBanner(GameSim sim, float width)
     {
         string text = null;
-        if (sim.IsOver) text = "K.O.";
+        if (sim.IsOver) text = sim.timeUp ? "TIME!" : "K.O.";
         else if (sim.roundOverTicks > 0)
-            text = sim.hitStopTicks > 0 || sim.roundOverTicks > 90 ? "K.O." : MatchDialogue.Result(sim, match.LocalSlot, false);
+            text = sim.hitStopTicks > 0 || sim.roundOverTicks > 90 ? (sim.timeUp ? "TIME!" : "K.O.") : MatchDialogue.Result(sim, match.LocalSlot, false);
         else if (MatchDialogue.Start(sim) != "") text = MatchDialogue.Start(sim);
         else if (Time.unscaledTime < bannerUntil) text = banner;
         if (text != null) GUI.Label(new Rect(0, 200, width, 100), text, bigText);
