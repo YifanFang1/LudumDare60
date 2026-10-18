@@ -93,8 +93,8 @@ public class JuiceParticles
     }
 
     /// <summary>
-    /// Plays an effect once at a point on a fighter, facing the way they face. It does NOT follow
-    /// them afterwards (use Attach for that).
+    /// Plays an effect once at a point on a fighter, facing the way they face. It stays where it was
+    /// played unless <paramref name="follow"/> is true.
     /// </summary>
     /// <param name="effect">Effect name. Empty = play nothing.</param>
     /// <param name="fighter">Sim index (0 or 1).</param>
@@ -102,7 +102,8 @@ public class JuiceParticles
     /// <param name="offset">Extra nudge in Unity units, X forward, added to the prefab's offset.</param>
     /// <param name="scale">Size multiplier.</param>
     /// <param name="sim">The running sim, to read the fighter from. Nothing plays if null.</param>
-    public JuiceHandle BurstOnFighter(string effect, int fighter, JuiceAnchor anchor, Vector2 offset, float scale, GameSim sim)
+    /// <param name="follow">True = the effect moves with the fighter until it has finished.</param>
+    public JuiceHandle BurstOnFighter(string effect, int fighter, JuiceAnchor anchor, Vector2 offset, float scale, GameSim sim, bool follow = false)
     {
         if (!CheckFighter(fighter, "BurstOnFighter") || sim == null) return JuiceHandle.None;
 
@@ -112,7 +113,7 @@ public class JuiceParticles
         JuiceAnchor resolved = Resolve(anchor, fx);
         PlaceOnFighter(fx, sim.fighters[fighter], resolved, offset, scale);
         fx.Play();
-        return Track(effect, fx, -1, resolved, offset, clock + JuiceManager.TicksToSeconds(fx.burstMaxTicks), scale);
+        return Track(effect, fx, follow ? fighter : -1, resolved, offset, clock + JuiceManager.TicksToSeconds(fx.burstMaxTicks), scale);
     }
 
     /// <summary>Plays an effect that follows a point on a fighter, flipping with the way they face.</summary>
@@ -163,6 +164,13 @@ public class JuiceParticles
     {
         Active a = Find(handle);
         return a != null && !a.stopping;
+    }
+
+    /// <summary>Makes a playing effect's particles move with it (true) or go back to the prefab's setting (false).</summary>
+    public void SetSticky(JuiceHandle handle, bool sticky)
+    {
+        Active a = Find(handle);
+        if (a != null) a.effect.SetSticky(sticky);
     }
 
     /// <summary>Removes every effect instantly (new match, back to lobby).</summary>
@@ -285,6 +293,7 @@ public class JuiceParticles
         {
             JuiceEffect reused = free.Pop();
             reused.gameObject.SetActive(true);
+            reused.SetSticky(false);   // a pooled copy may still be sticky from its last use
             return reused;
         }
 

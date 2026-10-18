@@ -600,7 +600,17 @@ public class JuiceManager : MonoBehaviour
         {
             int target = row.place == JuicePlace.OnOpponent ? 1 - owner : owner;
             if (row.place == JuicePlace.AtEvent && hasPoint) DoBurst(row.effect, point, facing, scale, row.offset);
-            else if (row.ticks > 0) DoAttach(row.effect, target, row.ticks, scale, row.anchor, row.offset);
+            else if (row.ticks > 0)
+            {
+                JuiceHandle h = DoAttach(row.effect, target, row.ticks, scale, row.anchor, row.offset);
+                if (row.sticky) particles.SetSticky(h, true);
+            }
+            else if (row.sticky)
+            {
+                // A one-off effect that rides along with the fighter until it has finished.
+                JuiceHandle h = particles.BurstOnFighter(row.effect, target, row.anchor, row.offset, scale, match != null ? match.Sim : null, true);
+                particles.SetSticky(h, true);
+            }
             else DoBurstOnFighter(row.effect, target, row.anchor, row.offset, scale);
         }
         if (row.shake > 0f) DoShake(row.shake);
@@ -612,13 +622,15 @@ public class JuiceManager : MonoBehaviour
         Log("While " + row.trigger + " started for P" + (owner + 1));
         int target = row.place == JuicePlace.OnOpponent ? 1 - owner : owner;
         float scale = row.scale > 0f ? row.scale : 1f;
-        return DoAttach(row.effect, target, 0, scale, row.anchor, row.offset);   // follows until stopped
+        JuiceHandle h = DoAttach(row.effect, target, 0, scale, row.anchor, row.offset);   // follows until stopped
+        if (row.sticky) particles.SetSticky(h, true);
+        return h;
     }
 
     /// <summary>
     /// A While... row with Every Ticks: plays its effect once as soon as the condition becomes true,
     /// then again every N ticks while it stays true. Each one is a burst that stays where it was played
-    /// (footstep dust), not an effect that follows the fighter.
+    /// (footstep dust), or rides along with the fighter if the row is Sticky.
     /// <para>
     /// Counted in SIM ticks, so the rhythm follows the game: it pauses during hit stop and network
     /// stalls, and both players see the same rhythm.
@@ -644,7 +656,8 @@ public class JuiceManager : MonoBehaviour
         // Straight to the particle player, so the console doesn't get a line per footstep.
         int target = row.place == JuicePlace.OnOpponent ? 1 - owner : owner;
         float scale = row.scale > 0f ? row.scale : 1f;
-        particles.BurstOnFighter(row.effect, target, row.anchor, row.offset, scale, sim);
+        JuiceHandle h = particles.BurstOnFighter(row.effect, target, row.anchor, row.offset, scale, sim, row.sticky);
+        if (row.sticky) particles.SetSticky(h, true);   // this pulse rides along with the fighter
     }
 
     // The fighter's reaction rows, rebuilt whenever the character in that slot changes.

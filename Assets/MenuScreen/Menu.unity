@@ -6433,6 +6433,8 @@ MonoBehaviour:
   showHitboxes: 1
   showInactiveHitboxes: 1
   filled: 1
+  showOutline: 1
+  outline: 0
 --- !u!4 &1152043981
 Transform:
   m_ObjectHideFlags: 0
@@ -13882,6 +13884,7 @@ MonoBehaviour:
     tint: {r: 1, g: 1, b: 1, a: 1}
   material: {fileID: 0}
   sortingOrder: -100
+  onlyDuringMatch: 1
   referenceCameraY: 3
   referenceSize: 5
 --- !u!4 &1917600370
@@ -14442,7 +14445,9 @@ MonoBehaviour:
   frameCamera: 1
   showHurtboxes: 1
   showHitboxes: 1
+  showFighterInfo: 1
   showToggles: 1
+  outlineFighters: 1
   placeholderMaterial: {fileID: 0}
 --- !u!114 &2075206613
 MonoBehaviour:

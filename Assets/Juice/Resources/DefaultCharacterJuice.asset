@@ -16,12 +16,23 @@ MonoBehaviour:
   useDefaultReactions: 1
   reactions:
   - trigger: Hit
-    effect: Sparks
+    effect: Damage
     place: 0
     anchor: 0
     offset: {x: 0, y: 0}
+    ticks: 1
+    everyTicks: 0
+    sticky: 0
+    scale: 1
+    shake: 0
+  - trigger: AttackBlocked
+    effect: BlockedDamage
+    place: 1
+    anchor: 2
+    offset: {x: 1, y: 0}
     ticks: 0
     everyTicks: 0
+    sticky: 0
     scale: 1
     shake: 0
   - trigger: Grab
@@ -31,6 +42,7 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
     ticks: 0
     everyTicks: 0
+    sticky: 0
     scale: 1
     shake: 0
   - trigger: WhileLowHealth
@@ -40,6 +52,7 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
     ticks: 0
     everyTicks: 0
+    sticky: 0
     scale: 1
     shake: 0
   - trigger: WhileMoving
@@ -49,5 +62,46 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
     ticks: 0
     everyTicks: 15
+    sticky: 0
+    scale: 1
+    shake: 0
+  - trigger: WhileBlocking
+    effect: Barrier
+    place: 1
+    anchor: 2
+    offset: {x: 0.5, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 1
+    scale: 1
+    shake: 0
+  - trigger: WhileMeterFull
+    effect: Magic
+    place: 1
+    anchor: 2
+    offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 1
+    scale: 1
+    shake: 0
+  - trigger: DashForward
+    effect: Wind
+    place: 1
+    anchor: 2
+    offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 0
+    scale: 1
+    shake: 0
+  - trigger: DashBack
+    effect: WindBackwards
+    place: 1
+    anchor: 2
+    offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 0
     scale: 1
     shake: 0

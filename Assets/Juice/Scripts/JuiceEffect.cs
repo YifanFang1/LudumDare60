@@ -59,6 +59,8 @@ public class JuiceEffect : MonoBehaviour
 
     ParticleSystem root;
     ParticleSystemRenderer[] renderers;
+    ParticleSystem[] systems;
+    ParticleSystemSimulationSpace[] baseSpaces;   // each system's Simulation Space as set on the prefab
     Quaternion baseRotation;
     Vector3 baseScale;
     #endregion
@@ -85,10 +87,12 @@ public class JuiceEffect : MonoBehaviour
         baseRotation = transform.localRotation;
         baseScale = transform.localScale;
 
-        ParticleSystem[] systems = GetComponentsInChildren<ParticleSystem>(true);
+        systems = GetComponentsInChildren<ParticleSystem>(true);
+        baseSpaces = new ParticleSystemSimulationSpace[systems.Length];
         for (int i = 0; i < systems.Length; i++)
         {
             ParticleSystem.MainModule main = systems[i].main;
+            baseSpaces[i] = main.simulationSpace;
             main.playOnAwake = false;                                 // only JuiceManager starts effects
             main.scalingMode = ParticleSystemScalingMode.Hierarchy;   // so the scale argument works
             main.useUnscaledTime = true;                              // same clock as the rest of juice
@@ -138,5 +142,18 @@ public class JuiceEffect : MonoBehaviour
 
     /// <summary>Removes every particle immediately.</summary>
     public void Kill() { root.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); }
+
+    /// <summary>
+    /// True = particles move with the effect (Local space). False = back to the prefab's own setting.
+    /// Only matters for effects that follow a fighter.
+    /// </summary>
+    public void SetSticky(bool sticky)
+    {
+        for (int i = 0; i < systems.Length; i++)
+        {
+            ParticleSystem.MainModule main = systems[i].main;
+            main.simulationSpace = sticky ? ParticleSystemSimulationSpace.Local : baseSpaces[i];
+        }
+    }
     #endregion
 }

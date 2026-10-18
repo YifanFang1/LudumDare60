@@ -54,8 +54,13 @@ public class JuiceReaction
 
     [Tooltip("While... triggers only. 0 = one effect that follows the fighter for as long as the condition holds. " +
              "N = play the effect once every N ticks (60 = 1 second) while it holds, e.g. footstep dust every 15 ticks " +
-             "with WhileMoving. Each one plays where the fighter is at that moment and stays there.")]
+             "with WhileMoving. Each one plays where the fighter is at that moment and stays there, unless Sticky is on.")]
     [Min(0)] public int everyTicks;
+
+    [Tooltip("On = the effect rides along with the fighter and its particles move with them instead of trailing behind. " +
+             "Works for one-off effects, Ticks, While rows and Every Ticks pulses. Not for At Event rows on a hit " +
+             "(those play at the hit point). Off = stays where it was played, particles as set on the prefab.")]
+    public bool sticky;
 
     [Tooltip("Size multiplier. 0 counts as 1.")]
     [Min(0f)] public float scale = 1f;
