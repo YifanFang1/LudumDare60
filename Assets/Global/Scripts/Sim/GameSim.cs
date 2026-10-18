@@ -384,6 +384,7 @@ public class GameSim
                 h = h * 31 + f.vx;
                 h = h * 31 + f.vy;
                 h = h * 31 + (f.usedAirMove ? 1 : 0);
+                h = h * 31 + (f.usedAirDash ? 1 : 0);
                 h = h * 31 + f.hp;
                 h = h * 31 + (int)f.state;
                 h = h * 31 + f.stateTick;
