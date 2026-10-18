@@ -80,6 +80,9 @@ public class HudScreen : MonoBehaviour
             bannerText = label.GetComponent<TMP_Text>();
             if (resultText != null) bannerText.font = resultText.font;
             bannerText.fontSize = 96f;
+            bannerText.enableAutoSizing = true;
+            bannerText.fontSizeMin = 28f;
+            bannerText.fontSizeMax = 96f;
             bannerText.fontStyle = FontStyles.Bold;
             bannerText.alignment = TextAlignmentOptions.Center;
             bannerText.color = new Color(1f, 0.85f, 0.2f);
@@ -168,7 +171,9 @@ public class HudScreen : MonoBehaviour
         if (over)
         {
             int winner = sim.Winner;
-            SetText(resultText, winner == 2 ? "Draw" : match.NameOf(winner) + "\nwins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
+            string outcome = MatchDialogue.Result(sim, match.LocalSlot, true);
+            SetText(resultText, winner == 2 ? outcome : outcome + "\n" + match.NameOf(winner) +
+                " wins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
             if (rematchButton != null)
             {
                 rematchButton.interactable = !match.RematchRequested;
@@ -222,14 +227,15 @@ public class HudScreen : MonoBehaviour
         if (sim.round != shownRound)
         {
             shownRound = sim.round;
-            bool final = sim.roundsWon[0] == GameSim.RoundsToWin - 1 && sim.roundsWon[1] == GameSim.RoundsToWin - 1;
-            bannerRound = final ? "FINAL ROUND" : "ROUND " + sim.round;
+            bannerRound = MatchDialogue.Round(sim);
             bannerUntil = Time.unscaledTime + bannerSeconds;
         }
 
         string text = "";
-        if (sim.roundOverTicks > 0 || sim.IsOver) text = "K.O.";
-        else if (sim.CountdownText != "") text = sim.CountdownText;
+        if (sim.IsOver) text = "K.O.";
+        else if (sim.roundOverTicks > 0)
+            text = sim.hitStopTicks > 0 || sim.roundOverTicks > 90 ? "K.O." : MatchDialogue.Result(sim, match.LocalSlot, false);
+        else if (MatchDialogue.Start(sim) != "") text = MatchDialogue.Start(sim);
         else if (Time.unscaledTime < bannerUntil) text = bannerRound;
         // Keep the final K.O. above the result panel, clear of the winner and buttons.
         RectTransform bannerRect = bannerText.rectTransform;

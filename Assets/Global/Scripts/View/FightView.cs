@@ -42,15 +42,14 @@ public class FightView : MonoBehaviour
 
     void OnMatchStarted(GameSim sim)
     {
-        ShowBanner("ROUND 1");
+        ShowBanner(MatchDialogue.Round(sim));
     }
 
     void OnSimEvent(SimEvent e)
     {
         if (e.type != SimEventType.RoundStart) return;
         GameSim sim = match.Sim;
-        bool final = sim.roundsWon[0] == GameSim.RoundsToWin - 1 && sim.roundsWon[1] == GameSim.RoundsToWin - 1;
-        ShowBanner(final ? "FINAL ROUND" : "ROUND " + e.amount);
+        ShowBanner(MatchDialogue.Round(sim));
     }
 
     void ShowBanner(string text)
@@ -205,10 +204,12 @@ public class FightView : MonoBehaviour
     void DrawBanner(GameSim sim, float width)
     {
         string text = null;
-        if (sim.roundOverTicks > 0 || sim.IsOver) text = "K.O.";
-        else if (sim.CountdownText != "") text = sim.CountdownText;
+        if (sim.IsOver) text = "K.O.";
+        else if (sim.roundOverTicks > 0)
+            text = sim.hitStopTicks > 0 || sim.roundOverTicks > 90 ? "K.O." : MatchDialogue.Result(sim, match.LocalSlot, false);
+        else if (MatchDialogue.Start(sim) != "") text = MatchDialogue.Start(sim);
         else if (Time.unscaledTime < bannerUntil) text = banner;
-        if (text != null) GUI.Label(new Rect(0, 200, width, 50), text, bigText);
+        if (text != null) GUI.Label(new Rect(0, 200, width, 100), text, bigText);
     }
 
     void DrawResult(GameSim sim, float width)
@@ -216,7 +217,7 @@ public class FightView : MonoBehaviour
         if (!sim.IsOver) return;
 
         int winner = sim.Winner;
-        string result = winner == 2 ? "Draw" : match.NameOf(winner) + " wins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner];
+        string result = MatchDialogue.Result(sim, match.LocalSlot, true) + (winner == 2 ? "" : " - " + match.NameOf(winner) + " wins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
         GUI.Label(new Rect(width / 2f - 150, 255, 300, 30), result);
         if (GUI.Button(new Rect(width / 2f - 60, 285, 120, 30), "Back to lobby"))
         {
