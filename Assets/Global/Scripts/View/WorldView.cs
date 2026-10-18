@@ -22,8 +22,9 @@ public class WorldView : MonoBehaviour
     public bool frameCamera = true;        // set the main camera to see the whole arena
     public bool showHurtboxes = true;      // translucent green body boxes (the coloured box itself when there is no art)
     public bool showHitboxes = true;       // translucent yellow attack boxes
-    public bool showFighterInfo = true;    // text over each fighter + a log of what hit whom
-    public bool showToggles = true;        // the "Debug boxes" panel (bottom left) with checkboxes for the above
+    public bool showFighterInfo = false;   // state/keys box above each fighter plus the hit log (checkbox in the panel)
+    public bool showToggles = true;       // the "Debug boxes" panel (bottom left) with checkboxes for the two above
+    public bool outlineFighters = true;    // Player / Enemy outlines around the art (colours: Fight > Outline Colors)
     public Material placeholderMaterial;   // optional. If boxes look black, use an Unlit sprite material
 
     class FighterView
@@ -126,7 +127,21 @@ public class WorldView : MonoBehaviour
                 v.root = v.placeholder.gameObject;
             }
             if (v.placeholder == null) v.hurt = NewQuad("Hurtbox" + i, 5);
+            if (outlineFighters && v.placeholder == null) AddOutlines(v.root, i == match.LocalSlot);
             views[i] = v;
+        }
+    }
+
+    // Outlines every sprite of a fighter's art. The fighter this machine controls gets the Player
+    // colours and the other one the Enemy colours, so online each player sees themselves as "Player".
+    static void AddOutlines(GameObject root, bool isLocalPlayer)
+    {
+        foreach (SpriteRenderer sr in root.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            SpriteOutline outline = sr.GetComponent<SpriteOutline>();
+            if (outline == null) outline = sr.gameObject.AddComponent<SpriteOutline>();
+            outline.style = isLocalPlayer ? SpriteOutline.Style.Player : SpriteOutline.Style.Enemy;
+            outline.Apply();
         }
     }
 
@@ -201,7 +216,7 @@ public class WorldView : MonoBehaviour
         // the hurtbox the same way in either mode.
         CharacterLook d = v.data;
         v.root.transform.position = new Vector3(f.x * Scale + f.facing * d.spriteOffsetX, f.y * Scale + d.spriteOffsetY, 0f);
-        v.root.transform.localScale = new Vector3(f.facing * d.spriteScale, d.spriteScale, 1f);   // art faces right
+        v.root.transform.localScale = new Vector3(f.facing * d.SpriteFlip * d.spriteScale, d.spriteScale, 1f);   // art faces right (or is flipped to)
         if (v.art == null) Pose(v, f);
 
         if (v.hurt != null)
