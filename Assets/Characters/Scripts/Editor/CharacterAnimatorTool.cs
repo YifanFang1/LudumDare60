@@ -27,7 +27,7 @@ public static class CharacterAnimatorTool
     const string ArtRoot = "Assets/Characters";
 
     // Every fighter state the view can ask for (see WorldView.Pose). Moves are added per character.
-    static readonly string[] StateNames = { "Idle", "Walk", "DashForward", "DashBack", "Jump", "Hitstun", "Blockstun", "KO" };
+    static readonly string[] StateNames = { "Idle", "Walk", "DashForward", "DashBack", "Jump", "Hitstun", "Blockstun", "KO", "Held" };
     static readonly string[] LoopingStates = { "Idle", "Walk" };
 
     [MenuItem(MenuPath, true)]

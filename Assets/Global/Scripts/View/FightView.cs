@@ -124,7 +124,9 @@ public class FightView : MonoBehaviour
 
     static string CharacterLine(Fighter f)
     {
-        return CharacterList.NameOf(f.characterId) + (f.meter >= Fighter.MeterMax ? "   ULTIMATE READY" : "");
+        string status = FighterStatusText.For(f);
+        return CharacterList.NameOf(f.characterId) + (f.meter >= Fighter.MeterMax ? "   ULTIMATE READY" : "")
+             + (status.Length > 0 ? "   " + status : "");
     }
 
     // The player's name floating above their fighter, following it as it moves.

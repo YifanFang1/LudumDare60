@@ -72,6 +72,13 @@ public class HudScreen : MonoBehaviour
         shownRound = 0;   // this screen is switched on for each match, so ROUND 1 is shown again
         match = SessionFinder.Find();
         if (match == null) return;
+        if (resultText != null)
+        {
+            // long names shrink to fit instead of running off the panel
+            resultText.enableAutoSizing = true;
+            resultText.fontSizeMin = 24f;
+            resultText.fontSizeMax = 60f;
+        }
         if (!wired && resultButton != null)
         {
             resultButton.onClick.AddListener(() =>
@@ -96,8 +103,8 @@ public class HudScreen : MonoBehaviour
         // names
         SetText(leftName, match.NameOf(0));
         SetText(rightName, match.NameOf(1));
-        SetText(leftCharacter, CharacterList.NameOf(sim.fighters[0].characterId));
-        SetText(rightCharacter, CharacterList.NameOf(sim.fighters[1].characterId));
+        SetText(leftCharacter, CharacterLine(sim.fighters[0]));
+        SetText(rightCharacter, CharacterLine(sim.fighters[1]));
 
         // info
         string info = match.IsOnline
@@ -115,7 +122,7 @@ public class HudScreen : MonoBehaviour
         if (over)
         {
             int winner = sim.Winner;
-            SetText(resultText, winner == 2 ? "Draw" : match.NameOf(winner) + " wins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
+            SetText(resultText, winner == 2 ? "Draw" : match.NameOf(winner) + "\nwins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
         }
 
         UpdateWorldNames(sim);
@@ -200,6 +207,14 @@ public class HudScreen : MonoBehaviour
         bool show = who != "";
         if (superFlashText.gameObject.activeSelf != show) superFlashText.gameObject.SetActive(show);
         if (show) SetText(superFlashText, who + ": ULTIMATE!");
+    }
+
+    // The character's name, then its resources and status effects (ammo, potion, SLOW...).
+    static string CharacterLine(Fighter f)
+    {
+        string status = FighterStatusText.For(f);
+        string name = CharacterList.NameOf(f.characterId);
+        return status.Length > 0 ? name + "   " + status : name;
     }
 
     // Debug lines: hidden when Match Screens > Show Debug UI is off.

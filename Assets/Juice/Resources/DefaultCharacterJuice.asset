@@ -15,8 +15,8 @@ MonoBehaviour:
   character: {fileID: 0}
   useDefaultReactions: 1
   reactions:
-  - trigger: Hit
-    effect: Damage
+  - trigger: LightHit
+    effect: LightDamage
     place: 0
     anchor: 0
     offset: {x: 0, y: 0}
@@ -25,18 +25,8 @@ MonoBehaviour:
     sticky: 0
     scale: 1
     shake: 0
-  - trigger: AttackBlocked
-    effect: BlockedDamage
-    place: 1
-    anchor: 2
-    offset: {x: 1, y: 0}
-    ticks: 0
-    everyTicks: 0
-    sticky: 0
-    scale: 1
-    shake: 0
-  - trigger: Grab
-    effect: Sparks
+  - trigger: HeavyHit
+    effect: HeavyDamage
     place: 0
     anchor: 0
     offset: {x: 0, y: 0}
@@ -45,8 +35,18 @@ MonoBehaviour:
     sticky: 0
     scale: 1
     shake: 0
+  - trigger: AttackBlocked
+    effect: Barrier
+    place: 1
+    anchor: 2
+    offset: {x: 1, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 0
+    scale: 1
+    shake: 0
   - trigger: WhileLowHealth
-    effect: Bleed
+    effect: Glitch
     place: 1
     anchor: 0
     offset: {x: 0, y: 0}
@@ -63,16 +63,6 @@ MonoBehaviour:
     ticks: 0
     everyTicks: 15
     sticky: 0
-    scale: 1
-    shake: 0
-  - trigger: WhileBlocking
-    effect: Barrier
-    place: 1
-    anchor: 2
-    offset: {x: 0.5, y: 0}
-    ticks: 0
-    everyTicks: 0
-    sticky: 1
     scale: 1
     shake: 0
   - trigger: WhileMeterFull
@@ -103,5 +93,25 @@ MonoBehaviour:
     ticks: 0
     everyTicks: 0
     sticky: 0
+    scale: 1
+    shake: 0
+  - trigger: Grab
+    effect: Grab
+    place: 0
+    anchor: 2
+    offset: {x: 1, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 0
+    scale: 1
+    shake: 0
+  - trigger: WhileBlocking
+    effect: Lightning
+    place: 0
+    anchor: 2
+    offset: {x: 1, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 1
     scale: 1
     shake: 0

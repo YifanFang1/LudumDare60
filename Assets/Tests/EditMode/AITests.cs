@@ -33,7 +33,7 @@ public class AITests
     [Test]
     public void AIMatchesFinishAndUseTheWholeKit()
     {
-        int[] ids = { Brawler.Id, Shooter.Id, Samurai.Id };   // the six roster characters are identical for now
+        int[] ids = { Brawler.Id, Shooter.Id, Samurai.Id };
         HashSet<SimEventType> seen = new HashSet<SimEventType>();
 
         for (int i = 0; i < ids.Length; i++)
@@ -46,6 +46,96 @@ public class AITests
             }
         }
 
+        // Every launch-roster character, as each side, against a plain opponent: the AI has to be
+        // able to finish a match with all of them (Room can't block, Nek has no normal Ultimate...).
+        int[] roster = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id, Nek.Id };
+        for (int i = 0; i < roster.Length; i++)
+        {
+            GameSim asP1 = PlayAIMatch(roster[i], Brawler.Id, seen);
+            GameSim asP2 = PlayAIMatch(Brawler.Id, roster[i], seen);
+            Assert.IsTrue(asP1.IsOver && asP2.IsOver, CharacterList.NameOf(roster[i]) + ": AI match didn't finish in " + MaxTicks + " ticks");
+        }
+
+        AssertKitUsed(seen);
+    }
+
+    [Test]
+    public void AIUsesTheHoldFollowUpWhileHolding()
+    {
+        GameSim sim = new GameSim();
+        sim.hitStopOn = false;
+        sim.Reset(3, CharacterList.Factory(Elephant.Id), CharacterList.Factory(Sandbag.Id));
+        sim.fighters[0].x = -850;
+        sim.fighters[1].x = 850;
+        sim.Step(Buttons.Grab, 0);
+        for (int i = 0; i < 20 && sim.fighters[1].state != FighterStateId.Held; i++) sim.Step(0, 0);
+        Assert.AreEqual(FighterStateId.Held, sim.fighters[1].state, "set-up: Room is holding the Sandbag");
+
+        AIInputSource ai = new AIInputSource(sim, 0);
+        ai.Sample(sim.tick);
+        int bits;
+        Assert.IsTrue(ai.TryGet(sim.tick, out bits));
+        Assert.AreNotEqual(0, bits & Buttons.Special, "the AI should Vine Boom the held victim");
+    }
+
+    // Runs the AI as player 0 for `ticks` ticks against an idle opponent; `check` runs every tick.
+    static void RunAI(GameSim sim, int ticks, System.Action check)
+    {
+        AIInputSource ai = new AIInputSource(sim, 0);
+        for (int t = 0; t < ticks && !sim.IsOver; t++)
+        {
+            ai.Sample(sim.tick);
+            int bits;
+            ai.TryGet(sim.tick, out bits);
+            sim.Step(bits, 0);
+            check();
+        }
+    }
+
+    static GameSim NewMatch(int p0, int p1)
+    {
+        GameSim sim = new GameSim();
+        sim.Reset(3, CharacterList.Factory(p0), CharacterList.Factory(p1));
+        return sim;
+    }
+
+    [Test]
+    public void AITogglesInstallOnUpCloseAndOffWhenFar()
+    {
+        GameSim sim = NewMatch(Nek.Id, Sandbag.Id);
+        Nek nek = (Nek)sim.fighters[0];
+        nek.meter = 800;
+        bool turnedOn = false;
+        RunAI(sim, 1200, delegate { if (nek.installOn) turnedOn = true; });
+        Assert.IsTrue(turnedOn, "the AI should switch Install on up close with meter");
+
+        // Far away with Install on: it switches it off to save meter.
+        GameSim far = NewMatch(Nek.Id, Sandbag.Id);
+        Nek farNek = (Nek)far.fighters[0];
+        farNek.meter = Fighter.MeterMax;
+        farNek.installOn = true;
+        far.fighters[0].x = -7000;
+        far.fighters[1].x = 7000;
+        bool turnedOff = false;
+        RunAI(far, 120, delegate { if (!farNek.installOn && farNek.meter > 0) turnedOff = true; });
+        Assert.IsTrue(turnedOff, "the AI should switch Install off when far away");
+    }
+
+    [Test]
+    public void AISwitchesRemysPotionToHealWhenHurtAndDrinksIt()
+    {
+        GameSim sim = NewMatch(PlagueDoctor.Id, Sandbag.Id);
+        PlagueDoctor remy = (PlagueDoctor)sim.fighters[0];
+        remy.hp = 20;
+        bool choseHeal = false;
+        RunAI(sim, 2400, delegate { if (remy.selectedPotion == PlagueDoctor.PotionHeal) choseHeal = true; });
+
+        Assert.IsTrue(choseHeal, "the AI should switch to the heal potion when hurt");
+        Assert.Greater(remy.hp, 20, "and drink it (holding past the tap window)");
+    }
+
+    static void AssertKitUsed(HashSet<SimEventType> seen)
+    {
         SimEventType[] wanted = { SimEventType.Hit, SimEventType.Block, SimEventType.Grab, SimEventType.Dash,
                                   SimEventType.SuperFlash, SimEventType.RoundStart };
         for (int i = 0; i < wanted.Length; i++)

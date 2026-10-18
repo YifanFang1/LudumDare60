@@ -15,12 +15,12 @@ public class Brawler : BaseFighter
     static readonly MoveDef Jab = Melee("Light",
         totalTicks: 15, spawnTick: 4, activeTicks: 3,
         box: new Box(400, 900, 900, 400),
-        damage: 6, hitstun: 14, knockback: 40);
+        damage: 6, hitstun: 14, knockback: 40, cooldown: LightCooldown);
 
     static readonly MoveDef Haymaker = Melee("Heavy",
         totalTicks: 28, spawnTick: 10, activeTicks: 4,
         box: new Box(400, 700, 1300, 700),
-        damage: 14, hitstun: 22, knockback: 90);
+        damage: 14, hitstun: 22, knockback: 90, cooldown: HeavyCooldown);
 
     // A bit more health and speed than the template, and a wider, shorter body.
     public override int MaxHp { get { return 110; } }

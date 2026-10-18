@@ -55,6 +55,7 @@ public static class BuildFightCanvas
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
+        GameObject titlePage = BuildTitle(root.transform);
         GameObject mainMenu = BuildMainMenu(root.transform);
         GameObject controlsPage = BuildControls(root.transform, BuildControlRowPrefab());
         GameObject modePage = BuildModeSelect(root.transform);
@@ -63,7 +64,11 @@ public static class BuildFightCanvas
         GameObject select = BuildCharacterSelect(root.transform, buttonPrefab);
         GameObject hud = BuildHud(root.transform);
 
+        ShatterEffect shatter = BuildShatterOverlay(root.transform);   // last in the canvas = drawn on top
+        titlePage.GetComponent<TitleScreen>().shatter = shatter;
+
         MatchScreens screens = root.AddComponent<MatchScreens>();
+        screens.titleScreen = titlePage;
         screens.mainMenu = mainMenu;
         screens.controls = controlsPage;
         screens.modeSelect = modePage;
@@ -71,8 +76,9 @@ public static class BuildFightCanvas
         screens.waiting = waiting;
         screens.characterSelect = select;
         screens.hud = hud;
-        screens.editorPreview = UiScreen.Main;
-        Show(mainMenu, true);
+        screens.editorPreview = UiScreen.Title;
+        Show(titlePage, true);
+        Show(mainMenu, false);
         Show(controlsPage, false);
         Show(modePage, false);
         Show(lobby, false);
@@ -112,13 +118,23 @@ public static class BuildFightCanvas
             EditorUtility.DisplayDialog("No Fight UI found", "Run  Fight > Build Default UI Canvas  first.", "OK");
             return;
         }
-        if (screens.mainMenu != null && screens.controls != null && screens.modeSelect != null)
+        if (screens.titleScreen != null && screens.mainMenu != null && screens.controls != null && screens.modeSelect != null)
         {
-            EditorUtility.DisplayDialog("Already there", "This UI already has the start menu, mode and controls pages.", "OK");
+            EditorUtility.DisplayDialog("Already there", "This UI already has the title, start menu, mode and controls pages.", "OK");
             return;
         }
 
         Undo.RegisterFullObjectHierarchyUndo(root, "Add menu pages");
+        if (screens.titleScreen == null)
+        {
+            screens.titleScreen = BuildTitle(root.transform);
+            screens.titleScreen.transform.SetAsFirstSibling();
+        }
+        ShatterEffect shatter = root.GetComponentInChildren<ShatterEffect>(true);
+        if (shatter == null) shatter = BuildShatterOverlay(root.transform);
+        shatter.transform.SetAsLastSibling();   // drawn on top of every page
+        TitleScreen title = screens.titleScreen.GetComponent<TitleScreen>();
+        if (title != null && title.shatter == null) title.shatter = shatter;
         if (screens.mainMenu == null)
         {
             screens.mainMenu = BuildMainMenu(root.transform);
@@ -145,8 +161,9 @@ public static class BuildFightCanvas
             }
         }
 
-        screens.editorPreview = UiScreen.Main;
-        Show(screens.mainMenu, true);
+        screens.editorPreview = UiScreen.Title;
+        Show(screens.titleScreen, true);
+        Show(screens.mainMenu, false);
         Show(screens.controls, false);
         Show(screens.modeSelect, false);
         if (screens.lobby != null) Show(screens.lobby, false);
@@ -160,6 +177,98 @@ public static class BuildFightCanvas
     }
 
     // ================= screens =================
+
+    const string TitleArtFolder = "Assets/MenuScreen/PressAnyKey";
+
+    static GameObject BuildTitle(Transform parent)
+    {
+        GameObject screen = NewScreen("TitleScreen", parent, false);
+        Image bg = screen.AddComponent<Image>();
+        bg.color = new Color(0.04f, 0.04f, 0.05f, 1f);
+
+        // Your art, if it is in the project: backdrop, logo and the "PRESS ANY KEY" picture. Laid out like Mockup.png.
+        Texture2D backdrop = AssetDatabase.LoadAssetAtPath<Texture2D>(TitleArtFolder + "/Startscreen_backdrop.png");
+        Texture2D logo = AssetDatabase.LoadAssetAtPath<Texture2D>(TitleArtFolder + "/Techtonic Logo.png");
+        Texture2D promptArt = AssetDatabase.LoadAssetAtPath<Texture2D>(TitleArtFolder + "/PRESS ANY KEY.png");
+
+        TitleScreen ts = screen.AddComponent<TitleScreen>();
+        Sprite backdropSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TitleArtFolder + "/Startscreen_backdrop.png");
+        if (backdropSprite != null)
+        {
+            // a normal Image, so it can be 9-sliced and tinted; Sliced when the sprite has borders set in the Sprite Editor
+            GameObject backGo = new GameObject("Backdrop", typeof(RectTransform), typeof(Image));
+            backGo.transform.SetParent(screen.transform, false);
+            Stretch((RectTransform)backGo.transform);
+            Image back = backGo.GetComponent<Image>();
+            back.sprite = backdropSprite;
+            back.type = backdropSprite.border.sqrMagnitude > 0f ? Image.Type.Sliced : Image.Type.Simple;
+            back.raycastTarget = false;
+        }
+        else if (backdrop != null)
+        {
+            // the picture is not set up as a Sprite: fall back to a Raw Image
+            RawImage back = Raw(screen.transform, "Backdrop", backdrop);
+            Stretch(back.rectTransform);
+        }
+        else
+        {
+            // no art found: a slanted red band behind the title text
+            GameObject band = new GameObject("Band", typeof(RectTransform), typeof(Image));
+            band.transform.SetParent(screen.transform, false);
+            Anchor((RectTransform)band.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 60f), new Vector2(2800f, 300f));
+            band.transform.localRotation = Quaternion.Euler(0f, 0f, -6f);
+            band.GetComponent<Image>().color = new Color(0.87f, 0.07f, 0.15f, 1f);
+            band.GetComponent<Image>().raycastTarget = false;
+        }
+
+        if (logo != null)
+        {
+            RawImage logoImage = Raw(screen.transform, "Logo", logo);
+            Anchor(logoImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(15f, 115f), new Vector2(logo.width, logo.height));
+        }
+        else
+        {
+            TMP_Text title = FreeText(screen.transform, "Title", "FIGHT", 200, TextAlignmentOptions.Center, Color.white);
+            title.fontStyle = FontStyles.Bold;
+            title.characterSpacing = 18f;
+            Anchor(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 60f), new Vector2(1500f, 260f));
+            title.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -6f);
+        }
+
+        if (promptArt != null)
+        {
+            RawImage prompt = Raw(screen.transform, "PromptImage", promptArt);
+            Anchor(prompt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(55f, -171f), new Vector2(promptArt.width, promptArt.height));
+            ts.promptText = prompt;
+        }
+        else
+        {
+            TMP_Text prompt = FreeText(screen.transform, "PromptText", "PRESS ANY KEY", 48, TextAlignmentOptions.Center, Color.white);
+            prompt.characterSpacing = 14f;
+            Anchor(prompt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -171f), new Vector2(1000f, 70f));
+            ts.promptText = prompt;
+        }
+        return screen;
+    }
+
+    static RawImage Raw(Transform parent, string name, Texture texture)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(RawImage));
+        go.transform.SetParent(parent, false);
+        RawImage img = go.GetComponent<RawImage>();
+        img.texture = texture;
+        img.raycastTarget = false;
+        return img;
+    }
+
+    // Full-screen, always active, empty until the shatter plays. It must be the last child of the canvas.
+    static ShatterEffect BuildShatterOverlay(Transform parent)
+    {
+        GameObject go = new GameObject("ShatterOverlay", typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        Stretch((RectTransform)go.transform);
+        return go.AddComponent<ShatterEffect>();
+    }
 
     static GameObject BuildMainMenu(Transform parent)
     {
@@ -406,7 +515,7 @@ public static class BuildFightCanvas
         Anchor((RectTransform)resultGo.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640f, 320f));
         resultGo.GetComponent<Image>().color = PanelColor;
         TMP_Text resultText = FreeText(resultGo.transform, "ResultText", "", 64, TextAlignmentOptions.Center, Color.white);
-        Anchor(resultText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -90f), new Vector2(600f, 100f));
+        Anchor(resultText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -20f), new Vector2(580f, 160f));
         TMP_Text unused;
         Button back = Btn(resultGo.transform, "BackToLobbyButton", "Back to lobby", 64f, out unused);
         Anchor((RectTransform)back.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(320f, 64f));
@@ -429,157 +538,7 @@ public static class BuildFightCanvas
         hud.resultButton = back;
         hud.worldNameLayer = layer;
         hud.worldNames = names;
-        BuildKitHud(hud);
         return screen;
-    }
-
-    // Fight > Add Meter And Round HUD
-    // For a FightUI you already built and edited: adds only the shared-kit HUD parts its HudScreen
-    // is missing (Ultimate meters, round pips, banners, the Ultimate flash), touching nothing else.
-    [MenuItem("Fight/Add Meter And Round HUD")]
-    static void AddKitHudToExisting()
-    {
-        if (TMP_Settings.instance == null)
-        {
-            EditorUtility.DisplayDialog("TextMesh Pro resources needed",
-                "Run  Window > TextMeshPro > Import TMP Essential Resources  once, then run this menu item again.", "OK");
-            return;
-        }
-
-        GameObject root = GameObject.Find(RootName);
-        MatchScreens screens = root != null ? root.GetComponent<MatchScreens>() : null;
-        HudScreen hud = screens != null && screens.hud != null ? screens.hud.GetComponent<HudScreen>() : null;
-        if (hud == null)
-        {
-            EditorUtility.DisplayDialog("No Fight UI HUD found", "Run  Fight > Build Default UI Canvas  first.", "OK");
-            return;
-        }
-
-        Undo.RegisterFullObjectHierarchyUndo(root, "Add meter and round HUD");
-        int added = BuildKitHud(hud);
-        if (added == 0)
-        {
-            EditorUtility.DisplayDialog("Already there", "This HUD already has the meters, round pips, banner and Ultimate flash.", "OK");
-            return;
-        }
-
-        EditorUtility.SetDirty(hud);
-        Selection.activeGameObject = hud.gameObject;
-        EditorSceneManager.MarkSceneDirty(root.scene);
-        Debug.Log("Added " + added + " meter/round HUD parts to '" + RootName + "'. Save the scene to keep them.");
-    }
-
-    // The shared-kit parts of the HUD (Design/SHARED_KIT.md). Only fills slots that are empty, so it
-    // is safe to run on a HUD that already has some of them. Returns how many parts it made.
-    static int BuildKitHud(HudScreen hud)
-    {
-        Transform screen = hud.transform;
-        int added = 0;
-
-        if (hud.superFlash == null)
-        {
-            GameObject go = new GameObject("SuperFlash", typeof(RectTransform), typeof(Image));
-            go.transform.SetParent(screen, false);
-            go.transform.SetAsFirstSibling();   // behind the rest of the HUD
-            Stretch((RectTransform)go.transform);
-            Image flash = go.GetComponent<Image>();
-            flash.color = new Color(1f, 1f, 1f, 0f);
-            flash.raycastTarget = false;
-            flash.enabled = false;
-            hud.superFlash = flash;
-            added++;
-        }
-        if (hud.leftMeter == null) { hud.leftMeter = MeterBar(screen, "LeftMeter", false); added++; }
-        if (hud.rightMeter == null) { hud.rightMeter = MeterBar(screen, "RightMeter", true); added++; }
-        if (hud.leftUltimateReady == null) { hud.leftUltimateReady = UltimateReadyText(screen, "LeftUltimateReady", false); added++; }
-        if (hud.rightUltimateReady == null) { hud.rightUltimateReady = UltimateReadyText(screen, "RightUltimateReady", true); added++; }
-        if (hud.leftRoundPips == null || hud.leftRoundPips.Length == 0) { hud.leftRoundPips = RoundPips(screen, "LeftRoundPips", false); added++; }
-        if (hud.rightRoundPips == null || hud.rightRoundPips.Length == 0) { hud.rightRoundPips = RoundPips(screen, "RightRoundPips", true); added++; }
-        if (hud.bannerText == null)
-        {
-            TMP_Text banner = FreeText(screen, "Banner", "", 96, TextAlignmentOptions.Center, Color.white);
-            banner.fontStyle = FontStyles.Bold;
-            Anchor(banner.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -210f), new Vector2(1200f, 130f));
-            banner.gameObject.SetActive(false);
-            hud.bannerText = banner;
-            added++;
-        }
-        if (hud.superFlashText == null)
-        {
-            TMP_Text text = FreeText(screen, "SuperFlashText", "", 72, TextAlignmentOptions.Center, new Color(1f, 0.92f, 0.4f));
-            text.fontStyle = FontStyles.Bold;
-            Anchor(text.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 140f), new Vector2(1600f, 110f));
-            text.gameObject.SetActive(false);
-            hud.superFlashText = text;
-            added++;
-        }
-        return added;
-    }
-
-    // An Ultimate meter in a bottom corner, built like HealthBar: left fills from the left edge,
-    // right from the right edge.
-    static Image MeterBar(Transform parent, string name, bool right)
-    {
-        GameObject bg = new GameObject(name, typeof(RectTransform), typeof(Image));
-        bg.transform.SetParent(parent, false);
-        Vector2 a = right ? new Vector2(1f, 0f) : new Vector2(0f, 0f);
-        Anchor((RectTransform)bg.transform, a, a, new Vector2(right ? -40f : 40f, 40f), new Vector2(520f, 22f));
-        bg.GetComponent<Image>().sprite = BuiltIn("UI/Skin/Background.psd");
-        bg.GetComponent<Image>().type = Image.Type.Sliced;
-        bg.GetComponent<Image>().color = new Color(0.15f, 0.15f, 0.18f, 1f);
-
-        GameObject fillGo = new GameObject("Fill", typeof(RectTransform), typeof(Image));
-        fillGo.transform.SetParent(bg.transform, false);
-        RectTransform fillRt = (RectTransform)fillGo.transform;
-        fillRt.anchorMin = Vector2.zero;
-        fillRt.anchorMax = Vector2.one;
-        fillRt.offsetMin = new Vector2(3f, 3f);
-        fillRt.offsetMax = new Vector2(-3f, -3f);
-        Image fill = fillGo.GetComponent<Image>();
-        fill.sprite = BuiltIn("UI/Skin/Background.psd");
-        fill.type = Image.Type.Filled;
-        fill.fillMethod = Image.FillMethod.Horizontal;
-        fill.fillOrigin = right ? (int)Image.OriginHorizontal.Right : (int)Image.OriginHorizontal.Left;
-        fill.fillAmount = 0f;
-        fill.color = new Color(0.9f, 0.75f, 0.1f, 1f);
-        return fill;
-    }
-
-    // "ULTIMATE READY", just above that player's meter. HudScreen shows it while the meter is full.
-    static TMP_Text UltimateReadyText(Transform parent, string name, bool right)
-    {
-        TMP_Text t = FreeText(parent, name, "ULTIMATE READY", 26, right ? TextAlignmentOptions.BottomRight : TextAlignmentOptions.BottomLeft,
-                              new Color(1f, 0.92f, 0.4f));
-        t.fontStyle = FontStyles.Bold;
-        Vector2 a = right ? new Vector2(1f, 0f) : new Vector2(0f, 0f);
-        Anchor(t.rectTransform, a, a, new Vector2(right ? -40f : 40f, 70f), new Vector2(520f, 34f));
-        t.gameObject.SetActive(false);
-        return t;
-    }
-
-    // One square per round a player can win, beside the inner end of their health bar.
-    static Image[] RoundPips(Transform parent, string name, bool right)
-    {
-        GameObject group = new GameObject(name, typeof(RectTransform));
-        group.transform.SetParent(parent, false);
-        Stretch((RectTransform)group.transform);
-
-        Image[] pips = new Image[GameSim.RoundsToWin];
-        Vector2 a = right ? new Vector2(1f, 1f) : new Vector2(0f, 1f);
-        for (int r = 0; r < pips.Length; r++)
-        {
-            GameObject go = new GameObject("Round" + (r + 1), typeof(RectTransform), typeof(Image));
-            go.transform.SetParent(group.transform, false);
-            float x = 694f + r * 34f;   // the health bar ends 680 px in from the screen edge
-            Anchor((RectTransform)go.transform, a, a, new Vector2(right ? -x : x, -42f), new Vector2(26f, 26f));
-            Image img = go.GetComponent<Image>();
-            img.sprite = BuiltIn("UI/Skin/UISprite.psd");
-            img.type = Image.Type.Sliced;
-            img.color = new Color(0.25f, 0.25f, 0.3f);
-            img.raycastTarget = false;
-            pips[r] = img;
-        }
-        return pips;
     }
 
     static Image HealthBar(Transform parent, string name, bool right)
