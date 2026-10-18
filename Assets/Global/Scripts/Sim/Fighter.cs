@@ -17,9 +17,10 @@ public enum FighterStateId { Idle, Walk, Attack, Hitstun, KO, Blockstun, Dash, J
 // was up on the tick before). Toward the opponent = forward dash, away = back dash. A dash can't
 // block or attack until it ends. Characters change their dashes with ForwardDash / BackDash.
 //
-// JUMPING: hold Up while standing or walking. The arc is fixed when you leave the ground (Up alone
-// goes straight up, Up + a direction jumps that way) and you can't steer, block or turn around in
-// the air. Once per jump you can do an air attack (ChooseAirMove: Light or Heavy by default).
+// JUMPING: hold Up while standing or walking. Up alone goes straight up, Up + a direction jumps that
+// way. In the air, holding left or right nudges you that way a little (AirControl per tick, never
+// faster than the jump's forward speed), so you can adjust but not stop dead or turn on a dime.
+// You can't block or turn around in the air. Once per jump you can do an air attack (ChooseAirMove: Light or Heavy by default).
 // Landing ends the jump and cancels an unfinished air attack. Bodies only push each other when
 // both fighters are on the ground, so you can jump over the opponent and land on their other side.
 // Grabs can't catch an airborne fighter. A fighter hit in the air falls, and its hitstun lasts at
@@ -80,9 +81,15 @@ public abstract class Fighter
     public virtual DashDef ForwardDash { get { return new DashDef(14, 130); } }
     public virtual DashDef BackDash { get { return new DashDef(16, 110); } }
 
-    // The jump: about 36 ticks in the air, peaking at about 1.7 units (high enough to clear a
-    // Special projectile), travelling about 1.8 units forward or back. Override to change it.
-    public virtual JumpDef JumpArc { get { return new JumpDef(180, 50); } }
+    // The jump: about 40 ticks in the air, peaking at about 2.1 units (high enough to clear a
+    // Special projectile), travelling about 2 units forward or back. Override to change it.
+    // Peak height is roughly up * up / (2 * Gravity); time in the air roughly 2 * up / Gravity.
+    public virtual JumpDef JumpArc { get { return new JumpDef(210, 50); } }
+
+    // How much holding left/right changes your sideways speed each tick in the air (milli-units
+    // per tick, per tick). 0 = a fixed arc. At 3 it takes about 17 ticks to go from no drift to
+    // full speed, and most of a jump (about 33 ticks) to turn a forward jump into a backward one.
+    public virtual int AirControl { get { return 3; } }
 
     // ---------- optional hooks for theme mechanics / modifiers ----------
     // Change this tick's input before the fighter uses it. Return 0 to ignore the player
@@ -109,7 +116,7 @@ public abstract class Fighter
     public const int DashTapWindow = 12;
 
     // Taken off vy every tick while airborne, shared by every character.
-    public const int Gravity = 10;
+    public const int Gravity = 11;
 
     // Ultimate meter, shared by every character (Design/DECISIONS.md D-08). With 100 HP that is
     // roughly one full bar per round. Hits from an Ultimate give nothing.
@@ -220,6 +227,9 @@ public abstract class Fighter
                 break;
         }
 
+        // Air control works while jumping and during an air attack, not while knocked out of the air.
+        if (IsAirborne && (state == FighterStateId.Jump || state == FighterStateId.Attack)) SteerInAir(input);
+
         // Done after the switch so it uses this tick's facing (ThinkGrounded may have turned us).
         int back = facing > 0 ? Buttons.Left : Buttons.Right;
         holdingBack = (input & back) != 0;
@@ -324,7 +334,19 @@ public abstract class Fighter
         }
     }
 
-    // In the air the arc is fixed: the only choice is one air attack per jump.
+    // Holding a direction moves vx toward that direction's full jump speed by AirControl per tick.
+    // Holding nothing keeps your momentum, so a forward jump still carries you forward.
+    void SteerInAir(int input)
+    {
+        int direction = DirectionFrom(input);
+        if (direction == 0) return;
+        int target = direction * JumpArc.forward;
+        int step = AirControl;
+        if (vx < target) vx = Math.Min(target, vx + step);
+        else if (vx > target) vx = Math.Max(target, vx - step);
+    }
+
+    // The one air attack per jump.
     void ThinkAir(GameSim sim, int input)
     {
         if (usedAirMove) return;

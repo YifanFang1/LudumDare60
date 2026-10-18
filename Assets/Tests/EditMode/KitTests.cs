@@ -316,6 +316,48 @@ public class KitTests
         Assert.GreaterOrEqual(BodyGap(sim), 0);
     }
 
+    // Jumps once with `takeOff` and holds `inAir` for the whole jump. Returns how far player 1 moved.
+    static int JumpDistance(int takeOff, int inAir)
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        Fighter f = sim.fighters[0];
+        int startX = f.x;
+        sim.Step(takeOff, None);
+        while (f.IsAirborne) sim.Step(inAir, None);
+        return f.x - startX;
+    }
+
+    [Test]
+    public void AirControlNudgesAStraightUpJump()
+    {
+        int drift = JumpDistance(Buttons.Up, Buttons.Right);
+        int fullForward = JumpDistance(Buttons.Up | Buttons.Right, None);
+        Assert.Greater(drift, 0, "holding right in the air drifts right");
+        Assert.Less(drift, fullForward, "but less than jumping forward in the first place");
+    }
+
+    [Test]
+    public void AirControlSlowsButDoesNotInstantlyReverseAJump()
+    {
+        int steeredBack = JumpDistance(Buttons.Up | Buttons.Right, Buttons.Left);
+        int fullForward = JumpDistance(Buttons.Up | Buttons.Right, None);
+        Assert.Less(steeredBack, fullForward, "holding back shortens a forward jump");
+        Assert.Greater(steeredBack, -fullForward, "but can't turn it into a full backward jump");
+    }
+
+    [Test]
+    public void AirControlNeverExceedsJumpSpeed()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        Fighter f = sim.fighters[0];
+        sim.Step(Buttons.Up | Buttons.Right, None);
+        while (f.IsAirborne)
+        {
+            sim.Step(Buttons.Right, None);
+            Assert.LessOrEqual(f.vx, f.JumpArc.forward);
+        }
+    }
+
     [Test]
     public void CannotBlockInTheAir()
     {
