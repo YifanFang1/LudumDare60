@@ -585,7 +585,7 @@ public static class BuildFightCanvas
 
     static GameObject BuildModeSelect(Transform parent)
     {
-        GameObject screen = NewArtScreen("ModeSelectScreen", parent);
+        GameObject screen = NewArtScreen("ModeSelectScreen", parent, false, "Main Menubg_no_logo_logo.png", false);
         RectTransform panel = NewPanel("Panel", screen.transform, 560f);
 
         Txt(panel, "Title", "Choose mode", 56, TextAlignmentOptions.Center, Color.white, 80f);
@@ -681,7 +681,7 @@ public static class BuildFightCanvas
 
     static GameObject BuildLobby(Transform parent)
     {
-        GameObject screen = NewArtScreen("LobbyScreen", parent);
+        GameObject screen = NewArtScreen("LobbyScreen", parent, false, "Main Menubg_no_logo_logo.png", false);
         RectTransform panel = NewPanel("Panel", screen.transform, 600f);
 
         Txt(panel, "Title", "ONLINE", 64, TextAlignmentOptions.Center, Color.white, 80f);
@@ -1069,6 +1069,19 @@ public static class BuildFightCanvas
     }
 
     // A centered panel that grows with its content (a vertical layout).
+    // The UI Panel art (Assets/UI/Assets/UIPanel.png) behind every menu panel; flat colour if it is missing.
+    static void StylePanel(Image img)
+    {
+        Sprite art = LoadSprite("UIPanel.png");
+        if (art != null)
+        {
+            img.sprite = art;
+            img.type = Image.Type.Sliced;   // the sprite has its borders set (gears stay full size, the middle stretches)
+            img.color = Color.white;
+        }
+        else img.color = PanelColor;
+    }
+
     static RectTransform NewPanel(string name, Transform parent, float width)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
@@ -1077,10 +1090,10 @@ public static class BuildFightCanvas
         rt.anchorMin = new Vector2(0.5f, 0.5f);
         rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(width, 100f);
-        go.GetComponent<Image>().color = PanelColor;
+        rt.sizeDelta = new Vector2(width + 220f, 100f);   // the art's empty margin plus a roomier frame
+        StylePanel(go.GetComponent<Image>());
         VerticalLayoutGroup v = go.GetComponent<VerticalLayoutGroup>();
-        v.padding = new RectOffset(32, 32, 28, 28);
+        v.padding = new RectOffset(100, 100, 140, 90);   // clear of the frame and the gears
         v.spacing = 12f;
         v.childAlignment = TextAnchor.UpperCenter;
         v.childControlWidth = true;
