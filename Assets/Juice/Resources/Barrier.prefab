@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 6b1f3c2e9d4a4f0e8c7b5a2d1e9f0c34, type: 2}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: looping
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: lengthInSec
@@ -118,7 +118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: EmissionModule.m_Bursts.Array.data[0].cycleCount
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: ClampVelocityModule.multiplyDragByParticleVelocity
