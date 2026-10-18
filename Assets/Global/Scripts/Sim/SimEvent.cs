@@ -20,6 +20,7 @@ public enum SimEventType
     SummonSpawn,  // a: the owner, x: where the copy appeared
     SummonDestroyed, // a: the owner, b: who destroyed it (-1 = it ran out), x: where
     Hold,         // a held grab caught someone: a: grabber, b: victim, amount: hold ticks
+    OutOfAmmo,    // a fresh Special press with no ammo left (Noir's empty click): a: who, x/y: where
 }
 
 public struct SimEvent

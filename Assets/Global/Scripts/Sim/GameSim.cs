@@ -36,6 +36,11 @@ public class GameSim
 
     // Sessions enable this; isolated combat tests can start immediately.
     public bool countdownOn;
+    // Only the first round introduces each fighter, before the normal countdown.
+    public bool introductionsOn;
+    public const int IntroLineTicks = 240;
+    public int introTicks;
+    public int IntroSlot { get { return introTicks > IntroLineTicks ? 0 : introTicks > 0 ? 1 : -1; } }
     public const int CountdownTicks = 180;
     public const int FightBannerTicks = 60;
     public int countdownTicks;
@@ -129,6 +134,7 @@ public class GameSim
 
         round = number;
         roundOverTicks = 0;
+        introTicks = introductionsOn && number == 1 ? IntroLineTicks * 2 : 0;
         roundTimeTicks = RoundTimeTicks;
         timeUp = false;
         roundWinner = -1;
@@ -179,6 +185,14 @@ public class GameSim
     {
         events.Clear();
         if (IsOver) return;
+
+        // The intro consumes synchronized ticks too: neither player can act or run the clock.
+        if (introTicks > 0)
+        {
+            introTicks--;
+            tick++;
+            return;
+        }
 
         // Consume synchronized input ticks without applying them during the countdown.
         if (countdownTicks > 0)
@@ -806,6 +820,7 @@ public class GameSim
             h = h * 31 + roundsWon[0];
             h = h * 31 + roundsWon[1];
             h = h * 31 + roundOverTicks;
+            h = h * 31 + introTicks;
             h = h * 31 + countdownTicks;
             h = h * 31 + fightBannerTicks;
             for (int i = 0; i < 2; i++)

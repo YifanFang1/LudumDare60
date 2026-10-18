@@ -15,6 +15,7 @@ public class DefeatSequence : MonoBehaviour
     readonly List<Burn> burning = new List<Burn>();
     IMatchSession match;
     WorldView world;
+    MatchCinematics cinematic;
     GameSim previousSim;
     int round;
     bool started;
@@ -24,6 +25,7 @@ public class DefeatSequence : MonoBehaviour
     {
         match = GetComponent<IMatchSession>();
         world = GetComponent<WorldView>();
+        cinematic = GetComponent<MatchCinematics>();
     }
 
     void LateUpdate()
@@ -41,6 +43,8 @@ public class DefeatSequence : MonoBehaviour
             previousSim = sim;
             round = sim.round;
         }
+        // Let the losing character finish speaking before applying the death / burn effect.
+        if (sim.IsOver && cinematic != null && !cinematic.LoserLineFinished) return;
         if (!started && (sim.roundOverTicks > 0 || sim.IsOver))
         {
             started = true;
