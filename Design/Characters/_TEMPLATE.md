@@ -15,14 +15,16 @@ Two or three sentences: how this character wins, and what it's weak to. Every mo
 ## Generic moves
 Write "standard" for anything that uses the [shared kit](../SHARED_KIT.md#generic-moves-and-their-defaults) defaults.
 
-| Move | Name / look | Startup | Active | Total | Dmg | Hitstun | KB | Box | Notes |
-|---|---|---|---|---|---|---|---|---|---|
-| Light (J) | Jab | | | | | | | | |
-| Heavy (K) | | | | | | | | | |
-| Grab (L) | | | | | | | | | |
-| Forward dash | | | | | | | | | ticks / speed |
-| Back dash | | | | | | | | | ticks / speed |
-| Block | standard | | | | | | | | |
+| Move | Name / look | Startup | Active | Total | Dmg | Hitstun | KB | Box | CD | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Light (J) | Jab | | | | | | | | 5 | |
+| Heavy (K) | | | | | | | | | 10 | |
+| Grab (L) | | | | | | | | | 15 | |
+| Forward dash | | | | | | | | | 20 | ticks / speed |
+| Back dash | | | | | | | | | 20 | ticks / speed |
+| Block | standard | | | | | | | | - | |
+
+**CD** is the per-move cooldown in ticks after the move ends (D-43). The values shown are the standard ones; the Special's is 30.
 
 ## Special (I): <name>
 What it does, its frame data, any limit (`CanUseMove`), and any held-direction variant.

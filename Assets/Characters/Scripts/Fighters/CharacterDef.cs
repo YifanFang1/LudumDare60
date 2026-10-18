@@ -42,7 +42,8 @@ public class CharacterDef
         return b == AttackButton.JumpLight || b == AttackButton.JumpHeavy;
     }
 
-    // A new character starts with a basic Light and Heavy punch so it is playable immediately.
+    // A new character starts with a basic Light and Heavy punch so it is playable immediately,
+    // with the standard cooldowns (D-43). Assets made before cooldowns existed keep 0 (none).
     public static CharacterDef CreateDefault()
     {
         CharacterDef d = new CharacterDef();
@@ -53,7 +54,7 @@ public class CharacterDef
                 button = AttackButton.Heavy,
                 move = new MoveDef
                 {
-                    name = "Heavy", totalTicks = 28,
+                    name = "Heavy", totalTicks = 28, cooldown = 10,
                     hitboxes = new HitboxDef[]
                     {
                         new HitboxDef { spawnTick = 10, lifetime = 4, box = new Box(300, 700, 1300, 700),
@@ -66,7 +67,7 @@ public class CharacterDef
                 button = AttackButton.Light,
                 move = new MoveDef
                 {
-                    name = "Light", totalTicks = 15,
+                    name = "Light", totalTicks = 15, cooldown = 5,
                     hitboxes = new HitboxDef[]
                     {
                         new HitboxDef { spawnTick = 4, lifetime = 3, box = new Box(400, 800, 1000, 400),
@@ -97,6 +98,16 @@ public class CharacterDef
                 if (b.move == null) continue;
                 h = h * 31 + b.move.totalTicks;
                 h = h * 31 + (b.move.ultimate ? 1 : 0);
+                h = h * 31 + b.move.cooldown;
+                h = h * 31 + b.move.holdButton;
+                h = h * 31 + b.move.chargeTick;
+                h = h * 31 + b.move.chargeMax;
+                h = h * 31 + b.move.loopStart;
+                h = h * 31 + b.move.loopEnd;
+                h = h * 31 + b.move.loopMin;
+                h = h * 31 + b.move.loopMax;
+                h = h * 31 + b.move.tapWindow;
+                h = h * 31 + (b.move.keepOnLanding ? 1 : 0);
                 if (b.move.hitboxes == null) continue;
                 for (int j = 0; j < b.move.hitboxes.Length; j++)
                 {
@@ -111,6 +122,15 @@ public class CharacterDef
                     h = h * 31 + hb.vx;
                     h = h * 31 + (hb.unblockable ? 1 : 0);
                     h = h * 31 + (hb.grab ? 1 : 0);
+                    h = h * 31 + hb.pullTo;
+                    h = h * 31 + hb.holdTicks;
+                    h = h * 31 + (hb.untilHit ? 1 : 0);
+                    h = h * 31 + (hb.groundOnly ? 1 : 0);
+                    h = h * 31 + hb.armTicks;
+                    h = h * 31 + (hb.ignoresFighters ? 1 : 0);
+                    h = h * 31 + (hb.destroysProjectiles ? 1 : 0);
+                    h = h * 31 + (hb.reflectsProjectiles ? 1 : 0);
+                    h = h * 31 + (hb.stacks ? 1 : 0);
                     // hb.visual is cosmetic, so it is left out on purpose.
                 }
             }

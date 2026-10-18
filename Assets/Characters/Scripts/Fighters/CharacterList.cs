@@ -9,13 +9,14 @@ using System.Collections.Generic;
 //                 1  Shooter
 //                 2  Sandbag   (training dummy)
 //                 3-9          free, for more test characters
-//                10  Samurai          the launch roster (Design/README.md). For now all six
-//                11  Painter          are placeholders with the standard moveset.
-//                12  Cowboy           ("Black and White Cowboy")
-//                13  Elephant
-//                14  Executioner
-//                15  PlagueDoctor     ("Plague Doctor")
-//                16+          free, for new roster characters
+//                10  Samurai          "Ruy"              the launch roster (Design/README.md),
+//                11  Painter          "Paintress"        designed in Design/Characters/. The
+//                12  Cowboy           "Noir"             class names are older than the
+//                13  Elephant         "Room"             in-game names (D-40) and are kept
+//                14  Executioner      "The Executioner"  to avoid churn.
+//                15  PlagueDoctor     "Dr. Remy"
+//                16  Nek              "Nek" (temp name)
+//                17+          free, for new roster characters
 //   other ids   characters made in the Unity inspector (CharacterData assets). They get a big
 //               random id and register themselves at startup, so nobody edits this file for them.
 //
@@ -41,12 +42,13 @@ public static class CharacterList
         Add(Shooter.Id, "Shooter", delegate { return new Shooter(); }, null);
         Add(Sandbag.Id, "Sandbag", delegate { return new Sandbag(); }, null);
 
-        Add(Samurai.Id, "Samurai", delegate { return new Samurai(); }, null);
-        Add(Painter.Id, "Painter", delegate { return new Painter(); }, null);
-        Add(Cowboy.Id, "Black and White Cowboy", delegate { return new Cowboy(); }, null);
-        Add(Elephant.Id, "Elephant", delegate { return new Elephant(); }, null);
-        Add(Executioner.Id, "Executioner", delegate { return new Executioner(); }, null);
-        Add(PlagueDoctor.Id, "Plague Doctor", delegate { return new PlagueDoctor(); }, null);
+        Add(Samurai.Id, "Ruy", delegate { return new Samurai(); }, null);
+        Add(Painter.Id, "Paintress", delegate { return new Painter(); }, null);
+        Add(Cowboy.Id, "Noir", delegate { return new Cowboy(); }, null);
+        Add(Elephant.Id, "Room", delegate { return new Elephant(); }, null);
+        Add(Executioner.Id, "The Executioner", delegate { return new Executioner(); }, null);
+        Add(PlagueDoctor.Id, "Dr. Remy", delegate { return new PlagueDoctor(); }, null);
+        Add(Nek.Id, "Nek", delegate { return new Nek(); }, null);
     }
 
     // For characters written in code. Pick an id that is not used yet.

@@ -9,7 +9,7 @@ Date for all entries below: 2026-10-16.
 
 ## Scope
 
-### D-29 All six characters are identical placeholders for now (Decided)
+### D-29 All six characters are identical placeholders for now (Decided; replaced by D-40 on 2026-10-17)
 ArcadeGuy, Painter, Black and White Cowboy, Elephant, Executioner and Plague Doctor get the **same stats and the same standard kit**, including the same Special and Ultimate, and no perks. The goal right now is the bare implementation: all six exist, can be selected, and play a full match with the basic attacks.
 - *Why:* the creative side (move names, looks, eras, what each Special, Ultimate and perk does, which Old Tech(nique) each one gets) belongs to the artists and designers on the team, not to the plan. Each character gets its own design later, from [Characters/_TEMPLATE.md](Characters/_TEMPLATE.md).
 - Each type (Shoto, Rushdown, Zoner, Grappler, Trapper, Mixup) is recorded as a design target only.
@@ -56,7 +56,7 @@ The victim is put on the other side of the grabber before the knockback is appli
 - *Considered:* dealing damage only (the losing player rarely gets an ultimate), or a slow passive fill.
 - *Why:* rewards aggression and gives the losing player a comeback.
 
-### D-09 The Ultimate needs a full bar and spends all of it (Default)
+### D-09 The Ultimate needs a full bar and spends all of it (Default; Nek is the exception, D-48)
 One bar, no partial spending. Usable from Idle or Walk.
 
 ### D-10 The Ultimate starts with a short freeze (Decided)
@@ -144,7 +144,7 @@ The EditMode test assembly references LD.Match so `AITests` can play AI vs AI ma
 ### D-34 `facing` and the current move are now in the desync hash (Default)
 The original `GameSim.Hash()` left them out, although both change what happens next. The move is hashed by its numbers, not by `name.GetHashCode()`, because string hashes are not guaranteed to match between the Editor (Mono) and WebGL (IL2CPP).
 
-### D-35 Held keys keep repeating moves; only the Ultimate and dashes need a fresh press (Default)
+### D-35 Held keys keep repeating moves; only the Ultimate and dashes need a fresh press (Default; partly replaced by D-42 and D-43)
 As before, holding J repeats jabs. The Ultimate needs a fresh press so holding O can't fire it the moment the bar fills, and each dash tap must be a fresh press.
 
 ### D-36 Generate a character's Animator only when its art work starts (Default)
@@ -158,3 +158,109 @@ Main's Canvas UI (`HudScreen`, in `Menu.unity`) switches the OnGUI `FightView` o
 
 ### D-39 A landed grab gets the same juice as a hit (Decided)
 `JuiceManager` handles the `Grab` event like `Hit` (sparks and screen shake). A grab-specific effect can replace it later.
+
+## Real designs from the Moveset Tracker (2026-10-17)
+
+These come from the team's "Character Moveset - Moveset Tracker" sheet, plus the answers to the planner's questions about it. The per-character results are in [Characters/](Characters/). The build order is in [ROSTER_PLAN.md](ROSTER_PLAN.md).
+
+### D-40 The roster gets real designs, with the sheet's names (Decided)
+Replaces D-29. Seven characters: **Ruy** (Shoto, id 10), **Paintress** (Rushdown, 11), **Noir** (Zoner, 12), **Room** (Grappler, 13), **The Executioner** (Trapper, 14), **Dr. Remy** (Mixup, 15) and the new **Nek** (Powerup, **16**).
+- Ruy takes over id 10, which main had renamed from ArcadeGuy to `Samurai`. It's the same Shoto slot and was still a placeholder.
+- The sheet's names are used in the design docs and as the **in-game display names** (`CharacterList`). The **C# class names stay** (`Samurai`, `Painter`, `Cowboy`, `Elephant`, `Executioner`, `PlagueDoctor`), to avoid churn and merge conflicts. Nek gets a new class `Nek`.
+- *Considered:* renaming the classes too (more churn for nothing the player sees), or keeping Samurai and giving Ruy a new id.
+
+### D-41 The sheet's numbers: HP as written, movement speed as a % of walk speed (Decided)
+- HP is used as written (60 to 200), and tuned after playtests.
+- "Movement Speed" is a **percentage of the standard walk speed (60)**: 75 → 45, 150 → 90. Dashes are set separately from the Dash columns, and jumps stay standard.
+- The sheet gives no frame data, so every frame number in the character docs is a planner's proposal to tune.
+
+### D-42 Charge moves: hold to charge, release to fire (Decided)
+Ruy's Hadoken, Nek's Charged Punch and the Executioner's Charged Whip charge while their button is held, and the move comes out on release, or by itself at the cap (60 ticks, proposed). A tap gives the weakest version. The same generic extension covers:
+- **hold to repeat** (Nek's Rapid Punches keep going while I is held, up to a cap)
+- **tap vs hold** (Dr. Remy: a release before 15 ticks switches potion, and reaching 15 uses it)
+
+The charge state lives on `Fighter` and is hashed. This replaces D-35 for these moves only: other moves still repeat while held.
+- *Considered:* fixed slow windups with no holding (simplest), or two fixed versions (tap or full).
+
+### D-43 Every move has a cooldown, for every character (Decided)
+After a move ends, **that same move** can't be used again for its cooldown. Other moves are free. Standard values: **Light 5, Heavy 10, Grab 15, Special 30 ticks; dashes 20**. The heavy characters (Room, Executioner) have a 60-tick dash cooldown. Ultimates have none (the meter is their limit).
+- Characters change cooldowns through a hook (`ModifyCooldown`), not by editing shared `MoveDef`s (D-25). Nek's perk shrinks them as he's hurt, his Install sets them to 0, and Noir's Ultimate cuts the Special's.
+- This changes **every character, the test characters included**, so all existing tests and the soak test need checking, `Version` gets bumped, and the AI must not press buttons on cooldown.
+- *Considered:* one global cooldown after any attack, or cooldowns per button group.
+- Asked for by the team so "attack recharge time" (Nek's perk 2) means something.
+
+### D-44 Flavoured blocks are the standard block (Decided)
+Noir's lasso spin, Paintress's arms, Dr. Remy's cane spin and Nek's Zeep Zorp are only the `Blockstun` animation. **Room is the exception: he can't block at all** (a `CanBlock` hook).
+
+### D-45 Old Tech and era are TBD for every character (Decided)
+The sheet has neither. Each doc lists "Old Tech" as its first open question, and nothing is invented. D-13 (the Old Tech lives in the Ultimate) still stands, but two Ultimates are now buffs (Noir's Rapid Fire, Nek's Install), so the team may want the Old Tech elsewhere for them.
+
+### D-46 Status effects, as used by the designs (Decided; built with the Status effects extension, D-24)
+Every status lives on the victim:
+- **Slow:** a single status. A new slow only replaces the current one if it lasts longer; slows don't stack. Sources: Executioner traps and Dismember, Dr. Remy's slow potion.
+- **Bleed:** stacks up to 5, from Executioner whip and trap hits.
+- **Scramble:** from Paintress's Ultimate.
+- **Leech:** from Dr. Remy's Grab.
+
+Damage over time can't KO (D-23). Room ignores statuses (slow, dismember, scramble, paint slow) but still takes hitstun and knockback.
+
+### D-47 No random chance in perks; seeded rolls only where a design needs them (Decided)
+The Executioner's "percentage chance to dismember" became **every 3rd landed hit**: players can see it coming, and there's nothing to keep in sync. Two things still need a pseudo-random pick, and both use a roll made from the match seed and the tick (ints only, same on both machines, hashed): Paintress's control shuffle, and the placement of Room's copies. Room's copies were simplified to **fixed spots** instead.
+
+### D-48 Nek's Install replaces his Ultimate (Decided)
+His perk 1 turns the O button into a toggle. It starts with **any meter above 0**, with **no superflash**, and drains the meter until it's empty or he presses O again. While it's on: +30% damage, no cooldowns. He has no full-bar Ultimate, so he's the exception to D-09.
+
+### D-49 Build the designs in layers, cut from the top (Decided)
+Pass 1: every character's stats, normals, dashes and Special. Pass 2: Ultimates. Pass 3: perks. Each engine feature is built as a generic kit extension the first time a pass needs it. The riskiest features (Room's copies, the reflect) come last in their pass, so they can be cut. See [ROSTER_PLAN.md](ROSTER_PLAN.md).
+
+## Building the roster (2026-10-17)
+
+Answers to the open questions in each character doc: the team accepted every planner proposal listed there (Ruy, Nek, Noir, Room, Executioner, Paintress, Dr. Remy), except Dr. Remy's heal, which got its own cooldown (D-53). The docs now say "(confirmed)" for each one. The decisions below were made while building.
+
+### D-50 Ultimate projectiles can't be reflected or destroyed (Decided for reflect, Default for destroy)
+Paintress's canvas can't reflect them (confirmed). Room's Vine Boom doesn't destroy them either, so one rule covers both (Remy's rat waves and Paintress's splat always arrive). Traps and the Guillotine aren't projectiles (they don't move), so neither can touch them.
+
+### D-51 What "cooldown N" means (Default)
+The move waits exactly N ticks longer than it would with no cooldown. `Fighter.CooldownLeft` is "ticks until usable", so it reads N + 1 the moment the move ends. Cooldowns pause during hit stop and the superflash, like everything else. Air attacks have no cooldown (they're once per jump), and Ultimates have none (the meter is their limit).
+
+### D-52 Traps can't be blocked (Default)
+A trap on the floor is stepped on, not swung at, so blocking makes no sense. The Guillotine is unblockable by design.
+
+### D-53 Dr. Remy's potions share a cooldown; heal has its own long one (Decided: heal. Default: sharing)
+Using any potion puts the other two on (at least) the 30-tick Special cooldown, so he can't chain poison into slow. The heal potion has its own 300-tick cooldown (the team's answer to heal stalling). Only one poison cloud at a time: a new one replaces the old.
+
+### D-54 Room's boxes reach further forward (Default)
+His body is wider (1.4 units, confirmed), so the docs' boxes, written for the standard 1-unit body, couldn't reach a touching opponent. Every forward box got +200 to +300 of reach (`Elephant.cs`); the damage and frame data are unchanged.
+
+### D-55 Nek's Rapid Punches knockback is 3, not 8 (Default)
+At 8, ten punches pushed the victim out of reach by the 7th hit, so the held string couldn't connect. Found by `NekRapidPunchesKeepTheVictimInHitstun`.
+
+### D-56 Nek can flip Install whenever he could act (Default)
+Idle, walking, attacking, dashing or jumping, but not while stunned, held or knocked out. Turning it on clears his running move cooldowns ("no cooldowns while it's on").
+
+### D-57 What Room's copies copy (Decided, with one Default)
+They copy walking, Light, Heavy and Vine Boom (confirmed). They don't jump (Default: the design only says "mimic movement", and copies standing still in the air would look wrong).
+
+### D-58 Placeholder art is drawn in code (Decided)
+`PlaceholderArt` (View) gives each character its own colour, pattern and letter, and each projectile/trap visual key a shape. Real art needs no code: a Code Character Art asset with a sprite or prefab replaces it. Single sprites are tinted by state unless the look's **Tint By State** is unticked (Decided).
+
+### D-59 Network Version 10 (Decided; replaced by D-62)
+Everything in the roster plan changes the sim rules, so `RelayLockstepSession.Version` is "10" and older builds are refused.
+
+### D-60 The AI reads read-only hints from the fighter (Default)
+The AI stays generic (it never names a character), so a fighter tells it what it can't work out on its own: `UltimateIsToggle` (Nek: Install goes on up close with 400+ meter, off when far away to save the meter), `WantsSpecialSwitch` (Dr. Remy: tap to switch to Heal when below half health and it's ready, Poison up close, Slow at range) and `SpecialHoldTicks` (Dr. Remy: hold past the tap window to use a potion). They only read the sim and never change the fight, so they aren't hashed. Tested in `AITests`.
+
+### D-61 The online two-build match is left to the team (Decided)
+The roster plan asks for one online match between two builds after each pass. The team chose to run it themselves instead of adding a development-build-only command-line hook. The local relay passes its own smoke test (`npm test`), and the Editor-side lockstep is unchanged apart from the new sim rules, which the soak test covers for determinism.
+
+## Merge with main's air dash (2026-10-18)
+
+### D-62 Air dash meets the roster rules; network Version 11 (Decided)
+Main added `Buttons.Dash` (Left Shift + a direction), an air dash once per jump (`AirDash`), and Space as the default jump key. Main also bumped `Version` to "10" on its own, the same number as D-59, so the merge is **"11"**: a build with only one of the two changes can never match a build with both (the same reasoning as D-37). How the two meet:
+- The air dash **ignores the dash cooldown** (once per jump is its limit) but **starts it**, so you can't land and ground-dash straight away.
+- **Slows** cut the air dash's speed like any dash.
+- **Dash perks** fire on air dashes too: Paintress's forward air dash is invincible and her back air dash costs 8 HP; Room's forward air dash is a Stampede hit.
+- **Room and The Executioner** get a short air dash: 12 ticks at speed 70 (0.84 units; the standard is 1.3).
+- Air attacks still respect move cooldowns.
+
+Tests: `AirDashIgnoresTheDashCooldownButStartsIt`, `AirDashIsSlowedLikeAnyDash` (KitExtensionTests), `RoomAndTheExecutionerHaveAShortAirDash`, `PaintressDashPerksApplyToAirDashesToo` (RosterTests), plus main's own air dash tests in KitTests.

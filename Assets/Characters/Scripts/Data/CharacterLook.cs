@@ -11,7 +11,7 @@ using UnityEngine;
 public abstract class CharacterLook : ScriptableObject
 {
     [Header("Look (optional, never affects the fight)")]
-    [Tooltip("Prefab with an Animator. Needs states named Idle, Walk, DashForward, DashBack, Jump, Hitstun, Blockstun, KO and one per move name (Light, Heavy, Grab, Special, Ultimate, JumpLight, JumpHeavy). Art should face RIGHT. Empty = Sprite, or a coloured box.\nFight > Create Animator for Selected Character builds one for you.")]
+    [Tooltip("Prefab with an Animator. Needs states named Idle, Walk, DashForward, DashBack, Jump, Hitstun, Blockstun, KO, Held and one per move name (Light, Heavy, Grab, Special, Ultimate, JumpLight, JumpHeavy). Art should face RIGHT. Empty = Sprite, or a placeholder box.\nFight > Create Animator for Selected Character builds one for you.")]
     public GameObject viewPrefab;
     [Tooltip("A single pose for blockout or simple characters. Ignored if a View Prefab is set. Art should face RIGHT.")]
     public Sprite sprite;
@@ -22,6 +22,8 @@ public abstract class CharacterLook : ScriptableObject
     [Tooltip("Tick if the art was drawn facing LEFT. The game expects art facing right, so this mirrors it (Sprite or View Prefab). The offsets above are not mirrored.")]
     public bool flipSprite;
     public Color placeholderColor = new Color(0.3f, 0.5f, 1f);
+    [Tooltip("For a single Sprite (no View Prefab): tint it by what the fighter is doing (attack = brighter, hit = darker, block = cyan, powered up = gold), since one pose can't show it. Untick once the character has real animation.")]
+    public bool tintByState = true;
     [Tooltip("Ticks for one loop of the Idle / Walk animation (60 ticks = 1 second).")]
     public int idleLoopTicks = 60;
     public int walkLoopTicks = 30;

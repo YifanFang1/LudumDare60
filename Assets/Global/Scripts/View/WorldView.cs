@@ -4,12 +4,18 @@ using UnityEngine;
 // Draws the fight as real GameObjects (so you can see and select them in the Scene view).
 // It only READS the sim; it never changes it.
 //
-//   Fighters:  a character's view prefab if it has one, else its sprite, else a coloured box sized
-//              to its hurtbox (blockout mode, no art needed). The art comes from the character's
-//              CharacterData, or its CodeCharacterArt for characters written in code.
+//   Fighters:  a character's view prefab if it has one, else its sprite, else a placeholder box
+//              sized to its hurtbox, in the character's own colour, pattern and letter
+//              (PlaceholderArt). The art comes from the character's CharacterData, or its
+//              CodeCharacterArt for characters written in code. A single sprite (no animation) is
+//              tinted by state when the look's Tint By State is ticked.
 //   Hitboxes:  translucent yellow boxes while they exist (switch off with showHitboxes).
-//   Projectiles: the owner's projectile sprite for the move's `visual` name (CharacterLook.
-//              projectileSprites), drawn ALWAYS, not only with the debug toggle.
+//   Projectiles, traps, the canvas...: the owner's sprite for the hitbox's `visual` name
+//              (CharacterLook.projectileSprites), else a placeholder shape. Drawn ALWAYS.
+//   Zones:     paint puddles and poison clouds (GameSim.zones), as floor strips / clouds.
+//   Copies:    Ultimate copies (GameSim.summons), see-through.
+//   Warnings:  a red outline wherever a Telegraph event says an attack is about to land.
+//   Ink:       blots over the screen while the fighter THIS machine controls is scrambled.
 //   Gizmos:    green hurtbox and red hitbox outlines, in the Scene view while the game runs.
 //   Fighter info: text over each fighter's head (state, move, keys held, blocking or not) and a
 //              log of the last hits, blocks and grabs, bottom right. Debug UI only.
@@ -31,7 +37,8 @@ public class WorldView : MonoBehaviour
     {
         public GameObject root;
         public Animator animator;
-        public SpriteRenderer placeholder;   // blockout mode: coloured box, no art
+        public SpriteRenderer placeholder;   // blockout mode: placeholder box, no art
+        public SpriteRenderer facingTab;     // blockout mode: shows which way the box faces
         public SpriteRenderer art;           // sprite mode: CharacterLook.sprite
         public SpriteRenderer hurt;          // translucent hurtbox overlay (prefab and sprite modes)
         public CharacterLook data;           // null = no art for this character in this build
@@ -44,6 +51,18 @@ public class WorldView : MonoBehaviour
     FighterView[] views = new FighterView[2];
     List<SpriteRenderer> hitboxQuads = new List<SpriteRenderer>();
     List<SpriteRenderer> projectileArt = new List<SpriteRenderer>();
+    List<SpriteRenderer> zoneQuads = new List<SpriteRenderer>();
+    List<SpriteRenderer> summonQuads = new List<SpriteRenderer>();
+    List<SpriteRenderer> telegraphQuads = new List<SpriteRenderer>();
+
+    // A Telegraph event, remembered until its attack lands.
+    struct Warning
+    {
+        public int x;
+        public int width;
+        public int untilTick;
+    }
+    List<Warning> warnings = new List<Warning>();
 
     const int LogLines = 8;
     List<string> eventLog = new List<string>();   // newest last
@@ -124,6 +143,8 @@ public class WorldView : MonoBehaviour
             else
             {
                 v.placeholder = NewQuad("Fighter" + i + " (placeholder)", 0);
+                v.placeholder.sprite = PlaceholderArt.FighterSprite(sim.fighters[i].characterId);
+                v.facingTab = NewQuad("Facing" + i, 1);
                 v.root = v.placeholder.gameObject;
             }
             if (v.placeholder == null) v.hurt = NewQuad("Hurtbox" + i, 5);
@@ -159,6 +180,10 @@ public class WorldView : MonoBehaviour
         views[1] = null;
         hitboxQuads.Clear();
         projectileArt.Clear();
+        zoneQuads.Clear();
+        summonQuads.Clear();
+        telegraphQuads.Clear();
+        warnings.Clear();
         eventLog.Clear();
     }
 
@@ -194,21 +219,26 @@ public class WorldView : MonoBehaviour
         }
         UpdateHitboxes(sim);
         UpdateProjectileArt(sim);
+        UpdateZones(sim);
+        UpdateSummons(sim);
+        UpdateWarnings(sim);
     }
 
     void UpdateFighter(FighterView v, Fighter f, int index)
     {
         if (v.placeholder != null)
         {
-            Color c = v.data != null ? v.data.placeholderColor
-                    : (index == 0 ? new Color(0.3f, 0.5f, 1f) : new Color(1f, 0.4f, 0.4f));
-            if (f.state == FighterStateId.Attack) c = Color.Lerp(c, Color.white, 0.5f);
-            if (f.state == FighterStateId.Dash || f.state == FighterStateId.Jump) c = Color.Lerp(c, Color.white, 0.25f);
-            if (f.state == FighterStateId.Hitstun) c = Color.Lerp(c, Color.black, 0.35f);
-            if (f.state == FighterStateId.Blockstun) c = Color.Lerp(c, Color.cyan, 0.5f);
-            if (f.state == FighterStateId.KO) c = Color.gray;
-            v.placeholder.enabled = showHurtboxes || !MatchScreens.DebugUI;   // with no art the box IS the body, so debug-off never hides it
-            Place(v.placeholder, f.HurtboxWorld(), c);
+            Color c = StateTint(BaseColor(v, f), f);
+            bool show = showHurtboxes || !MatchScreens.DebugUI;   // with no art the box IS the body, so debug-off never hides it
+            v.placeholder.enabled = show;
+            Box body = f.HurtboxWorld();
+            PlaceSprite(v.placeholder, body, c);
+
+            // A dark tab near the top of the box, on the side it faces.
+            v.facingTab.enabled = show;
+            int tabW = body.w / 6;
+            int tabX = f.facing > 0 ? body.x + body.w - tabW : body.x;
+            Place(v.facingTab, new Box(tabX, body.y + body.h * 3 / 4, tabW, body.h / 8), new Color(0f, 0f, 0f, 0.65f));
             return;
         }
 
@@ -218,6 +248,7 @@ public class WorldView : MonoBehaviour
         v.root.transform.position = new Vector3(f.x * Scale + f.facing * d.spriteOffsetX, f.y * Scale + d.spriteOffsetY, 0f);
         v.root.transform.localScale = new Vector3(f.facing * d.SpriteFlip * d.spriteScale, d.spriteScale, 1f);   // art faces right (or is flipped to)
         if (v.art == null) Pose(v, f);
+        else v.art.color = d.tintByState ? StateTint(Color.white, f) : Color.white;
 
         if (v.hurt != null)
         {
@@ -278,6 +309,11 @@ public class WorldView : MonoBehaviour
                 stateName = "KO";
                 t = tick / 60f;
                 break;
+            case FighterStateId.Held:
+                // Pinned by a held grab. An Animator without a Held state shows Hitstun instead.
+                stateName = v.animator.HasState(0, Animator.StringToHash("Held")) ? "Held" : "Hitstun";
+                t = 0f;
+                break;
         }
 
         // A half-finished Animator still works: a missing state shows Idle instead.
@@ -321,18 +357,20 @@ public class WorldView : MonoBehaviour
         }
     }
 
-    // Projectile sprites, centred on the projectile's hitbox and flipped to its direction. The size
-    // comes from the sprite's import settings (Pixels Per Unit), like the fighters' art.
+    // Art for every hitbox with a `visual` name (projectiles, traps, the canvas...), centred on the
+    // hitbox and flipped to its direction. A real sprite keeps the size from its import settings
+    // (Pixels Per Unit), like the fighters' art; a placeholder shape is stretched to the hitbox.
     void UpdateProjectileArt(GameSim sim)
     {
         int used = 0;
         for (int i = 0; i < sim.hitboxes.Count; i++)
         {
             HitboxInstance h = sim.hitboxes[i];
-            if (h.def.followOwner || string.IsNullOrEmpty(h.def.visual)) continue;
+            if (string.IsNullOrEmpty(h.def.visual)) continue;
             FighterView owner = views[h.owner];
             Sprite sprite = owner != null && owner.data != null ? owner.data.FindProjectileSprite(h.def.visual) : null;
-            if (sprite == null) continue;
+            bool placeholder = sprite == null;
+            if (placeholder) sprite = PlaceholderArt.ShapeSprite(h.def.visual);
 
             if (used == projectileArt.Count)
             {
@@ -347,9 +385,119 @@ public class WorldView : MonoBehaviour
             sr.sprite = sprite;
             Box b = h.World(sim);
             sr.transform.position = new Vector3((b.x + b.w / 2f) * Scale, (b.y + b.h / 2f) * Scale, 0f);
-            sr.transform.localScale = new Vector3(h.facing, 1f, 1f);   // art faces right
+            if (placeholder)
+            {
+                // Charged shots (more damage than the move's own) look a bit bigger. View only.
+                float grow = h.def.damage > 0 && h.damage > h.def.damage ? 1f + 0.5f * (h.damage - h.def.damage) / h.def.damage : 1f;
+                sr.transform.localScale = new Vector3(h.facing * b.w * Scale * grow, b.h * Scale * grow, 1f);
+                Color c = OwnerColor(sim, h.owner);
+                sr.color = h.age < h.def.armTicks ? new Color(c.r, c.g, c.b, 0.35f) : Color.Lerp(c, Color.white, 0.35f);
+            }
+            else
+            {
+                sr.transform.localScale = new Vector3(h.facing, 1f, 1f);   // art faces right
+                sr.color = Color.white;
+            }
         }
         for (int i = used; i < projectileArt.Count; i++) projectileArt[i].enabled = false;
+    }
+
+    // ================= zones, Ultimate copies, warnings =================
+
+    void UpdateZones(GameSim sim)
+    {
+        while (zoneQuads.Count < sim.zones.Count) zoneQuads.Add(NewQuad("Zone", -1));
+        for (int i = 0; i < zoneQuads.Count; i++)
+        {
+            bool on = i < sim.zones.Count;
+            zoneQuads[i].enabled = on;
+            if (!on) continue;
+            Zone z = sim.zones[i];
+            Color c;
+            float height;
+            PlaceholderArt.ZoneLook(z.visual, OwnerColor(sim, z.owner), out c, out height);
+            if (z.ticksLeft < 30) c.a *= z.ticksLeft / 30f;   // fade out at the end
+            Place(zoneQuads[i], new Box(z.x - z.halfWidth, 0, z.halfWidth * 2, (int)(height / Scale)), c);
+        }
+    }
+
+    // Copies are drawn like their owner, see-through: the owner's sprite if it has one, else its
+    // placeholder box.
+    void UpdateSummons(GameSim sim)
+    {
+        while (summonQuads.Count < sim.summons.Count) summonQuads.Add(NewQuad("Copy", -1));
+        for (int i = 0; i < summonQuads.Count; i++)
+        {
+            bool on = i < sim.summons.Count;
+            SpriteRenderer sr = summonQuads[i];
+            sr.enabled = on;
+            if (!on) continue;
+
+            Summon s = sim.summons[i];
+            Fighter owner = sim.fighters[s.owner];
+            CharacterLook look = views[s.owner] != null ? views[s.owner].data : null;
+            Box body = sim.SummonBody(s);
+            float alpha = s.move != null ? 0.7f : 0.45f;   // a bit more solid while attacking
+            if (look != null && look.sprite != null)
+            {
+                sr.sprite = look.sprite;
+                sr.transform.position = new Vector3(s.x * Scale + s.facing * look.spriteOffsetX, look.spriteOffsetY, 0f);
+                sr.transform.localScale = new Vector3(s.facing * look.SpriteFlip * look.spriteScale, look.spriteScale, 1f);
+                sr.color = new Color(1f, 1f, 1f, alpha);
+            }
+            else
+            {
+                sr.sprite = PlaceholderArt.FighterSprite(owner.characterId);
+                Color c = OwnerColor(sim, s.owner);
+                PlaceSprite(sr, body, new Color(c.r, c.g, c.b, alpha));
+            }
+        }
+    }
+
+    void UpdateWarnings(GameSim sim)
+    {
+        for (int i = warnings.Count - 1; i >= 0; i--)
+        {
+            if (sim.tick >= warnings[i].untilTick) warnings.RemoveAt(i);
+        }
+        while (telegraphQuads.Count < warnings.Count) telegraphQuads.Add(NewQuad("Warning", 9));
+        float pulse = 0.25f + 0.25f * Mathf.PingPong(Time.unscaledTime * 6f, 1f);
+        for (int i = 0; i < telegraphQuads.Count; i++)
+        {
+            bool on = i < warnings.Count;
+            telegraphQuads[i].enabled = on;
+            if (!on) continue;
+            Warning w = warnings[i];
+            Place(telegraphQuads[i], new Box(w.x - w.width / 2, 0, w.width, 2400), new Color(1f, 0.1f, 0.1f, pulse));
+        }
+    }
+
+    // ================= colours =================
+
+    // The fighter's own colour: its art asset's placeholder colour if it has an asset, else the
+    // PlaceholderArt style for its character.
+    static Color BaseColor(FighterView v, Fighter f)
+    {
+        return v.data != null ? v.data.placeholderColor : PlaceholderArt.StyleFor(f.characterId).color;
+    }
+
+    Color OwnerColor(GameSim sim, int owner)
+    {
+        FighterView v = views[owner];
+        return v != null ? BaseColor(v, sim.fighters[owner]) : Color.white;
+    }
+
+    // State shows as a tint on boxes and single sprites (no animation to show it otherwise).
+    static Color StateTint(Color c, Fighter f)
+    {
+        if (f.state == FighterStateId.Attack) c = Color.Lerp(c, Color.white, f.charging ? 0.2f + 0.6f * Mathf.Min(1f, f.chargeTicks / 60f) : 0.5f);
+        if (f.state == FighterStateId.Dash || f.state == FighterStateId.Jump) c = Color.Lerp(c, Color.white, 0.25f);
+        if (f.state == FighterStateId.Hitstun || f.state == FighterStateId.Held) c = Color.Lerp(c, Color.black, 0.35f);
+        if (f.state == FighterStateId.Blockstun) c = Color.Lerp(c, Color.cyan, 0.5f);
+        if (f.IsPoweredUp) c = Color.Lerp(c, new Color(1f, 0.85f, 0.2f), 0.3f + 0.2f * Mathf.PingPong(Time.unscaledTime * 4f, 1f));
+        if (f.IsIntangible) c.a = 0.55f;
+        if (f.state == FighterStateId.KO) c = Color.gray;
+        return c;
     }
 
     static void Place(SpriteRenderer sr, Box b, Color c)
@@ -359,11 +507,22 @@ public class WorldView : MonoBehaviour
         sr.color = c;
     }
 
+    // Like Place, for a sprite of any size with a bottom-left pivot (the placeholder boxes).
+    static void PlaceSprite(SpriteRenderer sr, Box b, Color c)
+    {
+        Vector2 size = sr.sprite != null ? (Vector2)sr.sprite.bounds.size : Vector2.one;
+        sr.transform.position = new Vector3(b.x * Scale, b.y * Scale, 0f);
+        sr.transform.localScale = new Vector3(b.w * Scale / size.x, b.h * Scale / size.y, 1f);
+        sr.color = c;
+    }
+
     // ================= on-screen toggles =================
 
     void OnGUI()
     {
-        if (!showToggles || !MatchScreens.DebugUI || match == null || match.Phase != MatchPhase.Playing) return;
+        if (match == null || match.Phase != MatchPhase.Playing) return;
+        DrawInk();
+        if (!showToggles || !MatchScreens.DebugUI) return;
 
         float width, height;
         GuiDraw.BeginVirtualScreen(out width, out height);
@@ -400,6 +559,34 @@ public class WorldView : MonoBehaviour
         GUILayout.EndArea();
     }
 
+    // Paintress's Ultimate: ink over the screen of the player who was splatted, and only theirs
+    // (online each machine draws its own player). It doesn't touch the sim, so it does nothing to
+    // the AI. The blots are placed from the scramble's code, so they stay still while it lasts.
+    void DrawInk()
+    {
+        if (views[0] == null) return;
+        Fighter me = match.Sim.fighters[match.LocalSlot];
+        if (me.scrambleTicks <= 0) return;
+
+        float width, height;
+        GuiDraw.BeginVirtualScreen(out width, out height);
+        float alpha = Mathf.Min(1f, me.scrambleTicks / 30f) * 0.5f;   // "slightly" blind: you can still see through it
+        Color ink = new Color(0.12f, 0.02f, 0.18f, alpha);
+        uint seed = (uint)me.scrambleCode * 2654435761u + 1u;
+        for (int i = 0; i < 5; i++)
+        {
+            seed = seed * 1664525u + 1013904223u;
+            float x = (seed % 1000) / 1000f * (width - 220);
+            seed = seed * 1664525u + 1013904223u;
+            float y = (seed % 1000) / 1000f * (height - 160);
+            seed = seed * 1664525u + 1013904223u;
+            float size = 90 + (seed % 120);
+            // A rough blot: a few overlapping rectangles.
+            GuiDraw.Fill(x, y + size * 0.2f, size, size * 0.6f, ink);
+            GuiDraw.Fill(x + size * 0.2f, y, size * 0.6f, size, ink);
+        }
+    }
+
     // ================= fighter info + hit log =================
 
     // A small box above the fighter's head: what they're doing, which keys they hold this tick,
@@ -420,6 +607,8 @@ public class WorldView : MonoBehaviour
         string text = "P" + (f.index + 1) + "  " + StateText(f)
                     + "\nkeys: " + KeysText(f.prevInput)
                     + "\nHP " + f.hp + "   meter " + (f.meter * 100 / Fighter.MeterMax) + "%";
+        string status = FighterStatusText.For(f);
+        if (status.Length > 0) text += "\n" + status;
         Color back = new Color(0f, 0f, 0f, 0.6f);
         if (f.IsBlocking)
         {
@@ -443,6 +632,7 @@ public class WorldView : MonoBehaviour
         switch (f.state)
         {
             case FighterStateId.Attack:
+                if (f.move != null && f.charging) return f.move.name + " charging " + f.chargeTicks;
                 return f.move != null ? f.move.name + " " + t + "/" + f.move.totalTicks : "Attack";
             case FighterStateId.Hitstun:
             case FighterStateId.Blockstun:
@@ -495,6 +685,32 @@ public class WorldView : MonoBehaviour
                 break;
             case SimEventType.RoundEnd:
                 line = e.a == 2 ? "Round " + e.amount + ": double KO" : "Round " + e.amount + " won by " + P(e.a);
+                break;
+            case SimEventType.Telegraph:
+                Warning w = new Warning();
+                w.x = e.x;
+                w.width = e.amount;
+                w.untilTick = sim.tick + e.b;
+                warnings.Add(w);
+                line = P(e.a) + "'s attack lands here in " + e.b + " ticks";
+                break;
+            case SimEventType.Reflect:
+                line = P(e.a) + " REFLECTED " + P(e.b) + "'s projectile";
+                break;
+            case SimEventType.ProjectileDestroyed:
+                line = P(e.a) + " destroyed " + P(e.b) + "'s projectile";
+                break;
+            case SimEventType.Hold:
+                line = P(e.a) + " is HOLDING " + P(e.b);
+                break;
+            case SimEventType.SummonSpawn:
+                line = P(e.a) + " summoned a copy";
+                break;
+            case SimEventType.SummonDestroyed:
+                line = e.b >= 0 ? P(e.b) + " destroyed a copy" : P(e.a) + "'s copy faded";
+                break;
+            case SimEventType.Heal:
+                line = P(e.a) + " healed " + e.amount;
                 break;
             default:
                 return;   // AttackStart is shown over the fighter's head instead

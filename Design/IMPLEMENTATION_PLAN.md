@@ -1,6 +1,6 @@
 # Implementation plan
 
-> **Status (2026-10-17):** K1-K7, K-end, V1, A1, R1 and R3 are implemented, and all 47 EditMode tests pass. **R2** (one art asset per character, plus the generated Animator) is made in the Unity Editor; the steps are in the R2 row below. Decisions made while building are D-31 to D-35 in [DECISIONS.md](DECISIONS.md). The plan below is kept as written, so it shows what was intended.
+> **Status (2026-10-17):** this plan is done, and so is its follow-up, [ROSTER_PLAN.md](ROSTER_PLAN.md) (the real character designs). K1-K7, K-end, V1, A1, R1 and R3 are implemented, and all 47 EditMode tests passed at the time. **R2** (one art asset per character, plus the generated Animator) is made in the Unity Editor; the steps are in the R2 row below. Decisions made while building are D-31 to D-35 in [DECISIONS.md](DECISIONS.md). The plan below is kept as written, so it shows what was intended.
 
 How to build the [shared kit](SHARED_KIT.md) and the six placeholder characters with **one programmer** (D-27). The goal (D-29) is the bare implementation: all six characters selectable and playing full best-of-3 matches with the standard moveset. Every step below is a small commit that compiles, passes the EditMode tests and leaves the game playable.
 

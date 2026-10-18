@@ -42,10 +42,12 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 ### What every character gets for free (from `Fighter` and `GameSim`)
 - Walking left and right (A/D), always turning to face the opponent. Fighters can't walk through each other (pushboxes).
 - **Blocking:** hold the direction *away* from the opponent while standing or walking. A blocked hit does 0 damage and still pushes you back. It also puts you in **Blockstun** for 60% of the move's hitstun: you can't act, but you keep blocking while you hold back. You can't block during your own attack, a dash or hitstun. The numbers are `BlockstunPercent` and `BlockPushPercent` in `Fighter.cs`.
-- **Dashing:** double-tap a direction (two fresh presses within 12 ticks), or hold Left Shift and press a direction. Toward the opponent is a forward dash. It also works once per jump in the air (an air dash: straight across, no gravity). Override `ForwardDash` / `BackDash` / `AirDash` to change them.
-- **Jumping:** hold W (alone for straight up, with A/D to jump that way). Holding A/D in the air steers a little (`AirControl`), you can't block in the air, and you get one air attack per jump. Bodies don't push while someone is airborne, so you can jump over the opponent. Grabs can't catch an airborne fighter. Override `JumpArc` to change the jump.
+- **Dashing:** double-tap a direction (two fresh presses within 12 ticks), or hold Left Shift and press a direction. Toward the opponent is a forward dash. It also works once per jump in the air (an air dash: straight across, no gravity). Override `ForwardDash` / `BackDash` / `AirDash` to change them. The air dash ignores the dash cooldown but starts it, and slows, `OnDashStart` and `DashHitbox` apply to it like any dash (D-62).
+- **Jumping:** hold Space (alone for straight up, with A/D to jump that way). Holding A/D in the air steers a little (`AirControl`), you can't block in the air, and you get one air attack per jump. Bodies don't push while someone is airborne, so you can jump over the opponent. Grabs can't catch an airborne fighter. Override `JumpArc` to change the jump.
 - **Grab rules and back throws:** any hitbox with `grab` set ignores blocking but can't catch a stunned fighter; hold back when it lands to throw the victim behind you.
 - **The Ultimate meter:** fills from hits (dealt, taken and blocked). A move with `ultimate` set needs a full bar, spends it and freezes the match for a moment.
+- **Cooldowns:** when a move ends, that same move can't start again for its `cooldown` ticks (D-43). Dashes wait `DashCooldown` (20) after the last one.
+- **Status effects** that other characters can put on you: slow, bleed, scrambled controls, leeches, standing in a paint puddle or poison cloud. They live on the victim and are ticked by the kit (Design/DECISIONS.md D-46).
 - Hitstun, knockback, KO, best-of-3 rounds, and hitbox/hurtbox collisions.
 
 
@@ -64,7 +66,9 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 | Ultimate (O) | `StandardUltimate`: 30 dmg strike, needs a full meter | `UltimateMove` |
 | Jump + J | `StandardJumpLight`: quick air kick, 5 dmg | `JumpLightAttack` |
 | Jump + K | `StandardJumpHeavy`: big jump-in, 10 dmg | `JumpHeavyAttack` |
-| Dashes | about 1.8 units forward and back | `ForwardDash` / `BackDash` |
+| Dashes | about 1.8 units forward and back, 20-tick cooldown | `ForwardDash` / `BackDash` / `DashCooldown` |
+| Cooldowns | Light 5, Heavy 10, Grab 15, Special 30 ticks (`LightCooldown`...) | the move's `cooldown`, or `ModifyCooldown` for a rule |
+| Blocking | hold back | `CanBlock` (false = can't block at all) |
 | Jump | about 2.1 units high, 2 units across, 40 ticks | `JumpArc` |
 | Air control | a little steering with A/D in the air | `AirControl` (0 = fixed arc) |
 | When a move is allowed | always, except one Special projectile at a time | `CanUseMove(sim, move)`: call `base.CanUseMove` for moves you don't handle |
@@ -146,10 +150,30 @@ Need more than one hitbox (a two-hit combo, a sweep that grows)? Build the `Move
 | To ignore or change the player's input (stun, reversed controls) | Override `FilterInput(input)`. Sandbag returns 0 to ignore everything. |
 | A fighter that can't be KO'd | Override `CanBeKnockedOut` to return false; a lethal hit refills health instead. |
 | A new button | Add a bit in `Sim/Buttons.cs` (keep the old values), then a `Make(...)` line in `FightControls`. For inspector characters, also add it at the end of `AttackButton` in `CharacterDef.cs`. |
-| An engine rule the kit doesn't have yet (cancels, armor, poison, teleports...) | Check the extensions list in [Design/SHARED_KIT.md](../../Design/SHARED_KIT.md#extensions-build-when-a-design-needs-them): build it as a generic hook with a do-nothing default, plus a test in `KitTests.cs`. Never write `if (this is MyCharacter)` in `Fighter` or `GameSim`. |
+| A move you charge by holding its button | Set `holdButton`, `chargeTick` and `chargeMax` on the `MoveDef`. `chargeTicks` says how long it was held; use it in `OnHitboxSpawned` (Ruy's Hadoken in `Samurai.cs`). |
+| A move that repeats while held (rapid punches) | `holdButton`, `loopStart`, `loopEnd`, `loopMin`, `loopMax` on the `MoveDef` (`Nek.cs`). |
+| "Tap to switch, hold to use" | `holdButton` and `tapWindow`; a tap calls `OnTap` instead of playing the move (`PlagueDoctor.cs`). |
+| A damage / knockback bonus, a charged hit, a longer whip | `OnHitboxSpawned(sim, hit)` (when it's created) or `ModifyOutgoingHit(sim, victim, hit)` (when it lands). Change `hit.damage`, `hit.hitstun`, `hit.knockback`, `hit.box`; **never** `hit.def`, which both players share (D-25). |
+| Something on a given tick of a move (a jump, a teleport, placing a trap) | `OnMoveStart`, `OnMoveTick` (check `move` and `stateTick`), `OnMoveEnd`. A ground move that leaves the ground needs `keepOnLanding` (`Samurai.cs`'s Shoryuken). |
+| A different cooldown, or a shared one | `ModifyCooldown(move, ticks)`; `StartCooldown(move, ticks)` to put another move on cooldown; `ClearCooldowns()`. |
+| Invincible frames | Override `IsIntangible` (`Painter.cs`'s forward dash). Bodies still bump. |
+| A trap, or a hit at a chosen spot | `sim.SpawnHitboxAt(index, def, x, facing)` with `untilHit`, `groundOnly`, `armTicks` on the `HitboxDef`; `sim.CountHitboxes` / `RemoveOldestHitbox` for "max 2" (`Executioner.cs`). |
+| A warning before it lands | `sim.Telegraph(index, x, width, ticks)`: the view draws a red outline. |
+| Slow, bleed, scrambled controls, leeches, heal, a self-inflicted cost | On the victim: `ApplySlow`, `AddBleed`, `ApplyScramble`, `ApplyLeech`, `Heal`, `TakeDamage(sim, amount, canKO)`. Resist them with `IgnoresStatus` (`Elephant.cs`). |
+| A puddle or cloud on the floor | `sim.AddZone(new Zone { ... })` with a speed bonus, a slow or damage over time (`Painter.cs`, `PlagueDoctor.cs`). |
+| A lasso / whip grab | `pullTo` on the grab's `HitboxDef`. A grab that holds the victim: `holdTicks`, plus `ChooseHoldMove` for the follow-up (`Elephant.cs`). |
+| A reflector or a projectile eater | `reflectsProjectiles` / `destroysProjectiles` on a hitbox (with `ignoresFighters` if it shouldn't hit people). |
+| Hits that multiply when they land together | `stacks` on the hitboxes, and `StackMultiplier(count)`. |
+| Copies of yourself | `sim.SpawnSummon(index, x, ticks)` and `SummonCopiesMove(move)` (`Elephant.cs`'s Address Me). |
+| A dash that hits | Override `DashHitbox(forward)`. Something on a dash: `OnDashStart`. |
+| No meter for a while (a powered-up mode) | Override `CanGainMeter`. |
+| Something that must look random | `sim.Roll(salt)`: the same on both machines (D-47). Never `System.Random` in the sim. |
+| A line on the HUD (ammo, the selected potion) or a glow | `HudInfo` and `IsPoweredUp`. Cosmetic only, never hashed. |
+| The AI to use your mechanic properly | AI hints (read only, never hashed): `UltimateIsToggle`, `WantsSpecialSwitch(sim)`, `SpecialHoldTicks` (`Nek.cs`, `PlagueDoctor.cs`). The AI already respects cooldowns and `CanUseMove` by asking your `ChooseMove`. |
+| An engine rule the kit doesn't have yet (cancels, armor, teleports...) | Check the extensions list in [Design/SHARED_KIT.md](../../Design/SHARED_KIT.md#extensions-build-when-a-design-needs-them): build it as a generic hook with a do-nothing default, plus a test in `KitExtensionTests.cs`. Never write `if (this is MyCharacter)` in `Fighter` or `GameSim`. |
 
 
-**Extra state (meters, cooldowns, counters, stances) MUST be added to `HashExtra()`.** Otherwise online desyncs go unnoticed:
+**Extra state (meters, ammo, counters, stances) MUST be added to `HashExtra()`.** Otherwise online desyncs go unnoticed. (Move cooldowns, charge, statuses, zones and copies are kit state that `GameSim.Hash()` already covers.)
 
 
 ```csharp
@@ -173,6 +197,10 @@ The `Characters` folder is part of the deterministic simulation:
 - Sounds, particles and screen shake go in the View layer and react to `SimEvent`s (`AttackStart`, `Hit`, `Block`, `KO`).
 - Changing `Fighter` or `GameSim` rules means bumping `Version` in `RelayLockstepSession.cs`. Changing only your own character's numbers or code doesn't, as long as everyone plays the same build.
 
+
+## The launch roster
+
+Seven characters, each designed in `Design/Characters/<Name>.md` and built in its own class: Ruy (`Samurai.cs`, id 10), Paintress (`Painter.cs`, 11), Noir (`Cowboy.cs`, 12), Room (`Elephant.cs`, 13), The Executioner (`Executioner.cs`, 14), Dr. Remy (`PlagueDoctor.cs`, 15) and Nek (`Nek.cs`, 16). The class names are older than the in-game names (D-40). Each one's special rules have a test in `RosterTests.cs`. They're the best examples of the hooks above.
 
 ## The test characters
 
@@ -211,7 +239,11 @@ Both start on. The defaults are `Show Hurtboxes` / `Show Hitboxes` on the `World
 
 
 ### Placeholder boxes
-A character with no art is a **coloured box** the size of its hurtbox: blue for player 1 and red for player 2 (or the art asset's `Placeholder Color`). It turns lighter when attacking, darker in hitstun, cyan in blockstun and grey when KO'd. You can tell Brawler (wide) and Shooter (tall, thin) apart by shape.
+A character with no art is a **placeholder box** the size of its hurtbox, drawn in code by `Global/Scripts/View/PlaceholderArt.cs`: each character has its own colour, pattern and letter (R = Ruy, P = Paintress, N = Noir, E = Room, X = The Executioner, D = Dr. Remy, K = Nek, B/S/Z = the test characters), and a dark tab shows which way it faces. It turns lighter when attacking (brighter the longer a move is charged), darker in hitstun or when held, cyan in blockstun, gold-pulsing when powered up (Install, Rapid Fire), see-through while invincible, and grey when KO'd. If the character has an art asset, its `Placeholder Color` is used instead of the table's colour.
+
+Projectiles, traps, the canvas and the Guillotine with no sprite get a placeholder **shape** for their visual key (circle, bar, triangle, spikes...) in the owner's colour. Paint puddles and poison clouds are drawn as floor strips and clouds, Room's copies see-through, and the Guillotine's warning as a red outline.
+
+**Replacing a placeholder needs no code:** make the Code Character Art asset (below) and give it a Sprite or a View Prefab, plus a Projectile Sprite for each visual key (`special`, `bullet`, `gun`, `rat`, `rats`, `potion_slow`, `paint_splat`, `trap`, `guillotine`, `canvas`). Real art always wins. A single Sprite keeps the state tints until you untick **Tint By State** on the asset.
 
 
 ## Adding art and animation
@@ -269,6 +301,7 @@ Run the menu again after adding a move: it only adds the missing states and clip
 | `Hitstun` | Just got hit | Stretched over the hitstun |
 | `Blockstun` | Just blocked | Stretched over the blockstun |
 | `KO` | Knocked out | Plays over 1 second, then holds the last frame |
+| `Held` | Pinned by a held grab (Room's Trunk Grab) | Holds the first frame. Missing = `Hitstun` is shown |
 
 
 The **sim controls the frame**, not time: an attack clip is scrubbed over the move, so if the hitbox comes out on tick 4 of a 15-tick move, the frame 4/15 of the way through the clip is the one on screen when it hits. Make that your "impact" frame. The clip's length in seconds doesn't matter. A missing state shows `Idle` instead, so a half-finished Animator still works.

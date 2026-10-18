@@ -8,26 +8,28 @@ It sits outside `Assets/` on purpose, so Unity doesn't make `.meta` files for it
 |---|---|
 | [DECISIONS.md](DECISIONS.md) | Every design decision, the options we turned down, and why. Read it before changing a rule. |
 | [SHARED_KIT.md](SHARED_KIT.md) | The standard moveset every character gets (Light, Heavy, Block, Grab, Dash, Special, Ultimate, meter, rounds) and the engine changes it needs. |
-| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Build order, tasks, tests and coding practices. |
+| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Build order for the shared kit and the placeholders (done), tests and coding practices. |
+| [ROSTER_PLAN.md](ROSTER_PLAN.md) | Build order for the real character designs: kit-wide changes, then three passes (moves, Ultimates, perks), plus the cut list. **Done.** |
 | [Characters/_TEMPLATE.md](Characters/_TEMPLATE.md) | The form for designing a character's own moveset later. |
 | [Characters/_EXAMPLE.md](Characters/_EXAMPLE.md) | The template filled in for a made-up Caveman, to show what a finished design looks like. |
 
 ## The launch roster
 
-**For now every character is the same placeholder** (D-29): the same stats and the [standard kit](SHARED_KIT.md), including the same Special, Ultimate and (empty) perks. The goal is that all six exist, are selectable and play a full match. Their real movesets, looks and Old Tech(niques) will be designed later by the team and artists, using the [template](Characters/_TEMPLATE.md).
+**The team designed all seven characters** in the "Character Moveset - Moveset Tracker" sheet (2026-10-17, D-40), and **all seven are built** ([ROSTER_PLAN.md](ROSTER_PLAN.md)). Each one's design, with the questions that were answered and those still open, is in [Characters/](Characters/). Names follow the sheet (in-game display names too); the C# class names stay. Until artists deliver, each is drawn as a code-made placeholder with its own colour, pattern and letter (D-58).
 
-| Id | Character | Type (design target) | Class | Status |
-|---|---|---|---|---|
-| 10 | ArcadeGuy | Shoto | `ArcadeGuy` | Placeholder, in code |
-| 11 | Painter | Rushdown | `Painter` | Placeholder, in code |
-| 12 | Black and White Cowboy | Zoner | `Cowboy` | Placeholder, in code |
-| 13 | Elephant | Grappler | `Elephant` | Placeholder, in code |
-| 14 | Executioner | Trapper | `Executioner` | Placeholder, in code |
-| 15 | Plague Doctor | Mixup | `PlagueDoctor` | Placeholder, in code |
+| Id | Character | Type | Class | Design | Status |
+|---|---|---|---|---|---|
+| 10 | Ruy | Shoto | `Samurai` | [Ruy.md](Characters/Ruy.md) | Built; placeholder art (was ArcadeGuy, then Samurai) |
+| 11 | Paintress | Rushdown | `Painter` | [Paintress.md](Characters/Paintress.md) | Built; placeholder art |
+| 12 | Noir | Zoner | `Cowboy` | [Noir.md](Characters/Noir.md) | Built; placeholder art (was Black and White Cowboy) |
+| 13 | Room | Grappler | `Elephant` | [Room.md](Characters/Room.md) | Built; placeholder art |
+| 14 | The Executioner | Trapper | `Executioner` | [Executioner.md](Characters/Executioner.md) | Built; placeholder art |
+| 15 | Dr. Remy | Mixup | `PlagueDoctor` | [DrRemy.md](Characters/DrRemy.md) | Built; placeholder art (was Plague Doctor) |
+| 16 | Nek (temp name) | Powerup | `Nek` | [Nek.md](Characters/Nek.md) | Built; placeholder art |
 
-The type is only a target for the later design. It doesn't change anything in the placeholder.
+**Old Tech(niques) and eras are still TBD for everyone** (D-45). The sheet didn't include them.
 
-The test characters Brawler (0), Shooter (1) and Sandbag (2) stay. Ids 3-9 are free for more test characters, and **16 and up are free for new roster characters**.
+The test characters Brawler (0), Shooter (1) and Sandbag (2) stay. Ids 3-9 are free for more test characters, and **17 and up are free for new roster characters**.
 
 ## Status
 
@@ -36,7 +38,8 @@ The test characters Brawler (0), Shooter (1) and Sandbag (2) stay. Ids 3-9 are f
 | Shared kit (sim) | Done, with tests (K1-K7, K-end) |
 | HUD (meter, rounds), projectile art, sounds, AI update | Done (V1, A1) |
 | Six placeholder characters | Done in code (R1); art slots are Editor steps (R2) |
-| Real character designs | Waiting on the team |
+| Real character designs | Designed (D-40 to D-49) and built (D-50 to D-62, [ROSTER_PLAN.md](ROSTER_PLAN.md)); 181 EditMode tests pass. Online two-build match: to do by the team |
+| Real art | Waiting on the artists (placeholders drawn in code until then) |
 
 Update these tables when you finish a step.
 
