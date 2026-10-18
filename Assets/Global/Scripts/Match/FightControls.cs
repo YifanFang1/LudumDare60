@@ -49,7 +49,7 @@ public static class FightControls
             Make("Grab", Buttons.Grab, "<Keyboard>/l"),
             Make("Special", Buttons.Special, "<Keyboard>/i"),
             Make("Ultimate", Buttons.Ultimate, "<Keyboard>/o"),
-            Make("Jump", Buttons.Up, "<Keyboard>/w"),   // new keys go last, because Hint() finds keys by position
+            Make("Jump", Buttons.Up, "<Keyboard>/space"),   // new keys go last, because Hint() finds keys by position
             Make("Dash", Buttons.Dash, "<Keyboard>/leftShift"),
             // No "Block" line: blocking is holding away from the opponent, so the Block bit is unused.
         };
