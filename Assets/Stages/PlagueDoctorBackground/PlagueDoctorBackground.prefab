@@ -47,6 +47,8 @@ MonoBehaviour:
   layers:
   - name: Sky
     sprite: {fileID: 21300000, guid: 04976559144225a4f90dc41ab2ff68b7, type: 3}
+    frames: []
+    framesPerSecond: 8
     followCamera: 0.9
     tile: 0
     driftSpeed: 0
@@ -54,8 +56,24 @@ MonoBehaviour:
     y: 0
     scale: 8
     tint: {r: 1, g: 1, b: 1, a: 1}
+  - name: Bell
+    sprite: {fileID: 21300000, guid: cde66e17182e3504da47053bb4b9a245, type: 3}
+    frames:
+    - {fileID: -6539719876377865796, guid: 06a79d9b43032954ab9ec82084860172, type: 3}
+    - {fileID: -3453514716393394139, guid: a0a0bb64c696a2e4b9f60dd15d8c81e3, type: 3}
+    - {fileID: -3790839739465131683, guid: 101a3d42d9356a84583f40d397bd7a2e, type: 3}
+    framesPerSecond: 2
+    followCamera: 0
+    tile: 0
+    driftSpeed: 0
+    x: 0
+    y: -1.28
+    scale: 8
+    tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Background
     sprite: {fileID: 21300000, guid: 698337ea3de23b64ca2b4a0eb599aac9, type: 3}
+    frames: []
+    framesPerSecond: 8
     followCamera: 0.6
     tile: 0
     driftSpeed: 0
@@ -65,6 +83,8 @@ MonoBehaviour:
     tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Midground
     sprite: {fileID: 21300000, guid: a173f5633589f12419363d60d326914a, type: 3}
+    frames: []
+    framesPerSecond: 8
     followCamera: 0.35
     tile: 0
     driftSpeed: 0
@@ -74,6 +94,8 @@ MonoBehaviour:
     tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Foreground
     sprite: {fileID: 21300000, guid: cde66e17182e3504da47053bb4b9a245, type: 3}
+    frames: []
+    framesPerSecond: 8
     followCamera: 0
     tile: 0
     driftSpeed: 0
