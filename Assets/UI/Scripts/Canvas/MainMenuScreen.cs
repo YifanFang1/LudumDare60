@@ -26,17 +26,24 @@ public class MainMenuScreen : MonoBehaviour
         if (creditsButton != null) creditsButton.onClick.AddListener(() => { AudioManager.Click(); screens.GoTo(MenuPage.Credits); });
         if (quitButton != null)
         {
-#if UNITY_WEBGL && !UNITY_EDITOR
-            quitButton.gameObject.SetActive(false);   // a browser tab cannot be quit from inside the page
-#else
             quitButton.onClick.AddListener(() =>
             {
                 AudioManager.Click();
                 quitButton.interactable = false;
                 // switch off like an old TV right away, then the game closes
+#if UNITY_WEBGL && !UNITY_EDITOR
+                // a browser tab cannot be closed from the page: the TV switches back on at the title screen instead
+                GameObject tv = null;
+                tv = TvOffEffect.Play(screens.transform, 0f, () =>
+                {
+                    if (tv != null) Destroy(tv);
+                    quitButton.interactable = true;
+                    screens.GoTo(MenuPage.Title, true);   // no glitch, back to the "press any button" screen
+                });
+#else
                 TvOffEffect.Play(screens.transform, 0f, Quit);
-            });
 #endif
+            });
         }
     }
 

@@ -59,12 +59,18 @@ public class MatchScreens : MonoBehaviour
     bool shownReady;
 
     // Go to another page (Main, Controls, Play = the lobby). Used by the buttons on the screens.
-    public void GoTo(MenuPage next)
+    public void GoTo(MenuPage next) { GoTo(next, false); }
+
+    // instant = skip the glitch and cut straight to the page (Quit's TV-off already covers the change).
+    public void GoTo(MenuPage next, bool instant)
     {
         if (next == page) return;
         previousPage = page;
         page = next;
+        if (instant) instantChange = true;
     }
+
+    bool instantChange;
 
     public void GoBack()
     {
@@ -112,6 +118,12 @@ public class MatchScreens : MonoBehaviour
             shownPhase = phase;
             shownPage = page;
             shownReady = true;
+        }
+        else if (instantChange && (shownPhase != phase || shownPage != page))
+        {
+            instantChange = false;
+            shownPhase = phase;
+            shownPage = page;
         }
         else if (!transition.Busy && (shownPhase != phase || shownPage != page))
         {

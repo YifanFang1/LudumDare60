@@ -68,6 +68,13 @@ public class Nek : BaseFighter
 
     public override void OnTick(GameSim sim)
     {
+        // A knocked-out Nek switches Install off, so the bar stops draining once he is dead.
+        if (hp <= 0)
+        {
+            installOn = false;
+            return;
+        }
+
         if ((pressedInput & Buttons.Ultimate) != 0 && CanToggleInstall)
         {
             if (installOn) installOn = false;

@@ -21,7 +21,7 @@ public class TvOffEffect : MonoBehaviour
     Action done;
 
     // Starts the effect under `canvas` (a full-screen canvas transform). `done` runs at the very end.
-    public static void Play(Transform canvas, float wait, Action done)
+    public static GameObject Play(Transform canvas, float wait, Action done)
     {
         GameObject go = new GameObject("TvOffEffect", typeof(RectTransform));
         go.transform.SetParent(canvas, false);
@@ -37,6 +37,7 @@ public class TvOffEffect : MonoBehaviour
         fx.done = done;
         fx.Build();
         fx.StartCoroutine(fx.Run());
+        return go;
     }
 
     Image Make(string name, Color color, bool raycast = false)
