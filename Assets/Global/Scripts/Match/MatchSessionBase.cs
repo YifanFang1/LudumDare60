@@ -35,6 +35,9 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
     }
 
     public string NameOf(int slot) { return names[slot]; }
+    public string OpponentName { get; protected set; }
+    public bool RematchRequested { get; protected set; }
+    public bool OpponentWantsRematch { get; protected set; }
 
     // For subclasses: the opponent's name arrived (empty names are ignored).
     protected void SetName(int slot, string name)
@@ -65,6 +68,7 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
         Warning = "";
         Status = "";
         RoomCode = "";
+        OpponentName = "";
     }
 
     protected virtual void Update()
@@ -98,6 +102,13 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
         StartMatch(setup, new KeyboardInputSource(), new AIInputSource(sim, 1), 0, 0, false);
     }
 
+    // Vs AI: straight back to character select. The online session overrides this to ask the other player first.
+    public virtual void Rematch()
+    {
+        if (Phase != MatchPhase.Playing) return;
+        BackToCharacterSelect(ChoosesOpponent);
+    }
+
     // Subclasses that have no online mode just say so.
     public virtual void QuickMatch() { Status = "Online play is not available in this build"; }
     public virtual void CreateRoom() { Status = "Online play is not available in this build"; }
@@ -116,6 +127,18 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
         CharacterConfirmed = false;
         Status = "";
         Phase = MatchPhase.CharacterSelect;
+    }
+
+    // Ends the running match without leaving the room and opens character select again.
+    protected void BackToCharacterSelect(bool choosesOpponent)
+    {
+        bool wasPlaying = Phase == MatchPhase.Playing;
+        runner.Running = false;
+        Warning = "";
+        RematchRequested = false;
+        OpponentWantsRematch = false;
+        EnterCharacterSelect(choosesOpponent);
+        if (wasPlaying && MatchEnded != null) MatchEnded();
     }
 
     // Build the fighters, reset the sim, and start ticking. `delay` is the input delay in ticks
@@ -144,6 +167,9 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
         runner.Running = false;
         Phase = MatchPhase.Lobby;
         Warning = "";
+        OpponentName = "";
+        RematchRequested = false;
+        OpponentWantsRematch = false;
         if (wasPlaying && MatchEnded != null) MatchEnded();
     }
 

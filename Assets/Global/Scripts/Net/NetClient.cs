@@ -7,6 +7,8 @@ using NativeWebSocket;   // Package Manager > Add package from git URL:
 //   we send:     i,<tick>,<bits>    input for a tick
 //                h,<tick>,<hash>    state hash, to detect desyncs
 //                c,<characterId>    our character pick
+//                r                  we want a rematch
+//                p                  keepalive while waiting in a room
 //   we receive:  start,<slot>,<seed>,<delay>   both players are in
 //                i,... h,... c,...  forwarded from the other player
 //                full / badversion / left      status messages
@@ -19,6 +21,7 @@ public class NetClient
     public Action<int, int> OnInput;        // tick, bits   (other player's)
     public Action<int, int> OnHash;         // tick, hash   (other player's)
     public Action<string> OnName;           // the other player's display name
+    public Action OnRematch;                // the other player wants a rematch
     public Action<int> OnCharacter;         // character id (other player's pick)
     public Action<string> OnStatus;         // "full", "badversion", "left", "closed", "error: ..."
 
@@ -62,6 +65,7 @@ public class NetClient
         OnInput = null;
         OnHash = null;
         OnCharacter = null;
+        OnRematch = null;
         OnName = null;
         OnStatus = null;
         if (ws != null)
@@ -95,6 +99,14 @@ public class NetClient
         else if (p[0] == "n" && p.Length >= 2)
         {
             if (OnName != null) OnName(text.Substring(2));
+        }
+        else if (p[0] == "r")
+        {
+            if (OnRematch != null) OnRematch();
+        }
+        else if (p[0] == "p")
+        {
+            // keepalive, nothing to do
         }
         else if (p[0] == "c" && p.Length >= 2)
         {

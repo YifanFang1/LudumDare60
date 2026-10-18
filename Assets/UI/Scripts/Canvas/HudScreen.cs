@@ -30,6 +30,8 @@ public class HudScreen : MonoBehaviour
     public GameObject resultPanel;
     public TMP_Text resultText;
     public Button resultButton;
+    public Button rematchButton;         // made at runtime next to resultButton when left empty
+    TMP_Text rematchLabel;
 
     [Header("Names floating above the fighters")]
     public RectTransform worldNameLayer;        // stretched over the whole screen, pivot in the middle
@@ -81,6 +83,7 @@ public class HudScreen : MonoBehaviour
         }
         if (!wired && resultButton != null)
         {
+            MakeRematchButton();
             resultButton.onClick.AddListener(() =>
             {
                 AudioManager.Click();
@@ -88,6 +91,30 @@ public class HudScreen : MonoBehaviour
             });
             wired = true;
         }
+    }
+
+    // Copies the Back button: Rematch on the left, Back on the right.
+    void MakeRematchButton()
+    {
+        if (rematchButton == null)
+        {
+            rematchButton = Instantiate(resultButton, resultButton.transform.parent);
+            rematchButton.name = "RematchButton";
+            rematchButton.onClick.RemoveAllListeners();
+            RectTransform a = (RectTransform)rematchButton.transform;
+            RectTransform b = (RectTransform)resultButton.transform;
+            a.sizeDelta = b.sizeDelta = new Vector2(290f, b.sizeDelta.y);
+            a.anchoredPosition = new Vector2(-160f, b.anchoredPosition.y);
+            b.anchoredPosition = new Vector2(160f, b.anchoredPosition.y);
+        }
+        rematchLabel = rematchButton.GetComponentInChildren<TMP_Text>(true);
+        TMP_Text backLabel = resultButton.GetComponentInChildren<TMP_Text>(true);
+        if (backLabel != null) backLabel.text = "Menu";
+        rematchButton.onClick.AddListener(() =>
+        {
+            AudioManager.Confirm();
+            match.Rematch();
+        });
     }
 
     void Update()
@@ -123,6 +150,11 @@ public class HudScreen : MonoBehaviour
         {
             int winner = sim.Winner;
             SetText(resultText, winner == 2 ? "Draw" : match.NameOf(winner) + "\nwins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
+            if (rematchButton != null)
+            {
+                rematchButton.interactable = !match.RematchRequested;
+                SetText(rematchLabel, match.RematchRequested ? "Waiting..." : match.OpponentWantsRematch ? "Rematch!" : "Rematch");
+            }
         }
 
         UpdateWorldNames(sim);

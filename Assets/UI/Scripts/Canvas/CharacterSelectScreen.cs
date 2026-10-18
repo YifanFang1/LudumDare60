@@ -72,7 +72,12 @@ public class CharacterSelectScreen : MonoBehaviour
         if (youTabLabel != null) youTabLabel.text = "You: " + CharacterList.NameOf(match.LocalCharacter);
         if (opponentTabLabel != null) opponentTabLabel.text = "Opponent: " + CharacterList.NameOf(match.OpponentCharacter);
 
-        if (titleText != null) titleText.text = choosesOpponent ? "Choose characters" : "Choose your character";
+        if (titleText != null)
+        {
+            string title = choosesOpponent ? "Choose characters" : "Choose your character";
+            if (!choosesOpponent && match.OpponentName.Length > 0) title += "\nvs " + match.OpponentName;
+            titleText.text = title;
+        }
         if (confirmButton != null) confirmButton.gameObject.SetActive(!match.CharacterConfirmed);
         if (confirmLabel != null) confirmLabel.text = choosesOpponent ? "Fight!" : "Ready";
         if (backLabel != null) backLabel.text = choosesOpponent ? "Back" : "Leave room";

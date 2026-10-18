@@ -24,6 +24,7 @@ public interface IMatchSession
     // Names shown above the fighters and under the health bars.
     string LocalName { get; set; }     // your own name (remembered between sessions)
     string NameOf(int slot);           // the name to show for fighter 0 or 1
+    string OpponentName { get; }       // the other player's name once it is known online, "" before that and vs AI
 
     // Character ids (see CharacterList). For Play vs AI: yours and the AI's.
     // Online, only LocalCharacter is yours to set; the opponent picks their own.
@@ -35,6 +36,11 @@ public interface IMatchSession
     // every player has confirmed: right away vs AI, when both have picked online.
     bool ChoosesOpponent { get; }       // true vs AI: you also pick the AI's character
     bool CharacterConfirmed { get; }    // you have locked in your pick
+
+    // Rematch (after a match is over): back to character select with the same opponent.
+    // Vs AI it happens at once; online both players have to ask for it.
+    bool RematchRequested { get; }      // you asked and are waiting for the opponent
+    bool OpponentWantsRematch { get; }  // the opponent asked
 
     // Optional online extras. When SupportsRooms is false the lobby simply hides them.
     bool SupportsRooms { get; }
@@ -52,6 +58,7 @@ public interface IMatchSession
     void PlayVsAI();
     void QuickMatch();              // join whoever is waiting, or wait to be joined (needs SupportsRooms)
     void ConfirmCharacter();
+    void Rematch();
     void CreateRoom();
     void JoinRoom(string code);
     void Leave();

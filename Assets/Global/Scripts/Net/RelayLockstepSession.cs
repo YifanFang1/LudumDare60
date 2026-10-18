@@ -23,7 +23,8 @@ public class RelayLockstepSession : MatchSessionBase
     // (Design/ROSTER_PLAN.md: cooldowns, hold input, status effects, zones, Ultimate copies, held
     // grabs, the seven characters' movesets) and the air dash + Dash button. 11: the merge of both,
     // so a build with only one of them can never match a build with both.
-    const string Version = "11";
+    // 12: rematch ("r" message) and keepalive ("p").
+    const string Version = "12";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 
@@ -37,6 +38,11 @@ public class RelayLockstepSession : MatchSessionBase
     public bool fetchServerCharacters = true;
     public bool fetchInEditor = false;
     public bool CharactersLoading { get; private set; }
+
+    // Waiting in a Quick match room for longer than this puts you back in the queue (a fresh room, or
+    // someone else's), so a room the server has forgotten about can never strand you.
+    public float quickRefreshSeconds = 20f;
+    const float KeepAliveSeconds = 15f;
 
     public override bool SupportsRooms { get { return true; } }
     public override string ServerAddress { get { return relayUrl; } set { relayUrl = value; } }
@@ -98,10 +104,23 @@ public class RelayLockstepSession : MatchSessionBase
         CharactersLoading = false;
     }
 
+    float waitingSince, lastPing;
+    bool refreshing;
+
     protected override void Update()
     {
         if (net != null) net.Tick();
         base.Update();
+
+        if (Phase == MatchPhase.Waiting && net != null)
+        {
+            if (Time.unscaledTime - lastPing > KeepAliveSeconds)
+            {
+                lastPing = Time.unscaledTime;
+                net.Send("p");
+            }
+            if (IsQuickMatch && !refreshing && Time.unscaledTime - waitingSince > quickRefreshSeconds) RefreshQuickMatch();
+        }
     }
 
     // ---------- commands ----------
@@ -115,6 +134,45 @@ public class RelayLockstepSession : MatchSessionBase
     }
 
     bool quickBusy;
+
+    // Still waiting in a Quick match room: drop it and queue again without going back to the menu.
+    void RefreshQuickMatch()
+    {
+        if (refreshing || quickBusy) return;
+        StartCoroutine(RefreshQuickRoutine());
+    }
+
+    IEnumerator RefreshQuickRoutine()
+    {
+        refreshing = true;
+        CloseNet();                        // the old room empties and drops out of the queue
+        Status = "Finding a match...";
+        yield return new WaitForSecondsRealtime(1f);   // also stops a flapping connection from looping instantly
+
+        if (Phase == MatchPhase.Waiting)   // the player may have cancelled meanwhile
+        {
+            using (UnityWebRequest request = UnityWebRequest.Get(HttpBase(relayUrl) + "/quick"))
+            {
+                yield return request.SendWebRequest();
+
+                string code = request.result == UnityWebRequest.Result.Success ? request.downloadHandler.text.Trim().ToUpper() : "";
+                if (Phase == MatchPhase.Waiting)
+                {
+                    if (code.Length != 4)
+                    {
+                        Leave();
+                        Status = "Could not reach the server for quick match";
+                    }
+                    else
+                    {
+                        StartOnline(code, true);
+                        IsQuickMatch = true;
+                    }
+                }
+            }
+        }
+        refreshing = false;
+    }
 
     IEnumerator QuickMatchRoutine()
     {
@@ -180,6 +238,8 @@ public class RelayLockstepSession : MatchSessionBase
 #endif
 
         Leave();
+        waitingSince = Time.unscaledTime;
+        lastPing = Time.unscaledTime;
         RoomCode = code;
         Status = "Connecting...";
         Phase = MatchPhase.Waiting;   // set BEFORE connecting: a quick failure must be able to send us back to the lobby
@@ -188,7 +248,13 @@ public class RelayLockstepSession : MatchSessionBase
         net.OnOpen = () => { Status = "Connected. Waiting for an opponent..."; };
         net.OnStart = BeginCharacterSelect;
         net.OnCharacter = OnTheirCharacter;
-        net.OnName = (name) => { theirName = name; };
+        net.OnName = (name) =>
+        {
+            theirName = name;
+            OpponentName = PlayerNames.Clean(name).Trim();
+            if (Phase == MatchPhase.Playing) SetName(1 - LocalSlot, name);
+        };
+        net.OnRematch = OnTheirRematch;
         net.OnStatus = HandleStatus;
         net.Connect(relayUrl, code, Version + "-" + CharacterList.DataHash(), isPublic);
     }
@@ -196,6 +262,7 @@ public class RelayLockstepSession : MatchSessionBase
     // Both players are in: pick characters before the fight starts.
     void BeginCharacterSelect(int slot, int seed, int delay)
     {
+        LocalSlot = slot;
         pendingSlot = slot;
         pendingSeed = seed;
         pendingDelay = delay;
@@ -214,6 +281,31 @@ public class RelayLockstepSession : MatchSessionBase
         net.Send("c," + myPick);
         Status = "Waiting for opponent to pick...";
         TryBeginOnlineMatch();
+    }
+
+    // Online both players have to agree. The first to ask waits; when both have asked, both go back to
+    // character select with a new seed worked out the same way on each side.
+    public override void Rematch()
+    {
+        if (net == null) { base.Rematch(); return; }
+        if (Phase != MatchPhase.Playing || RematchRequested) return;
+        RematchRequested = true;
+        net.Send("r");
+        TryBeginRematch();
+    }
+
+    void OnTheirRematch()
+    {
+        OpponentWantsRematch = true;
+        TryBeginRematch();
+    }
+
+    void TryBeginRematch()
+    {
+        if (!RematchRequested || !OpponentWantsRematch) return;
+        pendingSeed = (int)(((long)pendingSeed * 1103515245L + 12345L) % 1000000000L);
+        haveTheirPick = false;
+        BackToCharacterSelect(false);
     }
 
     void OnTheirCharacter(int id)
@@ -263,6 +355,13 @@ public class RelayLockstepSession : MatchSessionBase
 
     void HandleStatus(string status)
     {
+        // The connection dropped while waiting for a Quick match: queue again instead of giving up.
+        if (Phase == MatchPhase.Waiting && IsQuickMatch && !refreshing && (status == "closed" || status.StartsWith("error")))
+        {
+            RefreshQuickMatch();
+            return;
+        }
+
         string text;
         if (status == "full") text = "Room is full";
         else if (status == "badversion") text = "Other player has a different version. Refresh the page.";

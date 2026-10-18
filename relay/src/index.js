@@ -125,8 +125,19 @@ const LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // same alphabet as the client: no I
 export class Matchmaker {
   constructor(state, env) {
     this.env = env;
+    this.state = state;
     this.pool = new Map(); // code -> time it was added
     this.queue = Promise.resolve(); // one request at a time, so two callers never grab the same room
+    // The pool is kept in storage too: if Cloudflare restarts this object while a host is waiting,
+    // the waiting room is still found instead of being forgotten.
+    state.blockConcurrencyWhile(async () => {
+      const saved = await state.storage.get("pool");
+      if (saved) this.pool = new Map(saved);
+    });
+  }
+
+  save() {
+    return this.state.storage.put("pool", [...this.pool.entries()]);
   }
 
   fetch(request) {
@@ -139,6 +150,7 @@ export class Matchmaker {
 
   async add(code) {
     if (code) this.pool.set(code, Date.now());
+    await this.save();
     return "ok";
   }
 
@@ -154,11 +166,15 @@ export class Matchmaker {
       this.pool.delete(code);
       const inside = await this.playersIn(code);
       // 1 = a host is waiting. 0 = the host is still connecting (give it 10 seconds).
-      if (inside === 1 || (inside === 0 && Date.now() - since < 10000)) return code;
+      if (inside === 1 || (inside === 0 && Date.now() - since < 10000)) {
+        await this.save();
+        return code;
+      }
     }
     let code = "";
     for (let i = 0; i < 4; i++) code += LETTERS[Math.floor(Math.random() * LETTERS.length)];
     this.pool.set(code, Date.now()); // so the next quick player finds this room
+    await this.save();
     return code;
   }
 }
