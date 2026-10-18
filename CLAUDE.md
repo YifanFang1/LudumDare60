@@ -84,7 +84,7 @@ The plan is 7 characters at launch, with more later. **The plan, the shared move
 - A proper character select screen and online lobby, including sending each player's character choice over the network.
 
 
-Default keys: A/D move (hold away from the opponent to block, tap twice or hold Left Shift to dash, also in the air), W jump (J/K in the air for an air attack), S down, J light, K heavy, L grab, I special, O ultimate. They can be rebound in `FightControls`. `Buttons.Block` (64) is reserved and unused: blocking is holding back.
+Default keys: A/D move (hold away from the opponent to block, tap twice or hold Left Shift to dash, also in the air), Space jump (J/K in the air for an air attack), S down, J light, K heavy, L grab, I special, O ultimate. They can be rebound in `FightControls`. `Buttons.Block` (64) is reserved and unused: blocking is holding back.
 
 
 ## Commands

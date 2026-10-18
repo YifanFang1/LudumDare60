@@ -466,6 +466,19 @@ public class RosterTests
     }
 
     [Test]
+    public void RoomAndTheExecutionerHaveAShortAirDash()
+    {
+        int[] heavy = { Elephant.Id, Executioner.Id };
+        for (int i = 0; i < heavy.Length; i++)
+        {
+            DashDef air = CharacterList.Create(heavy[i]).AirDash;
+            Assert.AreEqual(12, air.ticks);
+            Assert.AreEqual(70, air.speed, CharacterList.NameOf(heavy[i]) + " has the short air dash (merge, D-62)");
+        }
+        Assert.AreEqual(110, CharacterList.Create(Samurai.Id).AirDash.speed, "everyone else has the standard one");
+    }
+
+    [Test]
     public void RoomDashCooldownIsLong()
     {
         Assert.AreEqual(60, CharacterList.Create(Elephant.Id).DashCooldown);
@@ -638,6 +651,28 @@ public class RosterTests
         Assert.AreEqual(FighterStateId.Dash, p.state);
         Assert.IsFalse(p.IsIntangible);
         Assert.AreEqual(75 - Painter.BackDashCost, p.hp);
+    }
+
+    [Test]
+    public void PaintressDashPerksApplyToAirDashesToo()
+    {
+        GameSim sim = NewMatch(Painter.Id, Sandbag.Id, 8000);
+        Fighter p = sim.fighters[0];
+
+        sim.Step(Buttons.Up, None);
+        Run(sim, None, None, 6);
+        sim.Step(Buttons.Dash | Buttons.Right, None);   // toward the Sandbag
+        Assert.IsTrue(p.IsAirborne && p.state == FighterStateId.Dash);
+        Assert.IsTrue(p.IsIntangible, "a forward air dash is invincible");
+        Assert.AreEqual(75, p.hp);
+
+        while (p.IsAirborne) sim.Step(None, None);
+        Run(sim, None, None, Fighter.StandardDashCooldown + 40);
+        sim.Step(Buttons.Up, None);
+        Run(sim, None, None, 6);
+        sim.Step(Buttons.Dash | Buttons.Left, None);    // away
+        Assert.IsTrue(p.IsAirborne && p.state == FighterStateId.Dash);
+        Assert.AreEqual(75 - Painter.BackDashCost, p.hp, "a back air dash costs HP");
     }
 
     [Test]

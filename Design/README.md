@@ -38,7 +38,7 @@ The test characters Brawler (0), Shooter (1) and Sandbag (2) stay. Ids 3-9 are f
 | Shared kit (sim) | Done, with tests (K1-K7, K-end) |
 | HUD (meter, rounds), projectile art, sounds, AI update | Done (V1, A1) |
 | Six placeholder characters | Done in code (R1); art slots are Editor steps (R2) |
-| Real character designs | Designed (D-40 to D-49) and built (D-50 to D-61, [ROSTER_PLAN.md](ROSTER_PLAN.md)); 170 EditMode tests pass. Online two-build match: to do by the team |
+| Real character designs | Designed (D-40 to D-49) and built (D-50 to D-62, [ROSTER_PLAN.md](ROSTER_PLAN.md)); 181 EditMode tests pass. Online two-build match: to do by the team |
 | Real art | Waiting on the artists (placeholders drawn in code until then) |
 
 Update these tables when you finish a step.

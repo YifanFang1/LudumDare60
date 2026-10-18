@@ -6,7 +6,7 @@
 //                  (1.8 -> 2.8 units over 60 ticks), not damage. Adds a bleed stack.
 //   Grab (L)       Iron Maiden: a whip grab from about 2.5 units that pulls them in. 15 damage,
 //                  adds a bleed stack.
-//   Dashes         slow and heavy, 60-tick cooldown.
+//   Dashes         slow and heavy, 60-tick cooldown, and a short air dash.
 //   Special (I)    Bear Trap: dropped at his feet, max 2 (a 3rd replaces the oldest). It arms after
 //                  20 ticks, waits until stepped on (jumping avoids it), and can't be blocked.
 //                  3 damage, 10 hitstun, a 3-second slow and a bleed stack.
@@ -97,6 +97,8 @@ public class Executioner : BaseFighter
     public override DashDef ForwardDash { get { return new DashDef(22, 80); } }
     public override DashDef BackDash { get { return new DashDef(24, 70); } }
     public override int DashCooldown { get { return 60; } }
+    // Heavy in the air too: a short, slow air dash (0.84 units; the standard is 1.3).
+    public override DashDef AirDash { get { return new DashDef(12, 70); } }
 
     public override void OnHitboxSpawned(GameSim sim, HitboxInstance hit)
     {

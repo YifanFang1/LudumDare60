@@ -130,6 +130,46 @@ public class KitExtensionTests
         Assert.AreEqual(FighterStateId.Dash, f.state, "the cooldown is over");
     }
 
+    // Main's air dash meets our dash cooldown (merge, D-62): once per jump is the air dash's limit,
+    // so it ignores the cooldown, but it starts it.
+    [Test]
+    public void AirDashIgnoresTheDashCooldownButStartsIt()
+    {
+        GameSim sim = NewMatch(new KitFighter(), new KitFighter(), 12000);
+        Fighter f = sim.fighters[0];
+
+        sim.Step(Buttons.Dash | Buttons.Right, None);   // a ground dash starts the cooldown
+        while (f.state == FighterStateId.Dash) sim.Step(None, None);
+        sim.Step(Buttons.Up, None);
+        Run(sim, None, None, 6);
+        Assert.Greater(f.dashCooldown, 0, "set-up: the ground dash's cooldown is still running");
+
+        sim.Step(Buttons.Dash | Buttons.Right, None);
+        Assert.AreEqual(FighterStateId.Dash, f.state, "the air dash doesn't wait for it");
+        Assert.IsTrue(f.IsAirborne);
+
+        while (f.IsAirborne) sim.Step(None, None);
+        Assert.Greater(f.dashCooldown, 0, "the air dash started the cooldown again");
+        sim.Step(None, None);
+        sim.Step(Buttons.Dash | Buttons.Right, None);
+        Assert.AreNotEqual(FighterStateId.Dash, f.state, "so no ground dash straight after landing");
+    }
+
+    [Test]
+    public void AirDashIsSlowedLikeAnyDash()
+    {
+        GameSim sim = NewMatch(new KitFighter(), new KitFighter(), 12000);
+        Fighter f = sim.fighters[0];
+        f.ApplySlow(40, 300);
+        sim.Step(Buttons.Up, None);
+        Run(sim, None, None, 6);
+
+        sim.Step(Buttons.Dash | Buttons.Right, None);
+
+        Assert.AreEqual(FighterStateId.Dash, f.state);
+        Assert.AreEqual(f.AirDash.speed * 60 / 100, f.vx);
+    }
+
     [Test]
     public void StandardMovesHaveTheStandardCooldowns()
     {

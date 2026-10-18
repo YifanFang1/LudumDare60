@@ -7,7 +7,8 @@
 //   Heavy (K)      Trunk slam: slow (18 ticks), big (18 damage).
 //   Grab (L)       Trunk Grab: HOLDS the victim for 60 ticks. During the hold only Vine Boom (I)
 //                  works, and it can't miss; without it the hold ends in a normal throw.
-//   Dashes         slow and heavy, 60-tick cooldown. The forward dash is a hit (perk 1).
+//   Dashes         slow and heavy, 60-tick cooldown, and a short air dash. A forward dash (ground
+//                  or air) is a hit (perk 1).
 //   Special (I)    Vine Boom: hits all around him and destroys enemy projectiles. Booms that land
 //                  on the same tick (his and his copies') stack: x2, x4, capped at x4.
 //   Ultimate (O)   Address Me: 4 copies at fixed spots copy his walking, Light, Heavy and Vine Boom
@@ -88,6 +89,8 @@ public class Elephant : BaseFighter
     public override DashDef ForwardDash { get { return new DashDef(24 * (100 + MissingHpPercent) / 100, 80); } }
     public override DashDef BackDash { get { return new DashDef(24, 70); } }
     public override int DashCooldown { get { return 60; } }
+    // Heavy in the air too: a short, slow air dash (0.84 units; the standard is 1.3).
+    public override DashDef AirDash { get { return new DashDef(12, 70); } }
     public override HitboxDef DashHitbox(bool forward) { return forward ? StampedeHit : null; }
 
     public override MoveDef ChooseHoldMove(GameSim sim, int input)

@@ -9,7 +9,7 @@ Contents: [Controls](#controls) · [The standard moveset](#the-standard-moveset)
 | Key | Action | Bit in `Sim/Buttons.cs` |
 |---|---|---|
 | A / D | Walk. Hold away from the opponent to block. Double-tap to dash (also in the air, once per jump). | `Left = 1`, `Right = 2` (existing) |
-| W | Jump (held), see [Jump](#jump) | `Up = 4` |
+| Space | Jump (held), see [Jump](#jump) | `Up = 4` |
 | S | Down (unused by the sim for now, D-22) | `Down = 8` (existing) |
 | J | Light | `Light = 16` (existing) |
 | K | Heavy | `Heavy = 32` (existing) |
@@ -41,8 +41,8 @@ These are `BaseFighter`'s defaults, stored as `static readonly` moves (`Standard
 | Ultimate (O) | 6 (after the freeze) | 4 | 45 | 30 | 40 | 120 | `Box(300, 0, 2000, 2200)` | A big blockable strike (D-11). Gives no meter |
 | Forward dash | - | - | 14 | - | - | speed 130 | - | Travels ~1.8 units |
 | Back dash | - | - | 16 | - | - | speed 110 | - | Travels ~1.8 units |
-| Jump Light (W, then J) | 3 | 8 | 14 | 5 | 14 | 30 | `Box(200, 0, 800, 700)` | Air only, once per jump |
-| Jump Heavy (W, then K) | 6 | 6 | 24 | 10 | 20 | 60 | `Box(100, 0, 1000, 900)` | Air only, once per jump |
+| Jump Light (Space, then J) | 3 | 8 | 14 | 5 | 14 | 30 | `Box(200, 0, 800, 700)` | Air only, once per jump |
+| Jump Heavy (Space, then K) | 6 | 6 | 24 | 10 | 20 | 60 | `Box(100, 0, 1000, 900)` | Air only, once per jump |
 | Jump | - | - | 40 | - | - | up 210, forward 50, air control 3 | - | Peaks ~2.1 units, travels ~2 units |
 | Perks | - | - | - | - | - | - | - | None for now (D-12, D-29) |
 
@@ -79,6 +79,7 @@ New state `FighterStateId.Dash` (appended **at the end** of the enum so the old 
 - **Direction:** toward the opponent = forward dash, away = back dash. It's decided when the dash starts.
 - **During a dash:** `vx = direction * speed` for the dash's `ticks`, then Idle. You can't block or attack. You *can* be hit and grabbed.
 - **Shift dash:** holding `Dash` (Left Shift) with Left or Right dashes on the tick either one is freshly pressed, so holding both dashes once and then walks.
+- **Dash cooldown (D-43, D-62):** a ground dash waits `DashCooldown` (20) ticks after the last dash. The air dash ignores it (once per jump is its limit) but starts it. Slows and dash perks apply to air dashes too.
 - **Air dash:** the same inputs during a jump, once per jump (`usedAirDash`, reset on landing). It uses `AirDash` (12 ticks, speed 110, either direction), sets `vy = 0` and skips gravity while it lasts, then returns to `Jump` with a normal jump's sideways speed. An air attack is still allowed after it.
 - **Per character:** override `ForwardDash` / `BackDash` / `AirDash`, which return a `DashDef { ticks, speed }`.
 

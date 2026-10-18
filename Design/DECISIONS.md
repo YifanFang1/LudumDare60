@@ -244,7 +244,7 @@ They copy walking, Light, Heavy and Vine Boom (confirmed). They don't jump (Defa
 ### D-58 Placeholder art is drawn in code (Decided)
 `PlaceholderArt` (View) gives each character its own colour, pattern and letter, and each projectile/trap visual key a shape. Real art needs no code: a Code Character Art asset with a sprite or prefab replaces it. Single sprites are tinted by state unless the look's **Tint By State** is unticked (Decided).
 
-### D-59 Network Version 10 (Decided)
+### D-59 Network Version 10 (Decided; replaced by D-62)
 Everything in the roster plan changes the sim rules, so `RelayLockstepSession.Version` is "10" and older builds are refused.
 
 ### D-60 The AI reads read-only hints from the fighter (Default)
@@ -252,3 +252,15 @@ The AI stays generic (it never names a character), so a fighter tells it what it
 
 ### D-61 The online two-build match is left to the team (Decided)
 The roster plan asks for one online match between two builds after each pass. The team chose to run it themselves instead of adding a development-build-only command-line hook. The local relay passes its own smoke test (`npm test`), and the Editor-side lockstep is unchanged apart from the new sim rules, which the soak test covers for determinism.
+
+## Merge with main's air dash (2026-10-18)
+
+### D-62 Air dash meets the roster rules; network Version 11 (Decided)
+Main added `Buttons.Dash` (Left Shift + a direction), an air dash once per jump (`AirDash`), and Space as the default jump key. Main also bumped `Version` to "10" on its own, the same number as D-59, so the merge is **"11"**: a build with only one of the two changes can never match a build with both (the same reasoning as D-37). How the two meet:
+- The air dash **ignores the dash cooldown** (once per jump is its limit) but **starts it**, so you can't land and ground-dash straight away.
+- **Slows** cut the air dash's speed like any dash.
+- **Dash perks** fire on air dashes too: Paintress's forward air dash is invincible and her back air dash costs 8 HP; Room's forward air dash is a Stampede hit.
+- **Room and The Executioner** get a short air dash: 12 ticks at speed 70 (0.84 units; the standard is 1.3).
+- Air attacks still respect move cooldowns.
+
+Tests: `AirDashIgnoresTheDashCooldownButStartsIt`, `AirDashIsSlowedLikeAnyDash` (KitExtensionTests), `RoomAndTheExecutionerHaveAShortAirDash`, `PaintressDashPerksApplyToAirDashesToo` (RosterTests), plus main's own air dash tests in KitTests.

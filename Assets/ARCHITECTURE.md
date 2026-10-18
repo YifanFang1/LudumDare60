@@ -87,7 +87,7 @@ An empty server file means "nothing published yet" and the characters inside the
 ## Sim rules
 ints only, no float/Time/Random/UnityEngine, state changes only inside `GameSim.Step`. Visuals react to the sim; the sim never reads them. Every rule below is the same for every character and has a test in `KitTests` (or `KitExtensionTests` for the roster's rules). The reasons are in [Design/DECISIONS.md](../Design/DECISIONS.md).
 
-**Controls:** A/D walk, W jump, J Light, K Heavy, L Grab, I Special, O Ultimate (`Sim/Buttons.cs`, rebindable in `FightControls`). If several are pressed on one tick: Ultimate > Special > Grab > Heavy > Light.
+**Controls:** A/D walk, Space jump, Left Shift + A/D dash, J Light, K Heavy, L Grab, I Special, O Ultimate (`Sim/Buttons.cs`, rebindable in `FightControls`). If several are pressed on one tick: Ultimate > Special > Grab > Heavy > Light.
 
 **Blocking** is in `Fighter` and works the same for every character: hold away from the opponent while standing or walking. A blocked hit does no damage, pushes back, and causes `Blockstun` (60% of the hitstun). `GameSim` decides `hit.blocked` before applying any hit, and sends a `Block` event instead of `Hit`. You can't block during a dash.
 
