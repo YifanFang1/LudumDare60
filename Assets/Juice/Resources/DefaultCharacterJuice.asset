@@ -15,12 +15,22 @@ MonoBehaviour:
   character: {fileID: 0}
   useDefaultReactions: 1
   reactions:
-  - trigger: Hit
-    effect: Damage
+  - trigger: LightHit
+    effect: LightDamage
     place: 0
     anchor: 0
     offset: {x: 0, y: 0}
     ticks: 1
+    everyTicks: 0
+    sticky: 0
+    scale: 1
+    shake: 0
+  - trigger: HeavyHit
+    effect: HeavyDamage
+    place: 0
+    anchor: 0
+    offset: {x: 0, y: 0}
+    ticks: 0
     everyTicks: 0
     sticky: 0
     scale: 1
@@ -30,16 +40,6 @@ MonoBehaviour:
     place: 1
     anchor: 2
     offset: {x: 1, y: 0}
-    ticks: 0
-    everyTicks: 0
-    sticky: 0
-    scale: 1
-    shake: 0
-  - trigger: Grab
-    effect: Sparks
-    place: 0
-    anchor: 0
-    offset: {x: 0, y: 0}
     ticks: 0
     everyTicks: 0
     sticky: 0
@@ -90,6 +90,16 @@ MonoBehaviour:
     place: 1
     anchor: 2
     offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 0
+    scale: 1
+    shake: 0
+  - trigger: Grab
+    effect: Grab
+    place: 0
+    anchor: 2
+    offset: {x: 1, y: 0}
     ticks: 0
     everyTicks: 0
     sticky: 0
