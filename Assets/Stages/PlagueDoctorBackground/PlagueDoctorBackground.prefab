@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 9119122890101663134}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.22273, y: 1.41984, z: 0}
+  m_LocalPosition: {x: -7.24733, y: 5.139, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -57,43 +57,53 @@ MonoBehaviour:
     scale: 8
     tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Bell
-    sprite: {fileID: 21300000, guid: cde66e17182e3504da47053bb4b9a245, type: 3}
+    sprite: {fileID: 21300000, guid: 06a79d9b43032954ab9ec82084860172, type: 3}
     frames:
-    - {fileID: -6539719876377865796, guid: 06a79d9b43032954ab9ec82084860172, type: 3}
-    - {fileID: -3453514716393394139, guid: a0a0bb64c696a2e4b9f60dd15d8c81e3, type: 3}
-    - {fileID: -3790839739465131683, guid: 101a3d42d9356a84583f40d397bd7a2e, type: 3}
+    - {fileID: 21300000, guid: 06a79d9b43032954ab9ec82084860172, type: 3}
+    - {fileID: 21300000, guid: a0a0bb64c696a2e4b9f60dd15d8c81e3, type: 3}
+    - {fileID: 21300000, guid: 101a3d42d9356a84583f40d397bd7a2e, type: 3}
     framesPerSecond: 2
-    followCamera: 0
+    followCamera: 0.6
     tile: 0
     driftSpeed: 0
-    x: 0
-    y: -1.28
-    scale: 8
+    x: 2
+    y: 6.6
+    scale: 7
     tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Background
-    sprite: {fileID: 21300000, guid: 698337ea3de23b64ca2b4a0eb599aac9, type: 3}
-    frames: []
-    framesPerSecond: 8
+    sprite: {fileID: 21300000, guid: 981d43d1c3aa39449a673e0c9cd3e819, type: 3}
+    frames:
+    - {fileID: 21300000, guid: 981d43d1c3aa39449a673e0c9cd3e819, type: 3}
+    - {fileID: 21300000, guid: d4452cb594c80874e9ce6af4d963791b, type: 3}
+    - {fileID: 21300000, guid: 8df153bc84a1bdb46849e8259135ba22, type: 3}
+    - {fileID: 21300000, guid: b78718e72111cc845b9e2f01f8b2b875, type: 3}
+    - {fileID: 21300000, guid: 9cbbfc6efbc581248bed75178a38d24d, type: 3}
+    framesPerSecond: 5
     followCamera: 0.6
     tile: 0
     driftSpeed: 0
     x: 0
-    y: 0
+    y: -0.93
     scale: 8
     tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Midground
-    sprite: {fileID: 21300000, guid: a173f5633589f12419363d60d326914a, type: 3}
-    frames: []
-    framesPerSecond: 8
+    sprite: {fileID: 21300000, guid: 9e84bf173a0d6204fb3606a19bbf94b5, type: 3}
+    frames:
+    - {fileID: 21300000, guid: 9e84bf173a0d6204fb3606a19bbf94b5, type: 3}
+    - {fileID: 21300000, guid: d58660e433244e54eb9d0af2ca6f144e, type: 3}
+    - {fileID: 21300000, guid: 9f8f746740933b94f8df627e93fcd49f, type: 3}
+    - {fileID: 21300000, guid: 9e279c9fd32002d4c8a54f2291711ef3, type: 3}
+    - {fileID: 21300000, guid: efb20aac86937894e9770f334bbc196f, type: 3}
+    framesPerSecond: 3
     followCamera: 0.35
     tile: 0
     driftSpeed: 0
     x: 0
-    y: 0
+    y: -0.81
     scale: 8
     tint: {r: 1, g: 1, b: 1, a: 1}
   - name: Foreground
-    sprite: {fileID: 21300000, guid: cde66e17182e3504da47053bb4b9a245, type: 3}
+    sprite: {fileID: 21300000, guid: a8762d2e14879be4c99a9935ae8cb10f, type: 3}
     frames: []
     framesPerSecond: 8
     followCamera: 0
