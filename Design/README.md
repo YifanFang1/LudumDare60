@@ -10,6 +10,7 @@ It sits outside `Assets/` on purpose, so Unity doesn't make `.meta` files for it
 | [SHARED_KIT.md](SHARED_KIT.md) | The standard moveset every character gets (Light, Heavy, Block, Grab, Dash, Special, Ultimate, meter, rounds) and the engine changes it needs. |
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Build order, tasks, tests and coding practices. |
 | [Characters/_TEMPLATE.md](Characters/_TEMPLATE.md) | The form for designing a character's own moveset later. |
+| [Characters/_EXAMPLE.md](Characters/_EXAMPLE.md) | The template filled in for a made-up Caveman, to show what a finished design looks like. |
 
 ## The launch roster
 
@@ -17,7 +18,7 @@ It sits outside `Assets/` on purpose, so Unity doesn't make `.meta` files for it
 
 | Id | Character | Type (design target) | Class | Status |
 |---|---|---|---|---|
-| 10 | Samurai | Shoto | `Samurai` | Placeholder, in code |
+| 10 | ArcadeGuy | Shoto | `ArcadeGuy` | Placeholder, in code |
 | 11 | Painter | Rushdown | `Painter` | Placeholder, in code |
 | 12 | Black and White Cowboy | Zoner | `Cowboy` | Placeholder, in code |
 | 13 | Elephant | Grappler | `Elephant` | Placeholder, in code |

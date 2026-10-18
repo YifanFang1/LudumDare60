@@ -25,7 +25,7 @@ This guide is for anyone adding a fighter. Read [ARCHITECTURE.md](../ARCHITECTUR
 ```
 Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing, meter, hitstun, KO, the state machine.
  ├─ BaseFighter          (Characters/BaseFighter.cs) THE TEMPLATE. The standard moveset, controls, move helpers.
- │   ├─ Samurai ... PlagueDoctor   ids 10-15, the launch roster. Placeholders: the standard moveset, unchanged
+ │   ├─ ArcadeGuy ... PlagueDoctor   ids 10-15, the launch roster. Placeholders: the standard moveset, unchanged
  │   ├─ Brawler          id 0, close range test character
  │   ├─ Shooter          id 1, long range test character
  │   ├─ Sandbag          id 2, training dummy (does nothing, never dies)
@@ -35,7 +35,7 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 
 
 - **Fighter** is shared by everyone. Change it only for rules that should apply to every character, such as a new state like jumping. Changing it changes the sim, so bump `Version` in [RelayLockstepSession.cs](../Global/Scripts/Net/RelayLockstepSession.cs).
-- **BaseFighter** is the template. It gives a character defaults for every trait, and its moves default to the **standard moveset** ([Design/SHARED_KIT.md](../../Design/SHARED_KIT.md)), so a subclass only writes what's different. A subclass that overrides nothing is already fully playable: that's what the six roster placeholders (`Samurai.cs` etc.) are.
+- **BaseFighter** is the template. It gives a character defaults for every trait, and its moves default to the **standard moveset** ([Design/SHARED_KIT.md](../../Design/SHARED_KIT.md)), so a subclass only writes what's different. A subclass that overrides nothing is already fully playable: that's what the six roster placeholders (`ArcadeGuy.cs` etc.) are.
 - **Your character** overrides a few properties. Brawler and Shooter are about 30 lines each.
 
 

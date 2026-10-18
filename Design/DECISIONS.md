@@ -10,7 +10,7 @@ Date for all entries below: 2026-10-16.
 ## Scope
 
 ### D-29 All six characters are identical placeholders for now (Decided)
-Samurai, Painter, Black and White Cowboy, Elephant, Executioner and Plague Doctor get the **same stats and the same standard kit**, including the same Special and Ultimate, and no perks. The goal right now is the bare implementation: all six exist, can be selected, and play a full match with the basic attacks.
+ArcadeGuy, Painter, Black and White Cowboy, Elephant, Executioner and Plague Doctor get the **same stats and the same standard kit**, including the same Special and Ultimate, and no perks. The goal right now is the bare implementation: all six exist, can be selected, and play a full match with the basic attacks.
 - *Why:* the creative side (move names, looks, eras, what each Special, Ultimate and perk does, which Old Tech(nique) each one gets) belongs to the artists and designers on the team, not to the plan. Each character gets its own design later, from [Characters/_TEMPLATE.md](Characters/_TEMPLATE.md).
 - Each type (Shoto, Rushdown, Zoner, Grappler, Trapper, Mixup) is recorded as a design target only.
 
@@ -85,7 +85,7 @@ Each character is a `BaseFighter` subclass in its own file. Grab, dash, meter, t
 - *Why:* real designs will need unique code anyway, and there's one programmer. Cost: tuning needs a recompile, and balance can't be pushed through the server for these characters.
 
 ### D-16 Ids 10-15 for the launch roster, 16+ for new characters (Default)
-Samurai 10, Painter 11, Black and White Cowboy 12, Elephant 13, Executioner 14, Plague Doctor 15. 3-9 are left for test characters. Ids are permanent once pushed.
+ArcadeGuy 10, Painter 11, Black and White Cowboy 12, Elephant 13, Executioner 14, Plague Doctor 15. 3-9 are left for test characters. Ids are permanent once pushed.
 
 ### D-17 Move names are slot names (Default)
 Moves are named `Light`, `Heavy`, `Grab`, `Special`, `Ultimate`, because the move name is also the Animator state name. Artists get the same state list for every character.

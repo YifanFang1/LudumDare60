@@ -14,7 +14,7 @@ Players fight **online** (room codes through a Cloudflare relay) or **solo vs an
 ### Roster
 | Character | Status | Notes |
 |---|---|---|
-| Samurai | In code, placeholder (id 10) | Shoto. Placeholder: standard moveset, design TBD by the team. |
+| ArcadeGuy | In code, placeholder (id 10) | Shoto. Placeholder: standard moveset, design TBD by the team. |
 | Painter | In code, placeholder (id 11) | Rushdown. Placeholder: standard moveset, design TBD by the team. |
 | Black and White Cowboy | In code, placeholder (id 12) | Zoner. Placeholder: standard moveset, design TBD by the team. |
 | Elephant | In code, placeholder (id 13) | Grappler ("Overpowered Elephant"). Placeholder: standard moveset, design TBD by the team. |
@@ -28,7 +28,7 @@ Players fight **online** (room codes through a Cloudflare relay) or **solo vs an
 The plan is 6 characters at launch, with more later. **The plan, the shared moveset and every design decision are in [Design/](Design/README.md)** (start with [DECISIONS.md](Design/DECISIONS.md) and [IMPLEMENTATION_PLAN.md](Design/IMPLEMENTATION_PLAN.md)). For now all six share one standard moveset; creative design (moves, looks, Old Tech) comes from the team.
 
 
-**Idea pool (not committed):** steampunk British zoner whose ultimate runs the opponent over with a train · Salem witch (fireball, familiar) · plague doctor · Dr. Frankenstein (+ monster) · Vietnam soldier (rocket jump with self-stun, tree-disguise or bear-trap counters, matchstick projectile) · caveman (rock bash, spear, bow, fire) · medieval knight/executioner · torture-museum character (iron maiden, brazen bull) · samurai · Wall Street guy / oil tycoon / Henry Ford · printing press goons / typewriter "ink" guy (art is PNGs of a real guy posing) · philosopher whose words hurt · Sisyphus and his boulder · Little Boy vs Fat Man · Nokia-phone weapon · radio-possessing horrors · coal-mine canary · washing-machine weapon · puppet who briefly possesses the opponent.
+**Idea pool (not committed):** steampunk British zoner whose ultimate runs the opponent over with a train · Salem witch (fireball, familiar) · plague doctor · Dr. Frankenstein (+ monster) · Vietnam soldier (rocket jump with self-stun, tree-disguise or bear-trap counters, matchstick projectile) · caveman (rock bash, spear, bow, fire) · medieval knight/executioner · torture-museum character (iron maiden, brazen bull) · arcadeguy · Wall Street guy / oil tycoon / Henry Ford · printing press goons / typewriter "ink" guy (art is PNGs of a real guy posing) · philosopher whose words hurt · Sisyphus and his boulder · Little Boy vs Fat Man · Nokia-phone weapon · radio-possessing horrors · coal-mine canary · washing-machine weapon · puppet who briefly possesses the opponent.
 
 
 **Archetypes to cover:** shoto, rushdown, zoner, grappler, knight, puppet, and an arcade character with an elephant "stand".
