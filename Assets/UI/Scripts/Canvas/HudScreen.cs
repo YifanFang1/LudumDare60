@@ -69,11 +69,13 @@ public class HudScreen : MonoBehaviour
     public TMP_Text superFlashText;              // "<name>: ULTIMATE!"
 
     IMatchSession match;
+    MatchCinematics cinematic;
     bool wired;
     int shownRound;                              // the round whose banner was last shown (0 = none)
     float bannerUntil;
     string bannerRound = "";
     Vector2 bannerHomePosition;
+    bool bannerHomeStored;
 
     void OnEnable()
     {
@@ -97,10 +99,25 @@ public class HudScreen : MonoBehaviour
             rect.sizeDelta = new Vector2(900f, 180f);
             rect.anchoredPosition = Vector2.zero;
         }
-        bannerHomePosition = bannerText.rectTransform.anchoredPosition;
+        if (!bannerHomeStored)
+        {
+            bannerHomePosition = bannerText.rectTransform.anchoredPosition;
+            bannerHomeStored = true;
+        }
         shownRound = 0;   // this screen is switched on for each match, so ROUND 1 is shown again
         match = SessionFinder.Find();
         if (match == null) return;
+        Component owner = match as Component;
+        cinematic = owner != null ? owner.GetComponent<MatchCinematics>() : null;
+        if (GetComponentInChildren<CharacterDialogueScreen>(true) == null)
+        {
+            GameObject overlay = new GameObject("CharacterDialogue", typeof(RectTransform));
+            overlay.transform.SetParent(transform, false);
+            RectTransform rect = (RectTransform)overlay.transform;
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+            overlay.AddComponent<CharacterDialogueScreen>();
+        }
         if (resultText != null)
         {
             // long names shrink to fit instead of running off the panel
@@ -329,6 +346,11 @@ public class HudScreen : MonoBehaviour
         if (match == null) return;
         GameSim sim = match.Sim;
         if (sim == null || sim.fighters[0] == null || sim.fighters[1] == null) return;
+        if (cinematic == null)
+        {
+            Component owner = match as Component;
+            cinematic = owner != null ? owner.GetComponent<MatchCinematics>() : null;
+        }
 
         // health
         if (leftBar != null) leftBar.fillAmount = Mathf.Clamp01(sim.fighters[0].hp / (float)sim.fighters[0].MaxHp);
@@ -361,7 +383,7 @@ public class HudScreen : MonoBehaviour
         }
 
         // result
-        bool over = sim.IsOver;
+        bool over = sim.IsOver && (cinematic == null || cinematic.ResultsReady);
         if (resultPanel != null && resultPanel.activeSelf != over) resultPanel.SetActive(over);
         if (over)
         {
@@ -425,6 +447,11 @@ public class HudScreen : MonoBehaviour
     void UpdateBanner(GameSim sim)
     {
         if (bannerText == null) return;
+        if (cinematic != null && (cinematic.Active || (sim.IsOver && !cinematic.ResultsReady)))
+        {
+            bannerText.gameObject.SetActive(false);
+            return;
+        }
         if (sim.round != shownRound)
         {
             shownRound = sim.round;
