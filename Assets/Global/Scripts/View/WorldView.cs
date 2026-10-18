@@ -22,7 +22,8 @@ public class WorldView : MonoBehaviour
     public bool frameCamera = true;        // set the main camera to see the whole arena
     public bool showHurtboxes = true;      // translucent green body boxes (the coloured box itself when there is no art)
     public bool showHitboxes = true;       // translucent yellow attack boxes
-    public bool showToggles = true;        // the "Debug boxes" panel (bottom left) with checkboxes for the two above
+    public bool showFighterInfo = false;   // state/keys box above each fighter plus the hit log (checkbox in the panel)
+    public bool showToggles = true;       // the "Debug boxes" panel (bottom left) with checkboxes for the two above
     public bool outlineFighters = true;    // Player / Enemy outlines around the art (colours: Fight > Outline Colors)
     public Material placeholderMaterial;   // optional. If boxes look black, use an Unlit sprite material
 
