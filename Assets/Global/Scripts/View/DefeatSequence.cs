@@ -68,7 +68,10 @@ public class DefeatSequence : MonoBehaviour
         }
         if (!started) return;
         elapsed += Time.unscaledDeltaTime;
-        Shader.SetGlobalFloat("_DefeatGrey", Mathf.SmoothStep(0f, 1f, elapsed / 0.8f));
+        // The screen only drains of colour when YOU lost (or drew); a win keeps full colour.
+        int local = Mathf.Clamp(match.LocalSlot, 0, 1);
+        float grey = sim.fighters[local].hp <= 0 ? Mathf.SmoothStep(0f, 1f, elapsed / 0.8f) : 0f;
+        Shader.SetGlobalFloat("_DefeatGrey", grey);
         float progress = Mathf.Clamp01((elapsed - 0.15f) / 1.35f);
         foreach (Burn burn in burning)
         {

@@ -1639,7 +1639,7 @@ MonoBehaviour:
   startOnMainMenu: 1
   startOnTitle: 1
   replaceImguiUI: 1
-  showDebugUI: 1
+  showDebugUI: 0
   editorPreview: 7
   crtOverUI: 1
 --- !u!114 &153575396
