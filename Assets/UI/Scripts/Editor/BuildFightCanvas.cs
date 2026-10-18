@@ -69,7 +69,7 @@ public static class BuildFightCanvas
         GameObject select = BuildCharacterSelect(root.transform, buttonPrefab);
         GameObject hud = BuildHud(root.transform);
         GameObject creditsPage = BuildCredits(root.transform);
-        DoorTransition door = BuildDoorOverlay(root.transform);   // last in the canvas = drawn on top
+        GlitchTransition transition = BuildTransitionOverlay(root.transform);   // last in the canvas = drawn on top
 
         MatchScreens screens = root.AddComponent<MatchScreens>();
         screens.titleScreen = titlePage;
@@ -81,7 +81,7 @@ public static class BuildFightCanvas
         screens.characterSelect = select;
         screens.hud = hud;
         screens.credits = creditsPage;
-        screens.door = door;
+        screens.transition = transition;
         screens.editorPreview = UiScreen.Title;
         if (keepOptions)
         {
@@ -144,7 +144,7 @@ public static class BuildFightCanvas
             screens.titleScreen = BuildTitle(root.transform);
             screens.titleScreen.transform.SetAsFirstSibling();
         }
-        EnsureDoor(root, screens);
+        EnsureTransition(root, screens);
         if (screens.mainMenu == null)
         {
             screens.mainMenu = BuildMainMenu(root.transform);
@@ -271,60 +271,44 @@ public static class BuildFightCanvas
         return img;
     }
 
-    // The sliding metal door: full-screen, always active, its picture (the Door child) only shows while it moves.
-    // It must be the last child of the canvas, so it covers every page.
-    static DoorTransition BuildDoorOverlay(Transform parent)
+    // The screen-change glitch: a full-screen object that holds the GlitchTransition and a see-through Image that
+    // swallows clicks while it plays. It must be the last child of the canvas, so it sits over every page.
+    static GlitchTransition BuildTransitionOverlay(Transform parent)
     {
-        GameObject go = new GameObject("DoorOverlay", typeof(RectTransform));
+        GameObject go = new GameObject("TransitionOverlay", typeof(RectTransform));
         go.transform.SetParent(parent, false);
         Stretch((RectTransform)go.transform);
-        DoorTransition dt = go.AddComponent<DoorTransition>();
+        GlitchTransition gt = go.AddComponent<GlitchTransition>();
 
-        GameObject door = new GameObject("Door", typeof(RectTransform), typeof(Image));
-        door.transform.SetParent(go.transform, false);
-        Stretch((RectTransform)door.transform);
-        Image img = door.GetComponent<Image>();
-        Sprite art = LoadSprite("Metal Door Background for transitions.png");
-        img.sprite = art;
-        img.color = art != null ? Color.white : new Color(0.14f, 0.12f, 0.2f, 1f);
-        img.type = Image.Type.Simple;
+        GameObject block = new GameObject("ClickBlocker", typeof(RectTransform), typeof(Image));
+        block.transform.SetParent(go.transform, false);
+        Stretch((RectTransform)block.transform);
+        Image img = block.GetComponent<Image>();
+        img.color = new Color(0f, 0f, 0f, 0f);
         img.raycastTarget = true;
 
-        // a dark lip along the bottom edge, so the door has some thickness and a shadow
-        GameObject lip = new GameObject("Lip", typeof(RectTransform), typeof(Image));
-        lip.transform.SetParent(door.transform, false);
-        RectTransform lr = (RectTransform)lip.transform;
-        lr.anchorMin = new Vector2(0f, 0f);
-        lr.anchorMax = new Vector2(1f, 0f);
-        lr.pivot = new Vector2(0.5f, 1f);
-        lr.anchoredPosition = Vector2.zero;
-        lr.sizeDelta = new Vector2(0f, 18f);
-        Image lipImg = lip.GetComponent<Image>();
-        lipImg.color = new Color(0.02f, 0.02f, 0.04f, 0.9f);
-        lipImg.raycastTarget = false;
-
-        dt.door = (RectTransform)door.transform;
-        door.SetActive(false);
-        return dt;
+        gt.blocker = img;
+        block.SetActive(false);
+        return gt;
     }
 
-    // Finds or builds the door and makes it the last child (drawn on top), then hooks it up.
-    static void EnsureDoor(GameObject root, MatchScreens screens)
+    // Finds or builds the transition and makes it the last child (drawn on top), then hooks it up.
+    static void EnsureTransition(GameObject root, MatchScreens screens)
     {
         // the old glass-shatter overlay is not used any more
         ShatterEffect[] old = root.GetComponentsInChildren<ShatterEffect>(true);
         for (int i = 0; i < old.Length; i++) Undo.DestroyObjectImmediate(old[i].gameObject);
 
-        DoorTransition door = root.GetComponentInChildren<DoorTransition>(true);
-        if (door == null) door = BuildDoorOverlay(root.transform);
-        door.transform.SetAsLastSibling();
-        screens.door = door;
+        GlitchTransition t = root.GetComponentInChildren<GlitchTransition>(true);
+        if (t == null) t = BuildTransitionOverlay(root.transform);
+        t.transform.SetAsLastSibling();
+        screens.transition = t;
     }
 
     // Fight > Rebuild Default Canvas
     // For a FightUI you already have: swaps the start menu for the Play / Options / Credits / Quit layout
     // made from the art in Assets/UI/Assets, adds the Credits page, and replaces the glass shatter
-    // with the sliding metal door. Nothing else in the UI is touched.
+    // with the screen-change glitch. Nothing else in the UI is touched.
     static void RebuildMainMenu()
     {
         if (TMP_Settings.instance == null)
@@ -348,7 +332,7 @@ public static class BuildFightCanvas
         screens.mainMenu.transform.SetSiblingIndex(screens.titleScreen != null ? screens.titleScreen.transform.GetSiblingIndex() + 1 : 0);
 
         if (screens.credits == null) screens.credits = BuildCredits(root.transform);
-        EnsureDoor(root, screens);
+        EnsureTransition(root, screens);
 
         // the title page no longer shatters: clear the old hookup so nothing points at a deleted object
         screens.editorPreview = UiScreen.Main;
@@ -364,7 +348,7 @@ public static class BuildFightCanvas
 
         Selection.activeGameObject = screens.mainMenu;
         EditorSceneManager.MarkSceneDirty(root.scene);
-        Debug.Log("Main menu rebuilt, Credits page and metal door added to '" + RootName + "'.");
+        Debug.Log("Main menu rebuilt, Credits page and glitch transition added to '" + RootName + "'.");
     }
 
     // A sprite from a texture, also when the texture is set to Multiple (the first sprite in it).
@@ -486,7 +470,7 @@ public static class BuildFightCanvas
         RectTransform groupRt = (RectTransform)group.transform;
         groupRt.anchorMin = groupRt.anchorMax = groupRt.pivot = new Vector2(0.5f, 0.5f);
         groupRt.sizeDelta = ButtonGroupSize;
-        groupRt.anchoredPosition = new Vector2(ButtonGroupCenter.x - 960f, 540f - ButtonGroupCenter.y);
+        groupRt.anchoredPosition = new Vector2(ButtonGroupCenter.x - 960f, -190f);   // Pos Y -190 (the mockup's exact spot was -250)
 
         // positions measured from MainMenuMockup.png (sprite top-left, in a 1920x1080 layout)
         // Hierarchy order is draw order (the last one is on top): Quit, Credits, Options, Play. The sprites

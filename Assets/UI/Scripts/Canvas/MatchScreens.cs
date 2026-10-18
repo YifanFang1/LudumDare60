@@ -26,8 +26,8 @@ public class MatchScreens : MonoBehaviour
     public GameObject modeSelect;
     public GameObject titleScreen;   // "press any key" start screen
     public GameObject credits;
-    [Tooltip("The sliding metal door played between screens. Empty = screens switch instantly.")]
-    public DoorTransition door;
+    [Tooltip("The full-screen CRT glitch played between screens. Empty = screens switch instantly.")]
+    public GlitchTransition transition;
 
     [Header("Options")]
     [Tooltip("Start on the Play / Controls / Quit screen. Off: start straight in the lobby.")]
@@ -106,16 +106,16 @@ public class MatchScreens : MonoBehaviour
         if (phase == MatchPhase.Lobby && lastPhase != MatchPhase.Lobby) page = pageBeforeMatch;
         lastPhase = phase;
 
-        // The door covers every change of screen: the new screen only appears once it is closed.
-        if (!shownReady || door == null)
+        // Every change of screen goes through the glitch: the new screen only appears at its peak.
+        if (!shownReady || transition == null)
         {
             shownPhase = phase;
             shownPage = page;
             shownReady = true;
         }
-        else if (!door.Busy && (shownPhase != phase || shownPage != page))
+        else if (!transition.Busy && (shownPhase != phase || shownPage != page))
         {
-            door.Run(() => { shownPhase = match.Phase; shownPage = page; ApplyScreens(); });
+            transition.Run(() => { shownPhase = match.Phase; shownPage = page; ApplyScreens(); });
         }
         ApplyScreens();
     }

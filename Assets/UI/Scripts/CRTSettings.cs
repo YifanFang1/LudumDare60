@@ -53,6 +53,10 @@ public class CRTSettings : MonoBehaviour
     static readonly int ScanlineDarknessID    = Shader.PropertyToID("_ScanlineDarkness");
     static readonly int CurvatureID           = Shader.PropertyToID("_Curvature");
     static readonly int VignetteStrengthID    = Shader.PropertyToID("_VignetteStrength");
+    static readonly int FillGlitchID          = Shader.PropertyToID("_FillGlitch");
+    static readonly int FillSplitID           = Shader.PropertyToID("_FillSplit");
+    static readonly int FillWaveID            = Shader.PropertyToID("_FillWave");
+    static readonly int FillTearID            = Shader.PropertyToID("_FillTear");
 
     // The material made from CRT.shader, and the pass that draws it.
     Material material;
@@ -61,6 +65,12 @@ public class CRTSettings : MonoBehaviour
     // The current glitch: how long it lasts and how much is left (seconds).
     float glitchTime;
     float glitchLeft;
+
+    // The full-screen glitch (a copy of the glitch that is not limited to the middle of the screen).
+    // `fillLevel` is set from outside (the door transition ramps it up and down); `fillBurst` fades by itself.
+    float fillLevel;
+    float fillBurstTime;
+    float fillBurstLeft;
 
     // ------------------------------------------------------------------------
     //  AUTOMATIC STARTUP
@@ -128,7 +138,8 @@ public class CRTSettings : MonoBehaviour
     // is how URP lets a script add a pass without editing the renderer asset.
     void AddPassToCamera(ScriptableRenderContext context, Camera cam)
     {
-        if (pass == null || profile == null || profile.intensity <= 0f) return;
+        if (pass == null || profile == null) return;
+        if (profile.intensity <= 0f && FillGlitchAmount <= 0f) return;
         if (cam.cameraType != CameraType.Game) return; // not the Scene view or previews
 
         cam.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass(pass);
@@ -139,7 +150,33 @@ public class CRTSettings : MonoBehaviour
     void Update()
     {
         if (glitchLeft > 0f) glitchLeft = Mathf.Max(0f, glitchLeft - Time.unscaledDeltaTime);
+        if (fillBurstLeft > 0f) fillBurstLeft = Mathf.Max(0f, fillBurstLeft - Time.unscaledDeltaTime);
         ApplySettings();
+    }
+
+    // 0..1: how much of the full-screen glitch is on right now.
+    float FillGlitchAmount
+    {
+        get
+        {
+            float burst = fillBurstLeft > 0f && fillBurstTime > 0f ? fillBurstLeft / fillBurstTime : 0f;
+            return Mathf.Clamp01(Mathf.Max(fillLevel, burst * burst));
+        }
+    }
+
+    // The full-screen glitch at a level you control (0 = off, 1 = full). Call it every frame while it should be on;
+    // the page transitions ramp it up as the door closes and down as it opens.
+    public void SetFillGlitch(float level)
+    {
+        fillLevel = Mathf.Clamp01(level);
+    }
+
+    // A short full-screen burst that fades out by itself, like Glitch() but over the whole screen.
+    public void FillGlitch(float seconds)
+    {
+        if (seconds <= 0f) return;
+        fillBurstTime = seconds;
+        fillBurstLeft = seconds;
     }
 
     // ------------------------------------------------------------------------
@@ -178,6 +215,10 @@ public class CRTSettings : MonoBehaviour
         Shader.SetGlobalFloat(ScanlineDarknessID, p.scanlineDarkness);
         Shader.SetGlobalFloat(CurvatureID, p.curvature);
         Shader.SetGlobalFloat(VignetteStrengthID, p.vignetteStrength);
+        Shader.SetGlobalFloat(FillGlitchID, FillGlitchAmount);
+        Shader.SetGlobalFloat(FillSplitID, p.fillColorSplit);
+        Shader.SetGlobalFloat(FillWaveID, p.fillWaveAmount);
+        Shader.SetGlobalFloat(FillTearID, p.fillTear);
 
         // Colors you pick in the Inspector are stored in "gamma" space.
         // If the project renders in "linear" space, the shader expects a

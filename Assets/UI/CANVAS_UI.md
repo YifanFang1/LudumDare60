@@ -63,10 +63,10 @@ The HUD also shows the shared moveset's state (see `Design/SHARED_KIT.md`): an U
 
 Main menu > Play > **Mode** (name, Online, Offline vs AI, Back). Online opens the lobby page (quick match, create/join room); Offline starts a match vs the AI. After a match you land back on the lobby (online) or the mode page (offline). `Fight > Rebuild Default Canvas` also adds the mode page to an existing FightUI.
 
-## Main menu art and the metal door
+## Main menu art and the screen-change glitch
 
-- Art lives in `Assets/UI/Assets`: `Main Menu BACKGROUND`, `Techtonic Logo`, the `PLAY` / `OPTIONS` / `CREDITS` / `QUIT` pictures (and their `...HOVER` versions), `Options and Credits Menu Background`, and `Metal Door Background for transitions`. `MainMenuMockup.png` shows the layout.
-- **Fight > Rebuild Default Canvas** swaps an existing FightUI's start menu for that layout, adds the Credits page (Options opens the Controls page), and adds the `DoorOverlay`.
-- Every change of screen goes through `DoorTransition`: a metal shutter slides down, `MatchScreens` switches the page while it is closed, then it slides back up. Leave `Match Screens > Door` empty to switch screens instantly.
-- `QUIT.png` (the non-hover picture) is missing from the art folder, so Quit uses `QUITHOVER` dimmed until hovered. Add `QUIT.png` and re-run the rebuild to use it.
-- The old glass-shatter scripts (`ShatterEffect`, `Fracture`, ...) are no longer used by anything.
+- Art lives in `Assets/UI/Assets`: `Main Menu BACKGROUND` (it already has the title), the `PLAY` / `OPTIONS` / `CREDITS` / `QUIT` pictures (and their `...HOVER` versions), and `Options and Credits Menu Background`. `MainMenuMockup.png` shows the layout. Both backdrops are 9-sliced when borders are set.
+- **Fight > Rebuild Default Canvas** deletes the FightUI in the open scene (if any) and builds the whole default UI again, with no prompt. Hand edits to the canvas are replaced; the Match Screens options (debug UI, start page, CRT) are kept.
+- Every change of screen goes through `GlitchTransition`: the CRT's full-screen glitch ramps up, `MatchScreens` switches the page at the peak, then it fades. Tune it with `Full-screen glitch` on the CRT Profile (`Fight > CRT Settings`). Leave `Match Screens > Transition` empty to switch screens instantly. It needs the CRT filter running.
+- Options opens the Controls page; Credits is a placeholder page. `QUIT.png` (the non-hover picture) is missing, so Quit uses `QUITHOVER` dimmed until hovered.
+- The old glass-shatter scripts (`ShatterEffect`, `Fracture`, ...) are not used by anything.

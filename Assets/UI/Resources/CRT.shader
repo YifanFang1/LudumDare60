@@ -44,6 +44,15 @@ Shader "Hidden/LD/CRT"
             float _ScanlineDarkness;
             float _Curvature;
             float _VignetteStrength;
+            float _FillGlitch;   // 0..1, the full-screen glitch (page transitions)
+            float _FillSplit;
+            float _FillWave;
+            float _FillTear;
+
+            float Hash(float n)
+            {
+                return frac(sin(n * 91.3458) * 47453.5453);
+            }
 
             half3 SampleScreen(float2 uv)
             {
@@ -61,6 +70,9 @@ Shader "Hidden/LD/CRT"
                 float2 centered = uv * 2.0 - 1.0;                    // -1..1, 0 at the middle
                 float edge = pow(saturate(length(centered) / 1.4142), _EdgeFalloff);
                 float strength = _Intensity * lerp(_InnerIntensity, _OuterIntensity, edge);
+                // The full-screen glitch lifts the effect to full strength everywhere, not just in the middle.
+                float fill = saturate(_FillGlitch);
+                strength = max(strength, fill);
 
                 // Bulge the picture like a curved tube screen.
                 // Dividing by (1 + bend) zooms in just enough that the corners land
@@ -74,10 +86,20 @@ Shader "Hidden/LD/CRT"
                     return half4(0, 0, 0, 1);
 
                 // Wobble each row sideways a little.
-                crtUV.x += sin(crtUV.y * _WaveFrequency + t * _WaveSpeed) * _WaveAmount * strength;
+                crtUV.x += sin(crtUV.y * _WaveFrequency + t * _WaveSpeed) * (_WaveAmount * strength + _FillWave * fill);
+
+                // Full-screen glitch: bands of rows tear sideways, jumping about 20 times a second.
+                if (fill > 0.001)
+                {
+                    float step20 = floor(t * 20.0);
+                    float band = floor(crtUV.y * 28.0);
+                    float roll = Hash(band + step20 * 7.13);
+                    float torn = step(0.62, roll) * (Hash(band * 3.7 + step20) - 0.5) * 2.0;
+                    crtUV.x += torn * _FillTear * fill;
+                }
 
                 // Split red and blue apart sideways.
-                float split = _ColorSplit * strength;
+                float split = _ColorSplit * strength + _FillSplit * fill;
                 half3 col;
                 col.r = SampleScreen(crtUV + float2(split, 0)).r;
                 col.g = SampleScreen(crtUV).g;
