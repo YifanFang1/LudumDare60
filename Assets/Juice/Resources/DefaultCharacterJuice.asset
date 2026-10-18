@@ -105,3 +105,13 @@ MonoBehaviour:
     sticky: 0
     scale: 1
     shake: 0
+  - trigger: WhileBlocking
+    effect: Lightning
+    place: 0
+    anchor: 2
+    offset: {x: 1, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 1
+    scale: 1
+    shake: 0
