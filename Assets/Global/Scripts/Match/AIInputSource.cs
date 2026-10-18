@@ -5,6 +5,7 @@ using System.Collections.Generic;
 // it uses the shared kit (Design/SHARED_KIT.md) the same way for everyone.
 //
 //   far away     walk in, sometimes dash in, sometimes throw the Special
+//   mid range    walk in, sometimes jump in and swing a Heavy on the way down
 //   close        jab, heavy or grab (grabs more often when you're blocking), sometimes back dash
 //   you attack   about half the time it holds back to block until your move ends
 //   full meter   fires the Ultimate when you're in range
@@ -52,6 +53,13 @@ public class AIInputSource : IInputSource
         int toward = distance > 0 ? Buttons.Right : Buttons.Left;
         int away = distance > 0 ? Buttons.Left : Buttons.Right;
 
+        // In the air the arc is fixed, so the only choice is when to swing: on the way down, close in.
+        if (self.state == FighterStateId.Jump)
+        {
+            if (!self.usedAirMove && self.vy < 0 && gap < CloseRange + 300) return Buttons.Heavy;
+            return 0;
+        }
+
         // Block: when the player starts a move, about half the time hold back until it's over.
         if (foe.state == FighterStateId.Attack && foe.stateTick == 0 && foe.move != null && rng.Next(2) == 0)
         {
@@ -76,6 +84,7 @@ public class AIInputSource : IInputSource
         if (gap > CloseRange)
         {
             if (rng.Next(80) == 0) return Buttons.Special;
+            if (gap < 3000 && rng.Next(90) == 0) return Buttons.Up | toward;   // jump in
             return toward;   // walk in
         }
 

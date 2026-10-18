@@ -262,6 +262,205 @@ public class KitTests
         Assert.IsFalse(f.IsBlocking, "a dash is a commitment: no blocking until it ends");
     }
 
+    // ================= jumping =================
+
+    // Runs with nothing pressed until fighter `i` is back on the ground. Returns the ticks it took.
+    static int RunUntilLanded(GameSim sim, int i)
+    {
+        int ticks = 0;
+        while (sim.fighters[i].IsAirborne && ticks < 200)
+        {
+            sim.Step(None, None);
+            ticks++;
+        }
+        Assert.IsFalse(sim.fighters[i].IsAirborne, "should have landed");
+        return ticks;
+    }
+
+    [Test]
+    public void JumpGoesUpAndComesBackDown()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 8000);
+        Fighter f = sim.fighters[0];
+        int startX = f.x;
+
+        sim.Step(Buttons.Up, None);
+        Assert.AreEqual(FighterStateId.Jump, f.state);
+        Assert.Greater(f.y, 0);
+
+        int peak = 0;
+        int ticks = 1;
+        while (f.IsAirborne && ticks < 200)
+        {
+            sim.Step(None, None);
+            ticks++;
+            if (f.y > peak) peak = f.y;
+        }
+        Assert.AreEqual(0, f.y);
+        Assert.AreEqual(FighterStateId.Idle, f.state);
+        Assert.AreEqual(startX, f.x, "Up alone jumps straight up");
+        Assert.Greater(peak, 1300, "high enough to clear a Special projectile");
+        Assert.That(ticks, Is.InRange(25, 50), "about half a second in the air");
+    }
+
+    [Test]
+    public void JumpOverTheOpponentSwitchesSides()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 1400);
+        sim.Step(Buttons.Up | Buttons.Right, None);
+        RunUntilLanded(sim, 0);
+        Run(sim, None, None, 2);   // landing on top of them: pushboxes separate the bodies
+
+        Assert.Greater(sim.fighters[0].x, sim.fighters[1].x, "player 1 should land on the far side");
+        Assert.AreEqual(-1, sim.fighters[0].facing, "and turn around once on the ground");
+        Assert.GreaterOrEqual(BodyGap(sim), 0);
+    }
+
+    // Jumps once with `takeOff` and holds `inAir` for the whole jump. Returns how far player 1 moved.
+    static int JumpDistance(int takeOff, int inAir)
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        Fighter f = sim.fighters[0];
+        int startX = f.x;
+        sim.Step(takeOff, None);
+        while (f.IsAirborne) sim.Step(inAir, None);
+        return f.x - startX;
+    }
+
+    [Test]
+    public void AirControlNudgesAStraightUpJump()
+    {
+        int drift = JumpDistance(Buttons.Up, Buttons.Right);
+        int fullForward = JumpDistance(Buttons.Up | Buttons.Right, None);
+        Assert.Greater(drift, 0, "holding right in the air drifts right");
+        Assert.Less(drift, fullForward, "but less than jumping forward in the first place");
+    }
+
+    [Test]
+    public void AirControlSlowsButDoesNotInstantlyReverseAJump()
+    {
+        int steeredBack = JumpDistance(Buttons.Up | Buttons.Right, Buttons.Left);
+        int fullForward = JumpDistance(Buttons.Up | Buttons.Right, None);
+        Assert.Less(steeredBack, fullForward, "holding back shortens a forward jump");
+        Assert.Greater(steeredBack, -fullForward, "but can't turn it into a full backward jump");
+    }
+
+    [Test]
+    public void AirControlNeverExceedsJumpSpeed()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        Fighter f = sim.fighters[0];
+        sim.Step(Buttons.Up | Buttons.Right, None);
+        while (f.IsAirborne)
+        {
+            sim.Step(Buttons.Right, None);
+            Assert.LessOrEqual(f.vx, f.JumpArc.forward);
+        }
+    }
+
+    [Test]
+    public void CannotBlockInTheAir()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 4000);
+        Fighter f = sim.fighters[0];
+        Run(sim, Buttons.Up | BackP0, None, 3);
+
+        Assert.IsTrue(f.IsAirborne);
+        Assert.IsTrue(f.holdingBack);
+        Assert.IsFalse(f.IsBlocking, "a jump is a commitment: no blocking until you land");
+    }
+
+    [Test]
+    public void GrabCannotCatchAnAirborneFighter()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 1200);
+        sim.Step(Buttons.Grab, Buttons.Up);   // player 2 jumps as player 1 grabs
+        Run(sim, None, None, 20);
+
+        Assert.AreEqual(sim.fighters[1].MaxHp, sim.fighters[1].hp);
+    }
+
+    [Test]
+    public void JumpInHeavyHitsAStandingOpponent()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 2400);
+        Fighter jumper = sim.fighters[0];
+        sim.Step(Buttons.Up | Buttons.Right, None);
+        while (jumper.vy >= 0) sim.Step(None, None);   // wait for the way down
+        sim.Step(Buttons.Heavy, None);
+        Assert.AreSame(BaseFighter.StandardJumpHeavy, jumper.move);
+        RunUntilLanded(sim, 0);
+
+        Fighter victim = sim.fighters[1];
+        Assert.AreEqual(victim.MaxHp - BaseFighter.StandardJumpHeavy.hitboxes[0].damage, victim.hp);
+    }
+
+    [Test]
+    public void OnlyOneAirAttackPerJump()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 8000);
+        Fighter f = sim.fighters[0];
+        sim.Step(Buttons.Up, None);   // Up + Light on the ground would jab instead of jumping
+        int attacks = 0;
+        while (f.IsAirborne)
+        {
+            sim.Step(Buttons.Light, None);   // keep holding Light the whole jump
+            for (int e = 0; e < sim.events.Count; e++)
+            {
+                if (sim.events[e].type == SimEventType.AttackStart && sim.events[e].a == 0) attacks++;
+            }
+        }
+        Assert.AreEqual(1, attacks);
+    }
+
+    [Test]
+    public void LandingCancelsAnUnfinishedAirAttack()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 8000);
+        Fighter f = sim.fighters[0];
+        sim.Step(Buttons.Up, None);
+        while (f.y > 400 || f.vy > 0) sim.Step(None, None);   // almost back down
+        sim.Step(Buttons.Heavy, None);
+        Assert.AreEqual(FighterStateId.Attack, f.state);
+
+        RunUntilLanded(sim, 0);
+        Assert.AreEqual(FighterStateId.Idle, f.state);
+        Assert.IsNull(f.move);
+        Assert.AreEqual(0, sim.hitboxes.Count, "the air attack's hitbox is gone too");
+    }
+
+    [Test]
+    public void HitstunLastsUntilAnAirborneFighterLands()
+    {
+        MoveDef poke = TestFighter.MeleeMove(damage: 5);
+        poke.hitboxes[0].hitstun = 2;   // much shorter than the fall
+        GameSim sim = NewMatch(new TestFighter { light = poke }, new TestFighter(), 1100);
+        Fighter victim = sim.fighters[1];
+
+        sim.Step(Buttons.Light, Buttons.Up);   // player 2 jumps into player 1's poke
+        int guard = 0;
+        while (victim.state != FighterStateId.Hitstun && guard++ < 10) sim.Step(None, None);
+        Assert.AreEqual(FighterStateId.Hitstun, victim.state, "the poke should catch the rising jump");
+        Assert.IsTrue(victim.IsAirborne);
+
+        while (victim.IsAirborne)
+        {
+            Assert.AreEqual(FighterStateId.Hitstun, victim.state, "no recovering in mid-air");
+            sim.Step(None, None);
+        }
+        Run(sim, None, None, 3);
+        Assert.AreEqual(FighterStateId.Idle, victim.state, "back to normal after landing");
+    }
+
+    [Test]
+    public void InspectorCharacterWithoutAirMovesGetsTheStandardOnes()
+    {
+        GameSim sim = NewMatch(new DataFighter(CharacterDef.CreateDefault()), new TestFighter(), 8000);
+        sim.Step(Buttons.Up, None);
+        sim.Step(Buttons.Heavy, None);
+        Assert.AreSame(BaseFighter.StandardJumpHeavy, sim.fighters[0].move);
+    }
+
     // ================= meter, Special, Ultimate =================
 
     [Test]

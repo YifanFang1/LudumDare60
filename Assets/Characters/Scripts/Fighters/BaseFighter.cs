@@ -15,7 +15,11 @@
 //   Grab (L)       StandardGrab: unblockable, short     GrabMove
 //   Special (I)    StandardSpecial: a projectile        SpecialMove
 //   Ultimate (O)   StandardUltimate: big strike         UltimateMove (needs a full meter)
+//   Jump + J       StandardJumpLight: quick air kick    JumpLightAttack (one air attack per jump)
+//   Jump + K       StandardJumpHeavy: big jump-in       JumpHeavyAttack
 //   Dashes         about 1.8 units                      ForwardDash / BackDash (in Fighter)
+//   Jump (W)       about 2.1 units high, a little       JumpArc / AirControl (in Fighter)
+//                  steering in the air
 //   Move rules     one Special projectile at a time     CanUseMove   (e.g. "one fireball at a time")
 //
 // Everything every fighter shares (walking, blocking by holding back, dashing, hitstun, KO, the
@@ -42,6 +46,8 @@ public abstract class BaseFighter : Fighter
     protected virtual MoveDef GrabMove { get { return StandardGrab; } }
     protected virtual MoveDef SpecialMove { get { return StandardSpecial; } }
     protected virtual MoveDef UltimateMove { get { return StandardUltimate; } }
+    protected virtual MoveDef JumpLightAttack { get { return StandardJumpLight; } }
+    protected virtual MoveDef JumpHeavyAttack { get { return StandardJumpHeavy; } }
 
     // ---------- the standard moveset (Design/SHARED_KIT.md) ----------
     // Every character gets these unless it overrides the slot. Public so tests can check them.
@@ -80,6 +86,18 @@ public abstract class BaseFighter : Fighter
         box: new Box(300, 0, 2000, 2200),
         damage: 30, hitstun: 40, knockback: 120);
 
+    // Air attacks. The boxes sit low and forward (box y = 0 is the jumper's feet), so they reach
+    // down onto a standing opponent's head and body. Landing cancels them, so they're short.
+    public static readonly MoveDef StandardJumpLight = Melee("JumpLight",
+        totalTicks: 14, spawnTick: 3, activeTicks: 8,
+        box: new Box(200, 0, 800, 700),
+        damage: 5, hitstun: 14, knockback: 30);
+
+    public static readonly MoveDef StandardJumpHeavy = Melee("JumpHeavy",
+        totalTicks: 24, spawnTick: 6, activeTicks: 6,
+        box: new Box(100, 0, 1000, 900),
+        damage: 10, hitstun: 20, knockback: 60);
+
     // Extra rules for when a move is allowed (resources, cooldowns, projectile limits).
     // `sim` is read-only here: look, don't change. If you override this, call
     // base.CanUseMove(sim, move) for the moves you don't handle yourself.
@@ -104,6 +122,14 @@ public abstract class BaseFighter : Fighter
         return null;
     }
 
+    // In the air: Heavy > Light, once per jump (Fighter takes care of the "once").
+    public override MoveDef ChooseAirMove(GameSim sim, int input)
+    {
+        if ((input & Buttons.Heavy) != 0 && IsUsable(sim, JumpHeavyAttack)) return JumpHeavyAttack;
+        if ((input & Buttons.Light) != 0 && IsUsable(sim, JumpLightAttack)) return JumpLightAttack;
+        return null;
+    }
+
     // Every move this character can do, for editor tools (one Animator state per move).
     public override MoveDef[] ListMoves()
     {
@@ -113,6 +139,8 @@ public abstract class BaseFighter : Fighter
         if (GrabMove != null) moves.Add(GrabMove);
         if (SpecialMove != null) moves.Add(SpecialMove);
         if (UltimateMove != null) moves.Add(UltimateMove);
+        if (JumpLightAttack != null) moves.Add(JumpLightAttack);
+        if (JumpHeavyAttack != null) moves.Add(JumpHeavyAttack);
         return moves.ToArray();
     }
 

@@ -49,7 +49,7 @@ Each code folder is its own assembly (asmdef). The arrows are the ONLY allowed d
 - **Net** (LD.Net.Relay): the Cloudflare relay session; also downloads the published character file. Nothing outside this folder references it. Delete the folder and swap `RelayLockstepSession` for `LocalMatchSession` on the GameObject to ship without online play.
 - **View** (no asmdef, so in Assembly-CSharp): `WorldView` (fighters and projectile sprites as GameObjects) and `FightView` (the OnGUI HUD: health, meter, round pips, banners, the Ultimate flash) in `Global/Scripts/View`; `LobbyUI`, `ControlsUI` in `UI/Scripts`; `CharacterPreview` in `Characters/Scripts`; `FightCamera` (follows and zooms on the fighters) and `ParallaxBackground` (layered stage art). The Canvas UI (`UI/Scripts/Canvas`, see [UI/CANVAS_UI.md](UI/CANVAS_UI.md)) turns `FightView` off and shows `HudScreen` instead when it is in the scene; `HudScreen` shows the same meter, round pips, banners and Ultimate flash (**Fight > Add Meter And Round HUD** adds them to an existing canvas).
 - **Tests** (`Assets/Tests/EditMode`, LD.Tests.EditMode): checks that run the real sim with no scene, in milliseconds. Window > General > Test Runner > EditMode > Run All.
-  - `CharacterTests`: the characters and the roster. `KitTests`: every shared-kit rule (grab, dash, meter, Ultimate, rounds, pushboxes). `AITests`: AI vs AI matches finish and use the whole kit.
+  - `CharacterTests`: the characters and the roster. `KitTests`: every shared-kit rule (grab, dash, jump, meter, Ultimate, rounds, pushboxes). `AITests`: AI vs AI matches finish and use the whole kit.
   - `SoakTests`: random matches for **every pair** of code characters, each played twice, checking the hash is identical every tick (the desync check) and that matches can finish. It picks up new code characters by itself.
   - `SimHarness`: shared helpers (`NewMatch`, `Run`, `TestFighter`). The tests also reference LD.Match, for the AI.
 - **Audio**: `AudioManager` on the GameManager object. It plays fight sounds from `IMatchSession.SimEventRaised` and picks music from the match phase; menus call `AudioManager.Click()` / `Confirm()`, which do nothing if there is no AudioManager. Every clip slot is optional.
@@ -86,13 +86,15 @@ An empty server file means "nothing published yet" and the characters inside the
 ## Sim rules
 ints only, no float/Time/Random/UnityEngine, state changes only inside `GameSim.Step`. Visuals react to the sim; the sim never reads them. Every rule below is the same for every character and has a test in `KitTests`. The reasons are in [Design/DECISIONS.md](../Design/DECISIONS.md).
 
-**Controls:** A/D walk, J Light, K Heavy, L Grab, I Special, O Ultimate (`Sim/Buttons.cs`, rebindable in `FightControls`). If several are pressed on one tick: Ultimate > Special > Grab > Heavy > Light.
+**Controls:** A/D walk, W jump, J Light, K Heavy, L Grab, I Special, O Ultimate (`Sim/Buttons.cs`, rebindable in `FightControls`). If several are pressed on one tick: Ultimate > Special > Grab > Heavy > Light.
 
 **Blocking** is in `Fighter` and works the same for every character: hold away from the opponent while standing or walking. A blocked hit does no damage, pushes back, and causes `Blockstun` (60% of the hitstun). `GameSim` decides `hit.blocked` before applying any hit, and sends a `Block` event instead of `Hit`. You can't block during a dash.
 
 **Grabs** are hitboxes with `grab` ticked: they ignore blocking but can't catch a fighter in hitstun or blockstun (the hitbox stays out and catches them if they recover in time). Holding back when a grab lands throws the victim behind you. A landed grab sends a `Grab` event instead of `Hit`.
 
 **Dashes:** a fresh press of a direction twice within 12 ticks (`Fighter.DashTapWindow`). Toward the opponent is a forward dash. Characters change them with `ForwardDash` / `BackDash`.
+
+**Jumps:** holding Up (`Buttons.Up`) from Idle or Walk starts `FighterStateId.Jump` with `vy = JumpArc.up` and `vx = direction * JumpArc.forward`; holding left/right in the air nudges `vx` by `AirControl` per tick (`SteerInAir`), capped at the jump speed. `Fighter.Move` applies `Gravity` while `IsAirborne` (`y > 0 || vy > 0`) and lands at `y = 0`. In the air the only choice is one air attack (`ChooseAirMove`, `usedAirMove`); landing cancels it. You can't block in the air, grabs skip airborne victims, `SeparateBodies` only pushes when both fighters are grounded (so jumps can cross over), and Hitstun can't end while airborne. Inspector characters bind air attacks with `AttackButton.JumpLight` / `JumpHeavy`, and get the standard ones if they have none.
 
 **Meter and Ultimate:** `Fighter.meter` (0-1000) fills by hitting (damage x 7), getting hit (x 4) and blocked hits (x 2 for both). A move with `ultimate` set needs a full bar and a **fresh** press, spends the whole bar, and freezes the match for `GameSim.SuperFlashTicks` (`freezeTicks`, a `SuperFlash` event). Its hits give no meter.
 

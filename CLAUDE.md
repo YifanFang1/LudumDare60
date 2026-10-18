@@ -65,7 +65,7 @@ The plan is 6 characters at launch, with more later. **The plan, the shared move
 
 
 ## Current state vs plan
-**Built:** walk, light and heavy attacks, blocking by holding back (with blockstun), hitstun, KO, the **shared kit** ([Design/SHARED_KIT.md](Design/SHARED_KIT.md): grab with back throw, double-tap dashes, a Special projectile, an Ultimate with a meter and a freeze, pushboxes, best-of-3 rounds with the meter carrying over), a `BaseFighter` template whose defaults are that standard moveset, the six launch-roster characters as placeholders (ids 10-15), Brawler, Shooter and Sandbag test characters, a "Debug boxes" hitbox/hurtbox toggle panel, art for code characters (`CodeCharacterArt`) with an Animator generator (Fight > Create Animator for Selected Character), EditMode tests (including a determinism soak test over every character pair), projectiles (hitboxes that don't follow their owner), lockstep online play through the relay with desync hashes, local play vs a simple AI that uses the whole kit, the inspector character editor with live hitbox preview, a basic lobby and controls UI, and publishing character data to the server.
+**Built:** walk, light and heavy attacks, jumping with one air attack per jump (a little air control, crossups, no air blocking), blocking by holding back (with blockstun), hitstun, KO, the **shared kit** ([Design/SHARED_KIT.md](Design/SHARED_KIT.md): grab with back throw, double-tap dashes, a Special projectile, an Ultimate with a meter and a freeze, pushboxes, best-of-3 rounds with the meter carrying over), a `BaseFighter` template whose defaults are that standard moveset, the six launch-roster characters as placeholders (ids 10-15), Brawler, Shooter and Sandbag test characters, a "Debug boxes" hitbox/hurtbox toggle panel, art for code characters (`CodeCharacterArt`) with an Animator generator (Fight > Create Animator for Selected Character), EditMode tests (including a determinism soak test over every character pair), projectiles (hitboxes that don't follow their owner), lockstep online play through the relay with desync hashes, local play vs a simple AI that uses the whole kit, the inspector character editor with live hitbox preview, a basic lobby and controls UI, and publishing character data to the server.
 
 
 **Not built yet:**
@@ -79,11 +79,11 @@ The plan is 6 characters at launch, with more later. **The plan, the shared move
 
 
 **Roadmap (after the MVP):**
-- Moveset additions: jump (the `Buttons.Up` bit is reserved), aerials, high/low attacks.
+- Moveset additions: high/low attacks (crouch, crouch-block, overheads), landing recovery.
 - A proper character select screen and online lobby, including sending each player's character choice over the network.
 
 
-Default keys: A/D move (hold away from the opponent to block, tap twice to dash), S down, J light, K heavy, L grab, I special, O ultimate. They can be rebound in `FightControls`. `Buttons.Block` (64) is reserved and unused: blocking is holding back.
+Default keys: A/D move (hold away from the opponent to block, tap twice to dash), W jump (J/K in the air for an air attack), S down, J light, K heavy, L grab, I special, O ultimate. They can be rebound in `FightControls`. `Buttons.Block` (64) is reserved and unused: blocking is holding back.
 
 
 ## Commands

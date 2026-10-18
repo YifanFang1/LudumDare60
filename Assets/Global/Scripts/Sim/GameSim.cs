@@ -237,8 +237,12 @@ public class GameSim
     // x, both are pushed apart by half the overlap; a fighter against the arena edge can't move,
     // so the other one takes the rest. When both stand on exactly the same spot, fighter 0 goes
     // left: the tie-break must never depend on anything but the state, or the two machines differ.
+    // Bodies only push while BOTH fighters are on the ground, so a jump can pass over the opponent;
+    // if it lands overlapping them, this pushes them apart from the landing tick on.
     void SeparateBodies()
     {
+        if (fighters[0].IsAirborne || fighters[1].IsAirborne) return;
+
         Box a = fighters[0].HurtboxWorld();
         Box b = fighters[1].HurtboxWorld();
 
@@ -281,9 +285,10 @@ public class GameSim
 
             Fighter victim = fighters[1 - h.owner];
             if (victim.state == FighterStateId.KO) continue;
-            // Grab rule: a fighter in hitstun or blockstun can't be grabbed. The grab hitbox stays
-            // alive, so it still catches them if they recover before it runs out.
-            if (h.def.grab && (victim.state == FighterStateId.Hitstun || victim.state == FighterStateId.Blockstun)) continue;
+            // Grab rule: a fighter in hitstun or blockstun, or in the air, can't be grabbed. The grab
+            // hitbox stays alive, so it still catches them if they recover or land before it runs out.
+            if (h.def.grab && (victim.state == FighterStateId.Hitstun || victim.state == FighterStateId.Blockstun
+                               || victim.IsAirborne)) continue;
 
             Box hitWorld = h.World(this);
             Box hurtWorld = victim.HurtboxWorld();
@@ -375,7 +380,10 @@ public class GameSim
             {
                 Fighter f = fighters[i];
                 h = h * 31 + f.x;
+                h = h * 31 + f.y;
                 h = h * 31 + f.vx;
+                h = h * 31 + f.vy;
+                h = h * 31 + (f.usedAirMove ? 1 : 0);
                 h = h * 31 + f.hp;
                 h = h * 31 + (int)f.state;
                 h = h * 31 + f.stateTick;
