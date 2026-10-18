@@ -28,6 +28,9 @@ public class MatchScreens : MonoBehaviour
     public GameObject credits;
     [Tooltip("The full-screen CRT glitch played between screens. Empty = screens switch instantly.")]
     public GlitchTransition transition;
+    [Tooltip("The glass crack: played when you leave the title screen and when a match starts. Empty = the glitch is used instead.")]
+    public ShatterEffect shatter;
+    [HideInInspector] public Vector2 shatterPoint = new Vector2(-1f, -1f);   // where the glass is hit; set by the title screen
 
     [Header("Options")]
     [Tooltip("Start on the Play / Controls / Quit screen. Off: start straight in the lobby.")]
@@ -125,8 +128,17 @@ public class MatchScreens : MonoBehaviour
             shownPhase = phase;
             shownPage = page;
         }
-        else if (!transition.Busy && (shownPhase != phase || shownPage != page))
+        else if (!transition.Busy && !(shatter != null && shatter.IsPlaying) && (shownPhase != phase || shownPage != page))
         {
+            bool leavingTitle = shownPage == MenuPage.Title && page != MenuPage.Title && phase == MatchPhase.Lobby;
+            bool startingMatch = phase == MatchPhase.Playing && shownPhase != MatchPhase.Playing;
+            if (shatter != null && (leavingTitle || startingMatch))
+            {
+                Vector2 hit = shatterPoint.x >= 0f ? shatterPoint : new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+                shatterPoint = new Vector2(-1f, -1f);
+                shatter.Play(hit, () => { shownPhase = match.Phase; shownPage = page; ApplyScreens(); }, null);
+            }
+            else
             transition.Run(() => { shownPhase = match.Phase; shownPage = page; ApplyScreens(); });
         }
         ApplyScreens();

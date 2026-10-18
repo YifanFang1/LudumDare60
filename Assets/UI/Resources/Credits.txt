@@ -1,0 +1,2 @@
+# One person per line:  Name - Role
+# Lines starting with # are ignored. The credits page sorts by role, then by name.

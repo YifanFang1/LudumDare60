@@ -37,22 +37,22 @@ public class HudScreen : MonoBehaviour
     public RectTransform worldNameLayer;        // stretched over the whole screen, pivot in the middle
     public TMP_Text[] worldNames = new TMP_Text[2];
     public float nameHeightAboveHead = 0.35f;   // Unity units above the top of the fighter's body
-    public Color localNameColor = new Color(1f, 0.92f, 0.4f);
+    public Color localNameColor = new Color(0.75f, 1f, 0.55f);
     public Color otherNameColor = Color.white;
 
     [Header("Ultimate meters (Image with Type = Filled)")]
     public Image leftMeter;
     public Image rightMeter;
-    public Color meterColor = new Color(0.9f, 0.75f, 0.1f);
-    public Color meterFullColor = Color.white;   // a full meter pulses between the two colours
+    public Color meterColor = new Color(0.25f, 0.60f, 1f);
+    public Color meterFullColor = new Color(0.75f, 0.92f, 1f);   // a full meter pulses between the two colours
     public TMP_Text leftUltimateReady;           // shown only while that meter is full
     public TMP_Text rightUltimateReady;
 
     [Header("Rounds won: one Image per round (RoundsToWin), first round first")]
     public Image[] leftRoundPips;
     public Image[] rightRoundPips;
-    public Color pipWonColor = new Color(1f, 0.85f, 0.2f);
-    public Color pipEmptyColor = new Color(0.25f, 0.25f, 0.3f);
+    public Color pipWonColor = new Color(0.62f, 0.95f, 0.35f);
+    public Color pipEmptyColor = new Color(0.14f, 0.22f, 0.17f);
 
     [Header("Banners")]
     public TMP_Text bannerText;                  // ROUND 1 / FINAL ROUND, then K.O.
@@ -85,7 +85,7 @@ public class HudScreen : MonoBehaviour
             bannerText.fontSizeMax = 96f;
             bannerText.fontStyle = FontStyles.Bold;
             bannerText.alignment = TextAlignmentOptions.Center;
-            bannerText.color = new Color(1f, 0.85f, 0.2f);
+            bannerText.color = new Color(0.80f, 1f, 0.45f);
             bannerText.raycastTarget = false;
             RectTransform rect = bannerText.rectTransform;
             rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
@@ -143,7 +143,7 @@ public class HudScreen : MonoBehaviour
             bgRt.sizeDelta = new Vector2(520f, 24f);
             Image bgImage = bg.GetComponent<Image>();
             bgImage.sprite = whiteSprite;
-            bgImage.color = new Color(0.15f, 0.15f, 0.18f, 1f);
+            bgImage.color = new Color(0.06f, 0.14f, 0.10f, 1f);
 
             GameObject fillGo = new GameObject("Fill", typeof(RectTransform), typeof(Image));
             fillGo.transform.SetParent(bg.transform, false);

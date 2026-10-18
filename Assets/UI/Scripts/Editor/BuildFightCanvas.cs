@@ -20,11 +20,11 @@ public static class BuildFightCanvas
     const string ButtonPrefabPath = PrefabFolder + "/CharacterButton.prefab";
     const string RowPrefabPath = PrefabFolder + "/ControlRow.prefab";
 
-    static readonly Color Dim = new Color(0.05f, 0.07f, 0.12f, 0.88f);
-    static readonly Color PanelColor = new Color(0.12f, 0.16f, 0.26f, 0.96f);
-    static readonly Color ButtonColor = new Color(0.27f, 0.36f, 0.58f, 1f);
-    static readonly Color FieldColor = new Color(0.07f, 0.09f, 0.16f, 1f);
-    static readonly Color Muted = new Color(0.7f, 0.74f, 0.85f, 1f);
+    static readonly Color Dim = new Color(0.02f, 0.06f, 0.04f, 0.88f);
+    static readonly Color PanelColor = new Color(0.06f, 0.14f, 0.10f, 0.96f);
+    static readonly Color ButtonColor = new Color(0.12f, 0.42f, 0.24f, 1f);
+    static readonly Color FieldColor = new Color(0.03f, 0.08f, 0.05f, 1f);
+    static readonly Color Muted = new Color(0.66f, 0.82f, 0.70f, 1f);
 
     // Fight > Rebuild Default Canvas: deletes the FightUI in the open scene (if there is one) and builds the whole
     // default UI again, no questions asked. Your Match Screens options (debug UI, start page...) are kept.
@@ -69,7 +69,6 @@ public static class BuildFightCanvas
         GameObject select = BuildCharacterSelect(root.transform, buttonPrefab);
         GameObject hud = BuildHud(root.transform);
         GameObject creditsPage = BuildCredits(root.transform);
-        GlitchTransition transition = BuildTransitionOverlay(root.transform);   // last in the canvas = drawn on top
 
         MatchScreens screens = root.AddComponent<MatchScreens>();
         screens.titleScreen = titlePage;
@@ -81,7 +80,7 @@ public static class BuildFightCanvas
         screens.characterSelect = select;
         screens.hud = hud;
         screens.credits = creditsPage;
-        screens.transition = transition;
+        EnsureTransition(root, screens);   // the glitch and the glass crack overlays, last in the canvas = drawn on top
         screens.editorPreview = UiScreen.Title;
         if (keepOptions)
         {
@@ -295,14 +294,22 @@ public static class BuildFightCanvas
     // Finds or builds the transition and makes it the last child (drawn on top), then hooks it up.
     static void EnsureTransition(GameObject root, MatchScreens screens)
     {
-        // the old glass-shatter overlay is not used any more
-        ShatterEffect[] old = root.GetComponentsInChildren<ShatterEffect>(true);
-        for (int i = 0; i < old.Length; i++) Undo.DestroyObjectImmediate(old[i].gameObject);
-
         GlitchTransition t = root.GetComponentInChildren<GlitchTransition>(true);
         if (t == null) t = BuildTransitionOverlay(root.transform);
         t.transform.SetAsLastSibling();
         screens.transition = t;
+
+        // the glass crack: used when you press a key on the title and when a match starts
+        ShatterEffect shatter = root.GetComponentInChildren<ShatterEffect>(true);
+        if (shatter == null)
+        {
+            GameObject go = new GameObject("ShatterOverlay", typeof(RectTransform));
+            go.transform.SetParent(root.transform, false);
+            Stretch((RectTransform)go.transform);
+            shatter = go.AddComponent<ShatterEffect>();
+        }
+        shatter.transform.SetAsLastSibling();
+        screens.shatter = shatter;
     }
 
     // Fight > Rebuild Default Canvas
@@ -334,7 +341,6 @@ public static class BuildFightCanvas
         if (screens.credits == null) screens.credits = BuildCredits(root.transform);
         EnsureTransition(root, screens);
 
-        // the title page no longer shatters: clear the old hookup so nothing points at a deleted object
         screens.editorPreview = UiScreen.Main;
         if (screens.titleScreen != null) Show(screens.titleScreen, false);
         Show(screens.mainMenu, true);
@@ -362,6 +368,33 @@ public static class BuildFightCanvas
         return null;
     }
 
+    // A visible scrollbar for a scroll box: dark track, bright handle. The viewport needs 20 px kept free on the right.
+    static Scrollbar BuildScrollbar(Transform scrollRoot)
+    {
+        GameObject barGo = new GameObject("Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+        barGo.transform.SetParent(scrollRoot, false);
+        RectTransform barRt = (RectTransform)barGo.transform;
+        barRt.anchorMin = new Vector2(1f, 0f);
+        barRt.anchorMax = new Vector2(1f, 1f);
+        barRt.pivot = new Vector2(1f, 0.5f);
+        barRt.sizeDelta = new Vector2(16f, -8f);
+        barRt.anchoredPosition = new Vector2(-4f, 0f);
+        barGo.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
+        GameObject slide = new GameObject("Sliding Area", typeof(RectTransform));
+        slide.transform.SetParent(barGo.transform, false);
+        Stretch((RectTransform)slide.transform);
+        GameObject handle = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+        handle.transform.SetParent(slide.transform, false);
+        Stretch((RectTransform)handle.transform);
+        Image handleImg = handle.GetComponent<Image>();
+        handleImg.color = new Color(0.55f, 0.85f, 0.45f, 1f);
+        Scrollbar bar = barGo.GetComponent<Scrollbar>();
+        bar.handleRect = (RectTransform)handle.transform;
+        bar.targetGraphic = handleImg;
+        bar.direction = Scrollbar.Direction.BottomToTop;
+        return bar;
+    }
+
     static GameObject BuildCredits(Transform parent)
     {
         GameObject screen = NewScreen("CreditsScreen", parent, false);
@@ -381,14 +414,44 @@ public static class BuildFightCanvas
             screen.AddComponent<Image>().color = Dim;
         }
 
-        RectTransform panel = NewPanel("Panel", screen.transform, 760f);
-        Txt(panel, "Title", "Credits", 56, TextAlignmentOptions.Center, Color.white, 80f);
-        Txt(panel, "Names", "Made for Ludum Dare 60\n(put the team's names here)", 32, TextAlignmentOptions.Center, Muted, 120f);
+        RectTransform panel = NewPanel("Panel", screen.transform, 640f);
+        Txt(panel, "Title", "Credits", 48, TextAlignmentOptions.Center, Color.white, 70f);
+
+        // the names scroll inside a fixed-height box; the list itself is Assets/UI/Resources/Credits.txt
+        GameObject scrollGo = new GameObject("NamesScroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect), typeof(LayoutElement));
+        scrollGo.transform.SetParent(panel, false);
+        scrollGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.25f);
+        scrollGo.GetComponent<LayoutElement>().preferredHeight = 400f;
+        GameObject viewport = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
+        viewport.transform.SetParent(scrollGo.transform, false);
+        Stretch((RectTransform)viewport.transform);
+        ((RectTransform)viewport.transform).offsetMax = new Vector2(-20f, 0f);
+
+        TMP_Text names = FreeText(viewport.transform, "Names", "", 28, TextAlignmentOptions.TopLeft, Color.white);
+        RectTransform namesRt = names.rectTransform;
+        namesRt.anchorMin = new Vector2(0f, 1f);
+        namesRt.anchorMax = new Vector2(1f, 1f);
+        namesRt.pivot = new Vector2(0.5f, 1f);
+        namesRt.offsetMin = new Vector2(16f, 0f);
+        namesRt.offsetMax = new Vector2(-16f, 0f);
+        names.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        ScrollRect scroll = scrollGo.GetComponent<ScrollRect>();
+        scroll.viewport = (RectTransform)viewport.transform;
+        scroll.content = namesRt;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 30f;
+        scroll.verticalScrollbar = BuildScrollbar(scrollGo.transform);
+        scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+
         TMP_Text unused;
-        Button back2 = Btn(panel, "BackButton", "Back", 60f, out unused);
+        Button back2 = Btn(panel, "BackButton", "Back", 56f, out unused);
 
         CreditsScreen cs = screen.AddComponent<CreditsScreen>();
         cs.backButton = back2;
+        cs.namesText = names;
         return screen;
     }
 
@@ -441,7 +504,11 @@ public static class BuildFightCanvas
     // Without that art it falls back to the plain text menu below.
     static GameObject BuildMainMenu(Transform parent)
     {
-        Sprite backdrop = LoadSprite("Main Menu BACKGROUND.png");
+        // the logo-free backdrop plus the logo picture; the old picture (title painted in) is the fallback
+        Sprite noLogoBackdrop = LoadSprite("Main Menubg_no_logo_logo.png");
+        Texture2D logo = AssetDatabase.LoadAssetAtPath<Texture2D>(TitleArtFolder + "/Techtonic Logo.png");
+        bool addLogo = noLogoBackdrop != null && logo != null;
+        Sprite backdrop = addLogo ? noLogoBackdrop : LoadSprite("Main Menu BACKGROUND.png");
         Sprite play = LoadSprite("PLAY.png");
         Sprite options = LoadSprite("OPTIONS.png");
         Sprite credits = LoadSprite("CREDITS.png");
@@ -461,7 +528,15 @@ public static class BuildFightCanvas
         back.type = backdrop.border.sqrMagnitude > 0f ? Image.Type.Sliced : Image.Type.Simple;   // 9-sliced when borders are set in the Sprite Editor
         back.raycastTarget = false;
 
-        // (no logo here: the backdrop picture already has the title on it)
+        if (addLogo)
+        {
+            // placed where the title sat on the old backdrop (centre of the logo art at about 955, 265 in 1920x1080)
+            float scale = 0.6f;
+            RawImage logoImage = Raw(screen.transform, "Logo", logo);
+            Vector2 mid = new Vector2(0.5f, 0.5f);
+            Anchor(logoImage.rectTransform, mid, mid, new Vector2(-9f, 275f), new Vector2(logo.width * scale, logo.height * scale));
+            logoImage.rectTransform.pivot = mid;
+        }
 
         // One "Buttons" group holds all four, so you can scale or move the whole block in one go
         // (select Buttons, use its Scale or the Rect tool). It is anchored to the screen's centre.
@@ -510,7 +585,7 @@ public static class BuildFightCanvas
 
     static GameObject BuildModeSelect(Transform parent)
     {
-        GameObject screen = NewScreen("ModeSelectScreen", parent, true);
+        GameObject screen = NewArtScreen("ModeSelectScreen", parent);
         RectTransform panel = NewPanel("Panel", screen.transform, 560f);
 
         Txt(panel, "Title", "Choose mode", 56, TextAlignmentOptions.Center, Color.white, 80f);
@@ -531,16 +606,69 @@ public static class BuildFightCanvas
 
     static GameObject BuildControls(Transform parent, ControlRowUI rowPrefab)
     {
-        GameObject screen = NewScreen("ControlsScreen", parent, true);
-        RectTransform panel = NewPanel("Panel", screen.transform, 760f);
+        // same backdrop as Credits
+        GameObject screen = NewArtScreen("ControlsScreen", parent, false, "Options and Credits Menu Background.png", false);
+        RectTransform panel = NewPanel("Panel", screen.transform, 560f);
 
-        Txt(panel, "Title", "Controls", 56, TextAlignmentOptions.Center, Color.white, 80f);
-        TMP_Text hint = Txt(panel, "HintText", "Click an action, then press a key", 24, TextAlignmentOptions.Center, Muted, 36f);
+        Txt(panel, "Title", "Controls", 44, TextAlignmentOptions.Center, Color.white, 64f);
+        TMP_Text hint = Txt(panel, "HintText", "Click an action, then press a key", 22, TextAlignmentOptions.Center, Muted, 32f);
 
-        GameObject rows = NewGroup("Rows", panel);
+        // the rows scroll inside a fixed-height box, so a long list never grows past the screen
+        GameObject scrollGo = new GameObject("RowsScroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect), typeof(LayoutElement));
+        scrollGo.transform.SetParent(panel, false);
+        scrollGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.25f);
+        scrollGo.GetComponent<LayoutElement>().preferredHeight = 340f;
+        GameObject viewport = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
+        viewport.transform.SetParent(scrollGo.transform, false);
+        Stretch((RectTransform)viewport.transform);
+
+        GameObject rows = NewGroup("Rows", viewport.transform);
+        RectTransform rowsRt = (RectTransform)rows.transform;
+        rowsRt.anchorMin = new Vector2(0f, 1f);
+        rowsRt.anchorMax = new Vector2(1f, 1f);
+        rowsRt.pivot = new Vector2(0.5f, 1f);
+        rowsRt.offsetMin = Vector2.zero;
+        rowsRt.offsetMax = Vector2.zero;
+        rows.GetComponent<VerticalLayoutGroup>().padding = new RectOffset(8, 8, 8, 8);
+        rows.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        ScrollRect scroll = scrollGo.GetComponent<ScrollRect>();
+        scroll.viewport = (RectTransform)viewport.transform;
+        scroll.content = rowsRt;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 30f;
+
+        // a bar you can actually see: dark track, bright handle, always shown
+        ((RectTransform)viewport.transform).offsetMax = new Vector2(-20f, 0f);
+        GameObject barGo = new GameObject("Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+        barGo.transform.SetParent(scrollGo.transform, false);
+        RectTransform barRt = (RectTransform)barGo.transform;
+        barRt.anchorMin = new Vector2(1f, 0f);
+        barRt.anchorMax = new Vector2(1f, 1f);
+        barRt.pivot = new Vector2(1f, 0.5f);
+        barRt.sizeDelta = new Vector2(16f, -8f);
+        barRt.anchoredPosition = new Vector2(-4f, 0f);
+        barGo.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
+        GameObject slide = new GameObject("Sliding Area", typeof(RectTransform));
+        slide.transform.SetParent(barGo.transform, false);
+        Stretch((RectTransform)slide.transform);
+        GameObject handle = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+        handle.transform.SetParent(slide.transform, false);
+        Stretch((RectTransform)handle.transform);
+        Image handleImg = handle.GetComponent<Image>();
+        handleImg.color = new Color(0.55f, 0.85f, 0.45f, 1f);
+        Scrollbar bar = barGo.GetComponent<Scrollbar>();
+        bar.handleRect = (RectTransform)handle.transform;
+        bar.targetGraphic = handleImg;
+        bar.direction = Scrollbar.Direction.BottomToTop;
+        scroll.verticalScrollbar = bar;
+        scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+
         TMP_Text unused;
-        Button reset = Btn(panel, "ResetButton", "Reset to defaults", 60f, out unused);
-        Button back = Btn(panel, "BackButton", "Back", 60f, out unused);
+        Button reset = Btn(panel, "ResetButton", "Reset to defaults", 52f, out unused);
+        Button back = Btn(panel, "BackButton", "Back", 52f, out unused);
 
         ControlsScreen cs = screen.AddComponent<ControlsScreen>();
         cs.rowParent = (RectTransform)rows.transform;
@@ -553,7 +681,7 @@ public static class BuildFightCanvas
 
     static GameObject BuildLobby(Transform parent)
     {
-        GameObject screen = NewScreen("LobbyScreen", parent, true);
+        GameObject screen = NewArtScreen("LobbyScreen", parent);
         RectTransform panel = NewPanel("Panel", screen.transform, 600f);
 
         Txt(panel, "Title", "ONLINE", 64, TextAlignmentOptions.Center, Color.white, 80f);
@@ -580,13 +708,13 @@ public static class BuildFightCanvas
 
     static GameObject BuildWaiting(Transform parent)
     {
-        GameObject screen = NewScreen("WaitingScreen", parent, true);
+        GameObject screen = NewArtScreen("WaitingScreen", parent);
         RectTransform panel = NewPanel("Panel", screen.transform, 600f);
 
         TMP_Text heading = Txt(panel, "Heading", "Room code", 28, TextAlignmentOptions.Center, Muted, 40f);
         TMP_Text code = Txt(panel, "RoomCodeText", "ABCD", 110, TextAlignmentOptions.Center, Color.white, 130f);
         TMP_Text hint = Txt(panel, "HintText", "Give your opponent this code", 24, TextAlignmentOptions.Center, Muted, 36f);
-        TMP_Text status = Txt(panel, "StatusText", "", 22, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.4f), 34f);
+        TMP_Text status = Txt(panel, "StatusText", "", 22, TextAlignmentOptions.Center, new Color(0.75f, 0.95f, 0.40f), 34f);
         TMP_Text unused;
         Button cancel = Btn(panel, "CancelButton", "Cancel", 60f, out unused);
 
@@ -601,7 +729,7 @@ public static class BuildFightCanvas
 
     static GameObject BuildCharacterSelect(Transform parent, CharacterButtonUI buttonPrefab)
     {
-        GameObject screen = NewScreen("CharacterSelectScreen", parent, true);
+        GameObject screen = NewArtScreen("CharacterSelectScreen", parent, true);
 
         TMP_Text title = FreeText(screen.transform, "Title", "Choose your character", 48, TextAlignmentOptions.Center, Color.white);
         Anchor(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -50f), new Vector2(1000f, 70f));
@@ -673,7 +801,7 @@ public static class BuildFightCanvas
         Button back = Btn(row.transform, "BackButton", "Back", 64f, out backLabel);          // left
         Button confirm = Btn(row.transform, "ConfirmButton", "Ready", 64f, out confirmLabel);   // right
 
-        TMP_Text status = FreeText(screen.transform, "StatusText", "", 24, TextAlignmentOptions.Center, new Color(1f, 0.85f, 0.4f));
+        TMP_Text status = FreeText(screen.transform, "StatusText", "", 24, TextAlignmentOptions.Center, new Color(0.75f, 0.95f, 0.40f));
         Anchor(status.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1000f, 40f));
 
         CharacterSelectScreen cs = screen.AddComponent<CharacterSelectScreen>();
@@ -713,7 +841,7 @@ public static class BuildFightCanvas
         TMP_Text info = TopCenterText(screen.transform, "InfoText", 26, Color.white, -30f);
         TMP_Text controls = TopCenterText(screen.transform, "ControlsText", 22, Muted, -62f);
         TMP_Text tick = TopCenterText(screen.transform, "TickText", 22, Muted, -90f);
-        TMP_Text stalled = TopCenterText(screen.transform, "StalledText", 26, new Color(1f, 0.85f, 0.4f), -130f);
+        TMP_Text stalled = TopCenterText(screen.transform, "StalledText", 26, new Color(0.75f, 0.95f, 0.40f), -130f);
         TMP_Text warning = TopCenterText(screen.transform, "WarningText", 26, new Color(1f, 0.4f, 0.4f), -162f);
 
         // names that follow the fighters
@@ -770,7 +898,7 @@ public static class BuildFightCanvas
         ((RectTransform)bg.transform).pivot = a;
         bg.GetComponent<Image>().sprite = BuiltIn("UI/Skin/Background.psd");
         bg.GetComponent<Image>().type = Image.Type.Sliced;
-        bg.GetComponent<Image>().color = new Color(0.15f, 0.15f, 0.18f, 1f);
+        bg.GetComponent<Image>().color = new Color(0.06f, 0.14f, 0.10f, 1f);
 
         GameObject fillGo = new GameObject("Fill", typeof(RectTransform), typeof(Image));
         fillGo.transform.SetParent(bg.transform, false);
@@ -845,7 +973,7 @@ public static class BuildFightCanvas
         Image sel = selected.GetComponent<Image>();
         sel.sprite = BuiltIn("UI/Skin/UISprite.psd");
         sel.type = Image.Type.Sliced;
-        sel.color = new Color(1f, 0.9f, 0.3f, 0.4f);
+        sel.color = new Color(0.60f, 0.95f, 0.30f, 0.4f);
         sel.raycastTarget = false;
         selected.SetActive(false);
 
@@ -895,6 +1023,37 @@ public static class BuildFightCanvas
     }
 
     // ================= building blocks =================
+
+    // A screen with the logo-free menu picture behind it (Online / Quick match / Private room pages).
+    // Without the art it falls back to the dark dim.
+    static GameObject NewArtScreen(string name, Transform parent, bool logoInCorner = false,
+        string artFile = "Main Menubg_no_logo_logo.png", bool withLogo = true)
+    {
+        Sprite art = LoadSprite(artFile);
+        GameObject screen = NewScreen(name, parent, art == null);
+        if (art == null) return screen;
+        GameObject backGo = new GameObject("Backdrop", typeof(RectTransform), typeof(Image));
+        backGo.transform.SetParent(screen.transform, false);
+        Stretch((RectTransform)backGo.transform);
+        Image back = backGo.GetComponent<Image>();
+        back.sprite = art;
+        back.type = art.border.sqrMagnitude > 0f ? Image.Type.Sliced : Image.Type.Simple;
+        back.raycastTarget = false;
+
+        // the logo is not part of this backdrop: centred above the panel, or small in the corner on crowded screens
+        Texture2D logo = AssetDatabase.LoadAssetAtPath<Texture2D>(TitleArtFolder + "/Techtonic Logo.png");
+        if (withLogo && logo != null)
+        {
+            float scale = logoInCorner ? 0.28f : 0.5f;
+            RawImage logoImage = Raw(screen.transform, "Logo", logo);
+            logoImage.raycastTarget = false;
+            Vector2 anchor = logoInCorner ? new Vector2(0f, 1f) : new Vector2(0.5f, 1f);
+            Anchor(logoImage.rectTransform, anchor, anchor, new Vector2(logoInCorner ? 10f : 0f, 30f),
+                new Vector2(logo.width * scale, logo.height * scale));
+            logoImage.rectTransform.pivot = anchor;
+        }
+        return screen;
+    }
 
     static GameObject NewScreen(string name, Transform parent, bool dim)
     {
@@ -980,9 +1139,9 @@ public static class BuildFightCanvas
         Button b = go.GetComponent<Button>();
         b.targetGraphic = img;
         ColorBlock colors = b.colors;
-        colors.highlightedColor = new Color(1.15f, 1.15f, 1.3f, 1f);
-        colors.pressedColor = new Color(0.8f, 0.8f, 0.9f, 1f);
-        colors.disabledColor = new Color(1f, 0.85f, 0.35f, 0.9f);   // doubles as the "selected tab" look
+        colors.highlightedColor = new Color(1.10f, 1.30f, 1.10f, 1f);
+        colors.pressedColor = new Color(0.75f, 0.9f, 0.78f, 1f);
+        colors.disabledColor = new Color(0.70f, 0.95f, 0.35f, 0.95f);   // doubles as the "selected tab" look
         b.colors = colors;
 
         labelText = FreeText(go.transform, "Label", label, 28, TextAlignmentOptions.Center, Color.white);
