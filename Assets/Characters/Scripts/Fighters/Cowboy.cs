@@ -81,6 +81,15 @@ public class Cowboy : BaseFighter
         return base.CanUseMove(sim, m);
     }
 
+    // Standard controls, plus the empty click: a FRESH Special press with no bullets left.
+    // (The event only feeds sound; it never changes the fight.)
+    public override MoveDef ChooseMove(GameSim sim, int input)
+    {
+        if ((pressedInput & Buttons.Special) != 0 && ammo <= 0 && rapidFireTicks <= 0)
+            sim.AddEvent(SimEventType.OutOfAmmo, index, -1, x, y, 0);
+        return base.ChooseMove(sim, input);
+    }
+
     public override void OnTick(GameSim sim)
     {
         if (rapidFireTicks > 0) rapidFireTicks--;

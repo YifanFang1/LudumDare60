@@ -31,6 +31,9 @@ public abstract class CharacterLook : ScriptableObject
     [Tooltip("Art for this character's projectiles. 'Visual' must match the move's visual name: \"special\" for the standard Special. Use a Center pivot; art faces RIGHT. A projectile with no art here only shows as a yellow box with the Hitboxes toggle on.")]
     public ProjectileSprite[] projectileSprites;
 
+    [Tooltip("This character's own sounds. Anything left empty falls back to the AudioManager's shared sounds.")]
+    public CharacterSfx sfx = new CharacterSfx();
+
     // -1 when flipSprite is ticked, else 1. Multiply the art's x scale by it.
     public float SpriteFlip { get { return flipSprite ? -1f : 1f; } }
 
@@ -55,4 +58,54 @@ public class ProjectileSprite
 {
     public string visual = "special";
     public Sprite sprite;
+}
+
+// One character's sound set. Every slot is optional: empty = the AudioManager's shared sound plays.
+// Clip lists pick a random clip each time.
+[System.Serializable]
+public class CharacterSfx
+{
+    [Tooltip("Sound when a specific move starts. 'Move' is the move name: Light, Heavy, Grab, Special, Ultimate, JumpLight, JumpHeavy.")]
+    public MoveSfx[] moves;
+    [Tooltip("Played when ANY move of this character starts and 'moves' has no entry for it.")]
+    public AudioClip[] attackStart;
+    [Tooltip("This character's hits landing on someone.")]
+    public AudioClip[] hit;
+    [Tooltip("Heavy hits (damage at or above the AudioManager's Heavy Hit Damage). Empty = hit.")]
+    public AudioClip[] heavyHit;
+    [Tooltip("This character's grab landing. Empty = hit.")]
+    public AudioClip[] grab;
+    [Tooltip("This character blocking a hit.")]
+    public AudioClip[] block;
+    [Tooltip("This character dashing.")]
+    public AudioClip[] dash;
+    [Tooltip("This character's Ultimate freeze.")]
+    public AudioClip superFlash;
+    [Tooltip("This character being knocked out.")]
+    public AudioClip ko;
+    public AudioClip[] reflect;
+    public AudioClip[] destroy;
+    public AudioClip[] summon;
+    public AudioClip[] hold;
+    public AudioClip[] heal;
+    [Tooltip("A fresh Special press with no ammo left (Noir's empty click).")]
+    public AudioClip[] outOfAmmo;
+
+    public AudioClip[] FindMove(string moveName)
+    {
+        if (moves == null || string.IsNullOrEmpty(moveName)) return null;
+        for (int i = 0; i < moves.Length; i++)
+        {
+            if (moves[i] != null && moves[i].move == moveName && moves[i].clips != null && moves[i].clips.Length > 0)
+                return moves[i].clips;
+        }
+        return null;
+    }
+}
+
+[System.Serializable]
+public class MoveSfx
+{
+    public string move = "Light";
+    public AudioClip[] clips;
 }

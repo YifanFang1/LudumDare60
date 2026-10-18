@@ -26,6 +26,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] summonSounds;     // Ultimate copies appeared
     public AudioClip[] holdSounds;       // a held grab caught someone (empty = use grabSounds)
     public AudioClip[] healSounds;       // someone healed
+    public AudioClip[] outOfAmmoSounds;  // a Special press with no ammo (Noir's empty click)
     public int heavyHitDamage = 10;      // Brawler: Light does 5, Heavy does 12
 
     [Header("Match")]
@@ -129,52 +130,88 @@ public class AudioManager : MonoBehaviour
         PlayUI(fightStart);
     }
 
+    // The sound set of the character a fighter slot is playing, or null.
+    CharacterSfx SfxOf(int slot)
+    {
+        GameSim sim = match.Sim;
+        if (sim == null || slot < 0 || slot >= sim.fighters.Length || sim.fighters[slot] == null) return null;
+        CharacterLook look = CharacterRegistry.GetLook(sim.fighters[slot].characterId);
+        return look != null ? look.sfx : null;
+    }
+
+    static bool Has(AudioClip[] c) { return c != null && c.Length > 0; }
+
+    // The character's clips if it has any, else the shared ones.
+    static AudioClip[] Pick(AudioClip[] own, AudioClip[] shared) { return Has(own) ? own : shared; }
+
     void OnSimEvent(SimEvent e)
     {
+        CharacterSfx c = SfxOf(e.a);
         switch (e.type)
         {
             case SimEventType.AttackStart:
-                PlaySfx(attackSounds);
+            {
+                AudioClip[] clips = null;
+                GameSim sim = match.Sim;
+                if (c != null && sim != null && e.a >= 0 && e.a < sim.fighters.Length && sim.fighters[e.a].move != null)
+                    clips = c.FindMove(sim.fighters[e.a].move.name);
+                if (!Has(clips) && c != null) clips = c.attackStart;
+                PlaySfx(Pick(clips, attackSounds));
                 break;
+            }
             case SimEventType.Hit:
-                bool heavy = e.amount >= heavyHitDamage && heavyHitSounds != null && heavyHitSounds.Length > 0;
-                PlaySfx(heavy ? heavyHitSounds : hitSounds);
+            {
+                bool big = e.amount >= heavyHitDamage;
+                AudioClip[] own = null;
+                if (c != null) own = big && Has(c.heavyHit) ? c.heavyHit : c.hit;
+                bool sharedHeavy = big && Has(heavyHitSounds);
+                PlaySfx(Pick(own, sharedHeavy ? heavyHitSounds : hitSounds));
                 break;
+            }
             case SimEventType.Block:
-                PlaySfx(blockSounds);
+                PlaySfx(Pick(SfxOf(e.b) != null ? SfxOf(e.b).block : null, blockSounds));
                 break;
             case SimEventType.Grab:
-                PlaySfx(grabSounds != null && grabSounds.Length > 0 ? grabSounds : hitSounds);
+            {
+                AudioClip[] own = c != null ? (Has(c.grab) ? c.grab : c.hit) : null;
+                PlaySfx(Pick(own, Has(grabSounds) ? grabSounds : hitSounds));
                 break;
+            }
             case SimEventType.Dash:
-                PlaySfx(dashSounds);
+                PlaySfx(Pick(c != null ? c.dash : null, dashSounds));
                 break;
             case SimEventType.SuperFlash:
-                PlayUI(superFlashSound);
+                PlayUI(c != null && c.superFlash != null ? c.superFlash : superFlashSound);
                 break;
             case SimEventType.KO:
-                PlayUI(koSound);
+                PlayUI(c != null && c.ko != null ? c.ko : koSound);
                 break;
             case SimEventType.RoundStart:
                 PlayUI(roundStart != null ? roundStart : fightStart);
                 break;
             case SimEventType.Reflect:
-                PlaySfx(reflectSounds);
+                PlaySfx(Pick(c != null ? c.reflect : null, reflectSounds));
                 break;
             case SimEventType.ProjectileDestroyed:
-                PlaySfx(destroySounds);
+                PlaySfx(Pick(c != null ? c.destroy : null, destroySounds));
                 break;
             case SimEventType.Telegraph:
                 PlayUI(telegraphSound);
                 break;
             case SimEventType.SummonSpawn:
-                PlaySfx(summonSounds);
+                PlaySfx(Pick(c != null ? c.summon : null, summonSounds));
                 break;
             case SimEventType.Hold:
-                PlaySfx(holdSounds != null && holdSounds.Length > 0 ? holdSounds : grabSounds);
+            {
+                AudioClip[] own = c != null ? (Has(c.hold) ? c.hold : c.grab) : null;
+                PlaySfx(Pick(own, Has(holdSounds) ? holdSounds : grabSounds));
+                break;
+            }
+            case SimEventType.OutOfAmmo:
+                PlaySfx(Pick(c != null ? c.outOfAmmo : null, outOfAmmoSounds));
                 break;
             case SimEventType.Heal:
-                PlaySfx(healSounds);
+                PlaySfx(Pick(c != null ? c.heal : null, healSounds));
                 break;
         }
     }
