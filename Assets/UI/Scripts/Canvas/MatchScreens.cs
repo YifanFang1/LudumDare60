@@ -4,11 +4,11 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 #endif
 
-public enum UiScreen { Lobby, Waiting, CharacterSelect, Hud, Main, Controls, Mode }
+public enum UiScreen { Lobby, Waiting, CharacterSelect, Hud, Main, Controls, Mode, Title }
 
 // The pages you can navigate between while no match is running.
 // Play = the online lobby (quick match and rooms). Mode = the Online / Offline choice that comes after Play.
-public enum MenuPage { Main, Controls, Mode, Play }
+public enum MenuPage { Main, Controls, Mode, Play, Title }
 
 // The conductor of the canvas UI: shows the one screen that matches the match phase and hides the rest.
 // Each screen is an ordinary GameObject you can restyle in the Unity editor (see Assets/UI/CANVAS_UI.md).
@@ -24,10 +24,14 @@ public class MatchScreens : MonoBehaviour
     public GameObject mainMenu;
     public GameObject controls;
     public GameObject modeSelect;
+    public GameObject titleScreen;   // "press any key" start screen
 
     [Header("Options")]
     [Tooltip("Start on the Play / Controls / Quit screen. Off: start straight in the lobby.")]
     public bool startOnMainMenu = true;
+
+    [Tooltip("Open on the arcade-style 'press any key' screen (needs a Title Screen assigned above).")]
+    public bool startOnTitle = true;
 
     [Tooltip("Turn off the old OnGUI lobby and HUD (LobbyUI, FightView) while this canvas is in the scene.")]
     public bool replaceImguiUI = true;
@@ -61,9 +65,14 @@ public class MatchScreens : MonoBehaviour
         GoTo(previousPage == page ? MenuPage.Main : previousPage);
     }
 
+    [Tooltip("Render the UI through an overlay camera so the CRT filter covers it too.")]
+    public bool crtOverUI = true;
+
     void Awake()
     {
         DebugUI = showDebugUI;
+        if (crtOverUI && GetComponent<UiUnderCrt>() == null && GetComponent<Canvas>() != null)
+            gameObject.AddComponent<UiUnderCrt>();
         match = SessionFinder.Find();
         if (match == null)
         {
@@ -72,7 +81,7 @@ public class MatchScreens : MonoBehaviour
             return;
         }
 
-        page = startOnMainMenu ? MenuPage.Main : MenuPage.Mode;
+        page = startOnTitle && titleScreen != null ? MenuPage.Title : (startOnMainMenu ? MenuPage.Main : MenuPage.Mode);
         previousPage = MenuPage.Main;
 
         if (replaceImguiUI)
@@ -93,6 +102,7 @@ public class MatchScreens : MonoBehaviour
 
         bool inMenus = phase == MatchPhase.Lobby;
         Show(mainMenu, inMenus && page == MenuPage.Main);
+        Show(titleScreen, inMenus && page == MenuPage.Title);
         Show(controls, inMenus && page == MenuPage.Controls);
         Show(modeSelect, inMenus && page == MenuPage.Mode);
         Show(lobby, inMenus && page == MenuPage.Play);
@@ -147,6 +157,7 @@ public class MatchScreens : MonoBehaviour
             Show(hud, editorPreview == UiScreen.Hud);
             Show(mainMenu, editorPreview == UiScreen.Main);
             Show(controls, editorPreview == UiScreen.Controls);
+            Show(titleScreen, editorPreview == UiScreen.Title);
             Show(modeSelect, editorPreview == UiScreen.Mode);
         };
     }

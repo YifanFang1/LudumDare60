@@ -93,7 +93,7 @@ ints only, no float/Time/Random/UnityEngine, state changes only inside `GameSim.
 
 **Grabs** are hitboxes with `grab` ticked: they ignore blocking but can't catch a fighter in hitstun or blockstun (the hitbox stays out and catches them if they recover in time). Holding back when a grab lands throws the victim behind you. A landed grab sends a `Grab` event instead of `Hit`.
 
-**Dashes:** a fresh press of a direction twice within 12 ticks (`Fighter.DashTapWindow`). Toward the opponent is a forward dash. Characters change them with `ForwardDash` / `BackDash`.
+**Dashes:** a fresh press of a direction twice within 12 ticks (`Fighter.DashTapWindow`), or `Buttons.Dash` (Left Shift) with a direction (`DashRequest`). In the air it is an air dash, once per jump (`usedAirDash`, `AirDash`): `Move` skips gravity during it, then it returns to `Jump`. Toward the opponent is a forward dash. Characters change them with `ForwardDash` / `BackDash`.
 
 **Jumps:** holding Up (`Buttons.Up`) from Idle or Walk starts `FighterStateId.Jump` with `vy = JumpArc.up` and `vx = direction * JumpArc.forward`; holding left/right in the air nudges `vx` by `AirControl` per tick (`SteerInAir`), capped at the jump speed. `Fighter.Move` applies `Gravity` while `IsAirborne` (`y > 0 || vy > 0`) and lands at `y = 0`. In the air the only choice is one air attack (`ChooseAirMove`, `usedAirMove`); landing cancels it. You can't block in the air, grabs skip airborne victims, `SeparateBodies` only pushes when both fighters are grounded (so jumps can cross over), and Hitstun can't end while airborne. Inspector characters bind air attacks with `AttackButton.JumpLight` / `JumpHeavy`, and get the standard ones if they have none.
 

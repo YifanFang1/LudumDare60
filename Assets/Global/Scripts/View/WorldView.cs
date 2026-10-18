@@ -656,6 +656,7 @@ public class WorldView : MonoBehaviour
         if ((input & Buttons.Grab) != 0) s += "Grab ";
         if ((input & Buttons.Special) != 0) s += "Special ";
         if ((input & Buttons.Ultimate) != 0) s += "Ult ";
+        if ((input & Buttons.Dash) != 0) s += "Dash ";
         return s.Length > 0 ? s.TrimEnd() : "-";
     }
 

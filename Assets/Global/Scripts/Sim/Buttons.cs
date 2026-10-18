@@ -12,4 +12,5 @@ public static class Buttons
     public const int Grab = 128;
     public const int Special = 256;
     public const int Ultimate = 512;  // only works with a full meter, and needs a fresh press (not held)
+    public const int Dash = 1024;     // with Left or Right: dash that way (same as a double-tap), also in the air
 }

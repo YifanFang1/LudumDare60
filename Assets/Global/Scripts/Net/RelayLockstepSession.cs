@@ -19,9 +19,11 @@ public class RelayLockstepSession : MatchSessionBase
     // 6: player names ("n," message). 7: the shared kit (grab, dash, meter, Special/Ultimate,
     // rounds, pushboxes, new input bits). Both were "6" on separate branches, so the merge is 7:
     // a build with only one of them must not match a build with both. 8: hit stop.
-    // 10: the roster designs (Design/ROSTER_PLAN.md): cooldowns, hold input, status effects,
-    // zones, Ultimate copies, held grabs and the seven characters' real movesets.
-    const string Version = "10";
+    // 10: two different changes, both called "10" on separate branches: the roster designs
+    // (Design/ROSTER_PLAN.md: cooldowns, hold input, status effects, zones, Ultimate copies, held
+    // grabs, the seven characters' movesets) and the air dash + Dash button. 11: the merge of both,
+    // so a build with only one of them can never match a build with both.
+    const string Version = "11";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 
