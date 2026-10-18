@@ -1,8 +1,8 @@
 using UnityEditor;
 using UnityEngine;
 
-// Inspector for CharacterPreview: Move and Tick are sliders that follow the character's data
-// (Move runs over its list of moves, Tick over the chosen move's length), plus a Play button.
+// Inspector for CharacterPreview: a dropdown of every character in CharacterList, then Move and
+// Tick sliders that follow that character's moves, plus a Play button.
 [CustomEditor(typeof(CharacterPreview))]
 public class CharacterPreviewEditor : Editor
 {
@@ -11,29 +11,44 @@ public class CharacterPreviewEditor : Editor
         serializedObject.Update();
         CharacterPreview p = (CharacterPreview)target;
 
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("character"));
+        if (!Application.isPlaying) CharacterRegistry.EnsureLoaded();
 
-        bool ready = p.character != null && p.character.def != null
-                     && p.character.def.moves != null && p.character.def.moves.Length > 0;
-
-        if (!ready)
+        // character dropdown, built from the real roster
+        System.Collections.Generic.IList<int> ids = CharacterList.Ids;
+        string[] names = new string[ids.Count];
+        int selected = -1;
+        for (int i = 0; i < ids.Count; i++)
         {
-            EditorGUILayout.HelpBox("Drag a Character asset (with at least one move) into the slot above.", MessageType.Info);
+            names[i] = CharacterList.NameOf(ids[i]);
+            if (ids[i] == p.characterId) selected = i;
+        }
+        SerializedProperty idProp = serializedObject.FindProperty("characterId");
+        EditorGUILayout.BeginHorizontal();
+        int picked = EditorGUILayout.Popup("Character", selected, names);
+        if (GUILayout.Button("Reload", GUILayout.Width(60)))
+        {
+            CharacterRegistry.Reload();
+            p.Refresh();
+        }
+        EditorGUILayout.EndHorizontal();
+        if (picked >= 0 && picked != selected) idProp.intValue = ids[picked];
+
+        MoveDef[] moves = p.Moves();
+        if (moves.Length == 0)
+        {
+            EditorGUILayout.HelpBox("Pick a character above. (New inspector characters: press Reload.)", MessageType.Info);
         }
         else
         {
-            CharacterDef def = p.character.def;
-
             SerializedProperty moveProp = serializedObject.FindProperty("moveIndex");
-            moveProp.intValue = EditorGUILayout.IntSlider("Move", moveProp.intValue, 0, def.moves.Length - 1);
+            moveProp.intValue = EditorGUILayout.IntSlider("Move", moveProp.intValue, 0, moves.Length - 1);
 
-            MoveBinding binding = def.moves[Mathf.Clamp(moveProp.intValue, 0, def.moves.Length - 1)];
-            string moveName = binding.move != null && !string.IsNullOrEmpty(binding.move.name) ? binding.move.name : "(unnamed)";
-            int total = binding.move != null ? binding.move.totalTicks : 0;
-            EditorGUILayout.LabelField(" ", moveName + "   button: " + binding.button + "   " + total + " ticks");
+            MoveDef move = moves[Mathf.Clamp(moveProp.intValue, 0, moves.Length - 1)];
+            string moveName = !string.IsNullOrEmpty(move.name) ? move.name : "(unnamed)";
+            EditorGUILayout.LabelField(" ", moveName + "   " + move.totalTicks + " ticks");
 
             SerializedProperty tickProp = serializedObject.FindProperty("tick");
-            tickProp.intValue = EditorGUILayout.IntSlider("Tick", tickProp.intValue, 0, Mathf.Max(0, total - 1));
+            tickProp.intValue = EditorGUILayout.IntSlider("Tick", tickProp.intValue, 0, Mathf.Max(0, move.totalTicks - 1));
 
             SerializedProperty playProp = serializedObject.FindProperty("playing");
             if (GUILayout.Button(playProp.boolValue ? "Stop" : "Play move"))
@@ -42,7 +57,7 @@ public class CharacterPreviewEditor : Editor
             }
         }
 
-        DrawPropertiesExcluding(serializedObject, "m_Script", "character", "moveIndex", "tick", "playing");
+        DrawPropertiesExcluding(serializedObject, "m_Script", "characterId", "character", "moveIndex", "tick", "playing");
         serializedObject.ApplyModifiedProperties();
     }
 }

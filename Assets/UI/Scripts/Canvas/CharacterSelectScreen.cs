@@ -26,9 +26,12 @@ public class CharacterSelectScreen : MonoBehaviour
     public TMP_Text titleText;
     public TMP_Text statusText;
 
+    const int RandomId = -1;   // the "Random" tile: the real pick is made when you confirm
+
     IMatchSession match;
     bool wired;
     bool pickingOpponent;
+    bool randomYou, randomOpponent;
     readonly List<CharacterButtonUI> buttons = new List<CharacterButtonUI>();
     readonly List<int> builtIds = new List<int>();
 
@@ -37,6 +40,7 @@ public class CharacterSelectScreen : MonoBehaviour
         match = SessionFinder.Find();
         if (match == null) return;
         pickingOpponent = false;
+        randomYou = randomOpponent = false;
         if (!wired) { Wire(); wired = true; }
         Rebuild();
     }
@@ -45,7 +49,7 @@ public class CharacterSelectScreen : MonoBehaviour
     {
         if (youTab != null) youTab.onClick.AddListener(() => { AudioManager.Click(); pickingOpponent = false; });
         if (opponentTab != null) opponentTab.onClick.AddListener(() => { AudioManager.Click(); pickingOpponent = true; });
-        if (confirmButton != null) confirmButton.onClick.AddListener(() => { AudioManager.Confirm(); match.ConfirmCharacter(); });
+        if (confirmButton != null) confirmButton.onClick.AddListener(() => { AudioManager.Confirm(); ResolveRandom(); match.ConfirmCharacter(); });
         if (backButton != null) backButton.onClick.AddListener(() => { AudioManager.Click(); match.Leave(); });
     }
 
@@ -58,10 +62,12 @@ public class CharacterSelectScreen : MonoBehaviour
         bool choosesOpponent = match.ChoosesOpponent;
         bool forOpponent = choosesOpponent && pickingOpponent;
         int current = forOpponent ? match.OpponentCharacter : match.LocalCharacter;
+        bool randomNow = forOpponent ? randomOpponent : randomYou;
 
         for (int i = 0; i < buttons.Count; i++)
         {
-            buttons[i].SetSelected(buttons[i].CharacterId == current);
+            bool isRandomTile = buttons[i].CharacterId == RandomId;
+            buttons[i].SetSelected(isRandomTile ? randomNow : !randomNow && buttons[i].CharacterId == current);
             buttons[i].SetInteractable(!match.CharacterConfirmed);
         }
 
@@ -69,8 +75,8 @@ public class CharacterSelectScreen : MonoBehaviour
         // The tab you are on is switched off, so its "disabled" look doubles as the selected look.
         if (youTab != null) youTab.interactable = pickingOpponent;
         if (opponentTab != null) opponentTab.interactable = !pickingOpponent;
-        if (youTabLabel != null) youTabLabel.text = "You: " + CharacterList.NameOf(match.LocalCharacter);
-        if (opponentTabLabel != null) opponentTabLabel.text = "Opponent: " + CharacterList.NameOf(match.OpponentCharacter);
+        if (youTabLabel != null) youTabLabel.text = "You: " + (randomYou ? "Random" : CharacterList.NameOf(match.LocalCharacter));
+        if (opponentTabLabel != null) opponentTabLabel.text = "Opponent: " + (randomOpponent ? "Random" : CharacterList.NameOf(match.OpponentCharacter));
 
         if (titleText != null)
         {
@@ -114,13 +120,48 @@ public class CharacterSelectScreen : MonoBehaviour
             b.Setup(ids[i], Pick);
             buttons.Add(b);
         }
+
+        // the Random tile goes last
+        CharacterButtonUI random = Instantiate(buttonPrefab, gridParent);
+        random.Setup(RandomId, Pick);
+        if (random.nameText != null) random.nameText.text = "Random";
+        if (random.portrait != null) random.portrait.enabled = false;
+        if (random.colorStrip != null) random.colorStrip.enabled = false;
+        buttons.Add(random);
+    }
+
+    // Turns a Random tile into a real pick (Sandbag, the training dummy, is not in the draw).
+    // Online the result is what gets sent to the opponent, so both sides agree.
+    void ResolveRandom()
+    {
+        if (randomYou) match.LocalCharacter = RandomCharacter();
+        if (randomOpponent && match.ChoosesOpponent) match.OpponentCharacter = RandomCharacter();
+        randomYou = randomOpponent = false;
+    }
+
+    static int RandomCharacter()
+    {
+        System.Collections.Generic.IList<int> ids = CharacterList.Ids;
+        System.Collections.Generic.List<int> pool = new System.Collections.Generic.List<int>();
+        for (int i = 0; i < ids.Count; i++)
+        {
+            if (ids[i] != Sandbag.Id) pool.Add(ids[i]);
+        }
+        if (pool.Count == 0) return ids.Count > 0 ? ids[0] : 0;
+        return pool[Random.Range(0, pool.Count)];
     }
 
     void Pick(int id)
     {
         if (match.CharacterConfirmed) return;
         AudioManager.Click();
-        if (match.ChoosesOpponent && pickingOpponent) match.OpponentCharacter = id;
-        else match.LocalCharacter = id;
+        bool forOpponent = match.ChoosesOpponent && pickingOpponent;
+        if (id == RandomId)
+        {
+            if (forOpponent) randomOpponent = true; else randomYou = true;
+            return;
+        }
+        if (forOpponent) { randomOpponent = false; match.OpponentCharacter = id; }
+        else { randomYou = false; match.LocalCharacter = id; }
     }
 }

@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// The start screen: Play, Controls, Quit. Play opens the Online / Offline choice, Controls opens the key bindings page.
+// The start screen: Play, Options (the key bindings), Credits, Quit. Play opens the Online / Offline choice, Controls opens the key bindings page.
 public class MainMenuScreen : MonoBehaviour
 {
     public Button playButton;
-    public Button controlsButton;
+    public Button controlsButton;     // "Options" in the new layout
+    public Button creditsButton;
     public Button quitButton;
 
     MatchScreens screens;
@@ -22,6 +23,7 @@ public class MainMenuScreen : MonoBehaviour
     {
         if (playButton != null) playButton.onClick.AddListener(() => { AudioManager.Click(); screens.GoTo(MenuPage.Mode); });
         if (controlsButton != null) controlsButton.onClick.AddListener(() => { AudioManager.Click(); screens.GoTo(MenuPage.Controls); });
+        if (creditsButton != null) creditsButton.onClick.AddListener(() => { AudioManager.Click(); screens.GoTo(MenuPage.Credits); });
         if (quitButton != null)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR

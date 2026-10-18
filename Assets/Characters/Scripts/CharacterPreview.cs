@@ -5,19 +5,24 @@ using UnityEditor;
 
 // BLOCKOUT TOOL, works without pressing Play.
 //   1. Add this component to an empty GameObject in the scene.
-//   2. Drag a CharacterData asset into "Character".
+//   2. Pick a character from the list (the same CharacterList the game uses: code characters like
+//      the Executioner and inspector ones alike).
 //   3. Pick a move with Move Index and drag the Tick slider.
-// The Scene view draws the character's sprite (if it has one), its body (green) and the move's
-// hitboxes at that tick: red while active, faint yellow when not. Select the CharacterData asset
-// and drag its sliders (hurtbox, hitbox boxes, sprite offset and scale): everything here updates
-// live. Tick N here is exactly tick N of the move in the real fight.
+// The Scene view draws the character's sprite (if it has art), its body (green) and the move's
+// hitboxes at that tick: red while active, faint yellow when not. Change a character's numbers
+// (in its .cs file, or the sliders on its CharacterData asset) and this updates. Tick N here is
+// exactly tick N of the move in the real fight.
 // Press Play in the inspector to step through the move's ticks automatically (60 per second).
 // Only the sprite and boxes are previewed; the Animator of a View Prefab plays in matches.
 // Outline shows the sprite with the Player or Enemy outline (colours: Fight > Outline Colors).
 [ExecuteAlways]
 public class CharacterPreview : MonoBehaviour
 {
-    public CharacterData character;
+    [Tooltip("CharacterList id of the character to preview (the inspector shows a dropdown).")]
+    public int characterId = -1;
+    // Old scenes picked a CharacterData asset here. It is converted to an id the first time it is seen.
+    [HideInInspector] public CharacterData character;
+
     public int moveIndex;               // slider in the inspector (see Editor/CharacterPreviewEditor)
     public int tick;                    // slider in the inspector, 0 .. totalTicks - 1
     public bool playing;                // steps through the move's ticks in the editor
@@ -37,6 +42,55 @@ public class CharacterPreview : MonoBehaviour
     SpriteRenderer art;                // lives on a hidden child object, never saved in the scene
     SpriteOutline artOutline;          // on the same hidden object
 
+    Fighter fighter;                   // built from CharacterList for characterId
+    int fighterId = int.MinValue;
+
+    // Makes sure the roster is loaded and the fighter for characterId exists. False = nothing to show.
+    bool Resolve()
+    {
+        if (character != null && character.def != null)
+        {
+            characterId = character.def.id;   // upgrade from the old asset slot
+            character = null;
+        }
+
+        if (!Application.isPlaying) CharacterRegistry.EnsureLoaded();
+        if (!CharacterList.Contains(characterId))
+        {
+            System.Collections.Generic.IList<int> ids = CharacterList.Ids;
+            if (ids.Count == 0) return false;
+            if (characterId >= 0) return false;   // an id that no longer exists: show nothing instead of switching silently
+            characterId = ids[0];
+        }
+
+        if (fighter == null || fighterId != characterId)
+        {
+            fighter = CharacterList.Create(characterId);
+            fighterId = characterId;
+        }
+        return fighter != null;
+    }
+
+    public MoveDef[] Moves()
+    {
+        return Resolve() ? fighter.ListMoves() : new MoveDef[0];
+    }
+
+    public Box Hurtbox { get { return Resolve() ? fighter.Hurtbox : new Box(0, 0, 0, 0); } }
+
+    public MoveDef CurrentMove()
+    {
+        MoveDef[] moves = Moves();
+        if (moves.Length == 0) return null;
+        return moves[Mathf.Clamp(moveIndex, 0, moves.Length - 1)];
+    }
+
+    public int TotalTicks()
+    {
+        MoveDef move = CurrentMove();
+        return move == null ? 0 : move.totalTicks;
+    }
+
 #if UNITY_EDITOR
     double lastTime;
     float tickBank;
@@ -48,7 +102,7 @@ public class CharacterPreview : MonoBehaviour
         float dt = (float)(now - lastTime);
         lastTime = now;
 
-        if (!playing || Application.isPlaying || character == null) { tickBank = 0f; return; }
+        if (!playing || Application.isPlaying) { tickBank = 0f; return; }
         int total = TotalTicks();
         if (total <= 0) return;
 
@@ -60,14 +114,14 @@ public class CharacterPreview : MonoBehaviour
         }
         SceneView.RepaintAll();
     }
-#endif
 
-    public int TotalTicks()
+    // Forget the cached fighter, so the next draw builds it again (after "Reload characters").
+    public void Refresh()
     {
-        if (character == null || character.def == null || character.def.moves == null || character.def.moves.Length == 0) return 0;
-        MoveDef move = character.def.moves[Mathf.Clamp(moveIndex, 0, character.def.moves.Length - 1)].move;
-        return move == null ? 0 : move.totalTicks;
+        fighter = null;
+        fighterId = int.MinValue;
     }
+#endif
 
     void OnEnable()
     {
@@ -102,14 +156,15 @@ public class CharacterPreview : MonoBehaviour
     {
         if (art == null) return;
 
-        bool have = character != null && character.sprite != null && showSprite;
+        CharacterLook look = Resolve() ? CharacterRegistry.GetLook(characterId) : null;
+        bool have = look != null && look.sprite != null && showSprite;
         art.enabled = have;
         if (!have) return;
 
         int facing = faceRight ? 1 : -1;
-        art.sprite = character.sprite;
-        art.transform.localPosition = new Vector3(facing * character.spriteOffsetX, character.spriteOffsetY, 0f);
-        art.transform.localScale = new Vector3(facing * character.SpriteFlip * character.spriteScale, character.spriteScale, 1f);
+        art.sprite = look.sprite;
+        art.transform.localPosition = new Vector3(facing * look.spriteOffsetX, look.spriteOffsetY, 0f);
+        art.transform.localScale = new Vector3(facing * look.SpriteFlip * look.spriteScale, look.spriteScale, 1f);
 
         if (artOutline != null)
         {
@@ -122,20 +177,18 @@ public class CharacterPreview : MonoBehaviour
     void OnDrawGizmos()
     {
         SyncSprite();
-        if (character == null || character.def == null) return;
+        if (!Resolve()) return;
 
-        CharacterDef def = character.def;
         int facing = faceRight ? 1 : -1;
         Vector3 origin = transform.position;
 
-        if (showHurtbox) WorldView.DrawBox(def.hurtbox.ToWorld(0, 0, facing), origin, Color.green, filled);
+        if (showHurtbox) WorldView.DrawBox(fighter.Hurtbox.ToWorld(0, 0, facing), origin, Color.green, filled);
 
         // ground line under the character
         Gizmos.color = Color.gray;
         Gizmos.DrawLine(origin + new Vector3(-3f, 0f, 0f), origin + new Vector3(3f, 0f, 0f));
 
-        if (def.moves == null || def.moves.Length == 0) return;
-        MoveDef move = def.moves[Mathf.Clamp(moveIndex, 0, def.moves.Length - 1)].move;
+        MoveDef move = CurrentMove();
         if (move == null || move.hitboxes == null) return;
 
         bool anyActive = false;
@@ -161,7 +214,7 @@ public class CharacterPreview : MonoBehaviour
         }
 
 #if UNITY_EDITOR
-        string label = move.name + "  tick " + tick + " / " + move.totalTicks + (anyActive ? "   HITBOX ACTIVE" : "");
+        string label = CharacterList.NameOf(characterId) + ": " + move.name + "  tick " + tick + " / " + move.totalTicks + (anyActive ? "   HITBOX ACTIVE" : "");
         Handles.Label(origin + new Vector3(-1f, 2.4f, 0f), label);
 #endif
     }

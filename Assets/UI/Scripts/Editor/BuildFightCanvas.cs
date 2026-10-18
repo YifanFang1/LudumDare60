@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem.UI;
 #endif
 
-// Fight > Build Default UI Canvas
+// Fight > Rebuild Default Canvas
 // Creates a ready-to-use canvas UI in the open scene: lobby, waiting, character select and HUD.
 // Everything it makes is a normal GameObject (Button, TextMeshPro text, Image, ...). Restyle, move,
 // re-colour, swap sprites and fonts, or delete what you do not want. The scripts on each screen only
@@ -26,7 +26,9 @@ public static class BuildFightCanvas
     static readonly Color FieldColor = new Color(0.07f, 0.09f, 0.16f, 1f);
     static readonly Color Muted = new Color(0.7f, 0.74f, 0.85f, 1f);
 
-    [MenuItem("Fight/Build Default UI Canvas")]
+    // Fight > Rebuild Default Canvas: deletes the FightUI in the open scene (if there is one) and builds the whole
+    // default UI again, no questions asked. Your Match Screens options (debug UI, start page...) are kept.
+    [MenuItem("Fight/Rebuild Default Canvas")]
     static void Build()
     {
         if (TMP_Settings.instance == null)
@@ -37,11 +39,14 @@ public static class BuildFightCanvas
         }
 
         GameObject existing = GameObject.Find(RootName);
-        if (existing != null)
-        {
-            if (!EditorUtility.DisplayDialog("Replace the UI?", "'" + RootName + "' already exists in this scene. Replace it? Your edits to it are lost.", "Replace", "Cancel")) return;
-            Undo.DestroyObjectImmediate(existing);
-        }
+        MatchScreens oldScreens = existing != null ? existing.GetComponent<MatchScreens>() : null;
+        bool keepOptions = oldScreens != null;
+        bool oldDebug = keepOptions && oldScreens.showDebugUI;
+        bool oldStartMain = keepOptions && oldScreens.startOnMainMenu;
+        bool oldStartTitle = keepOptions && oldScreens.startOnTitle;
+        bool oldReplaceImgui = keepOptions && oldScreens.replaceImguiUI;
+        bool oldCrt = keepOptions && oldScreens.crtOverUI;
+        if (existing != null) Undo.DestroyObjectImmediate(existing);
 
         CharacterButtonUI buttonPrefab = BuildCharacterButtonPrefab();
 
@@ -63,9 +68,8 @@ public static class BuildFightCanvas
         GameObject waiting = BuildWaiting(root.transform);
         GameObject select = BuildCharacterSelect(root.transform, buttonPrefab);
         GameObject hud = BuildHud(root.transform);
-
-        ShatterEffect shatter = BuildShatterOverlay(root.transform);   // last in the canvas = drawn on top
-        titlePage.GetComponent<TitleScreen>().shatter = shatter;
+        GameObject creditsPage = BuildCredits(root.transform);
+        DoorTransition door = BuildDoorOverlay(root.transform);   // last in the canvas = drawn on top
 
         MatchScreens screens = root.AddComponent<MatchScreens>();
         screens.titleScreen = titlePage;
@@ -76,7 +80,18 @@ public static class BuildFightCanvas
         screens.waiting = waiting;
         screens.characterSelect = select;
         screens.hud = hud;
+        screens.credits = creditsPage;
+        screens.door = door;
         screens.editorPreview = UiScreen.Title;
+        if (keepOptions)
+        {
+            screens.showDebugUI = oldDebug;
+            screens.startOnMainMenu = oldStartMain;
+            screens.startOnTitle = oldStartTitle;
+            screens.replaceImguiUI = oldReplaceImgui;
+            screens.crtOverUI = oldCrt;
+        }
+        Show(creditsPage, false);
         Show(titlePage, true);
         Show(mainMenu, false);
         Show(controlsPage, false);
@@ -95,13 +110,12 @@ public static class BuildFightCanvas
 
         Selection.activeGameObject = root;
         EditorSceneManager.MarkSceneDirty(root.scene);
-        Debug.Log("Fight UI built. Pick the screen to design with  Match Screens > Editor Preview  on '" + RootName + "'. See Assets/UI/CANVAS_UI.md.");
+        Debug.Log("Fight UI rebuilt. Pick the screen to design with  Match Screens > Editor Preview  on '" + RootName + "'. See Assets/UI/CANVAS_UI.md.");
     }
 
-    // Fight > Add Start Menu And Controls Pages
+    // Fight > Rebuild Default Canvas
     // For a FightUI you already built and edited: adds only the two new pages and wires them in,
     // without touching anything else.
-    [MenuItem("Fight/Add Start Menu And Controls Pages")]
     static void AddPages()
     {
         if (TMP_Settings.instance == null)
@@ -115,7 +129,7 @@ public static class BuildFightCanvas
         MatchScreens screens = root != null ? root.GetComponent<MatchScreens>() : null;
         if (screens == null)
         {
-            EditorUtility.DisplayDialog("No Fight UI found", "Run  Fight > Build Default UI Canvas  first.", "OK");
+            EditorUtility.DisplayDialog("No Fight UI found", "Run  Fight > Rebuild Default Canvas  first.", "OK");
             return;
         }
         if (screens.titleScreen != null && screens.mainMenu != null && screens.controls != null && screens.modeSelect != null)
@@ -130,11 +144,7 @@ public static class BuildFightCanvas
             screens.titleScreen = BuildTitle(root.transform);
             screens.titleScreen.transform.SetAsFirstSibling();
         }
-        ShatterEffect shatter = root.GetComponentInChildren<ShatterEffect>(true);
-        if (shatter == null) shatter = BuildShatterOverlay(root.transform);
-        shatter.transform.SetAsLastSibling();   // drawn on top of every page
-        TitleScreen title = screens.titleScreen.GetComponent<TitleScreen>();
-        if (title != null && title.shatter == null) title.shatter = shatter;
+        EnsureDoor(root, screens);
         if (screens.mainMenu == null)
         {
             screens.mainMenu = BuildMainMenu(root.transform);
@@ -178,7 +188,7 @@ public static class BuildFightCanvas
 
     // ================= screens =================
 
-    const string TitleArtFolder = "Assets/MenuScreen/PressAnyKey";
+    const string TitleArtFolder = "Assets/UI/Assets";   // the title and main menu art (moved here from MenuScreen/PressAnyKey)
 
     static GameObject BuildTitle(Transform parent)
     {
@@ -261,16 +271,242 @@ public static class BuildFightCanvas
         return img;
     }
 
-    // Full-screen, always active, empty until the shatter plays. It must be the last child of the canvas.
-    static ShatterEffect BuildShatterOverlay(Transform parent)
+    // The sliding metal door: full-screen, always active, its picture (the Door child) only shows while it moves.
+    // It must be the last child of the canvas, so it covers every page.
+    static DoorTransition BuildDoorOverlay(Transform parent)
     {
-        GameObject go = new GameObject("ShatterOverlay", typeof(RectTransform));
+        GameObject go = new GameObject("DoorOverlay", typeof(RectTransform));
         go.transform.SetParent(parent, false);
         Stretch((RectTransform)go.transform);
-        return go.AddComponent<ShatterEffect>();
+        DoorTransition dt = go.AddComponent<DoorTransition>();
+
+        GameObject door = new GameObject("Door", typeof(RectTransform), typeof(Image));
+        door.transform.SetParent(go.transform, false);
+        Stretch((RectTransform)door.transform);
+        Image img = door.GetComponent<Image>();
+        Sprite art = LoadSprite("Metal Door Background for transitions.png");
+        img.sprite = art;
+        img.color = art != null ? Color.white : new Color(0.14f, 0.12f, 0.2f, 1f);
+        img.type = Image.Type.Simple;
+        img.raycastTarget = true;
+
+        // a dark lip along the bottom edge, so the door has some thickness and a shadow
+        GameObject lip = new GameObject("Lip", typeof(RectTransform), typeof(Image));
+        lip.transform.SetParent(door.transform, false);
+        RectTransform lr = (RectTransform)lip.transform;
+        lr.anchorMin = new Vector2(0f, 0f);
+        lr.anchorMax = new Vector2(1f, 0f);
+        lr.pivot = new Vector2(0.5f, 1f);
+        lr.anchoredPosition = Vector2.zero;
+        lr.sizeDelta = new Vector2(0f, 18f);
+        Image lipImg = lip.GetComponent<Image>();
+        lipImg.color = new Color(0.02f, 0.02f, 0.04f, 0.9f);
+        lipImg.raycastTarget = false;
+
+        dt.door = (RectTransform)door.transform;
+        door.SetActive(false);
+        return dt;
     }
 
+    // Finds or builds the door and makes it the last child (drawn on top), then hooks it up.
+    static void EnsureDoor(GameObject root, MatchScreens screens)
+    {
+        // the old glass-shatter overlay is not used any more
+        ShatterEffect[] old = root.GetComponentsInChildren<ShatterEffect>(true);
+        for (int i = 0; i < old.Length; i++) Undo.DestroyObjectImmediate(old[i].gameObject);
+
+        DoorTransition door = root.GetComponentInChildren<DoorTransition>(true);
+        if (door == null) door = BuildDoorOverlay(root.transform);
+        door.transform.SetAsLastSibling();
+        screens.door = door;
+    }
+
+    // Fight > Rebuild Default Canvas
+    // For a FightUI you already have: swaps the start menu for the Play / Options / Credits / Quit layout
+    // made from the art in Assets/UI/Assets, adds the Credits page, and replaces the glass shatter
+    // with the sliding metal door. Nothing else in the UI is touched.
+    static void RebuildMainMenu()
+    {
+        if (TMP_Settings.instance == null)
+        {
+            EditorUtility.DisplayDialog("TextMesh Pro resources needed",
+                "Run  Window > TextMeshPro > Import TMP Essential Resources  once, then run this menu item again.", "OK");
+            return;
+        }
+
+        GameObject root = GameObject.Find(RootName);
+        MatchScreens screens = root != null ? root.GetComponent<MatchScreens>() : null;
+        if (screens == null)
+        {
+            EditorUtility.DisplayDialog("No Fight UI found", "Open the Menu scene, or run  Fight > Rebuild Default Canvas  first.", "OK");
+            return;
+        }
+
+        Undo.RegisterFullObjectHierarchyUndo(root, "Rebuild main menu");
+        if (screens.mainMenu != null) Undo.DestroyObjectImmediate(screens.mainMenu);
+        screens.mainMenu = BuildMainMenu(root.transform);
+        screens.mainMenu.transform.SetSiblingIndex(screens.titleScreen != null ? screens.titleScreen.transform.GetSiblingIndex() + 1 : 0);
+
+        if (screens.credits == null) screens.credits = BuildCredits(root.transform);
+        EnsureDoor(root, screens);
+
+        // the title page no longer shatters: clear the old hookup so nothing points at a deleted object
+        screens.editorPreview = UiScreen.Main;
+        if (screens.titleScreen != null) Show(screens.titleScreen, false);
+        Show(screens.mainMenu, true);
+        Show(screens.credits, false);
+        if (screens.controls != null) Show(screens.controls, false);
+        if (screens.modeSelect != null) Show(screens.modeSelect, false);
+        if (screens.lobby != null) Show(screens.lobby, false);
+        if (screens.waiting != null) Show(screens.waiting, false);
+        if (screens.characterSelect != null) Show(screens.characterSelect, false);
+        if (screens.hud != null) Show(screens.hud, false);
+
+        Selection.activeGameObject = screens.mainMenu;
+        EditorSceneManager.MarkSceneDirty(root.scene);
+        Debug.Log("Main menu rebuilt, Credits page and metal door added to '" + RootName + "'.");
+    }
+
+    // A sprite from a texture, also when the texture is set to Multiple (the first sprite in it).
+    static Sprite LoadSprite(string file)
+    {
+        Object[] all = AssetDatabase.LoadAllAssetsAtPath(TitleArtFolder + "/" + file);
+        for (int i = 0; all != null && i < all.Length; i++)
+        {
+            if (all[i] is Sprite) return (Sprite)all[i];
+        }
+        return null;
+    }
+
+    static GameObject BuildCredits(Transform parent)
+    {
+        GameObject screen = NewScreen("CreditsScreen", parent, false);
+        Sprite art = LoadSprite("Options and Credits Menu Background.png");
+        if (art != null)
+        {
+            GameObject backGo = new GameObject("Backdrop", typeof(RectTransform), typeof(Image));
+            backGo.transform.SetParent(screen.transform, false);
+            Stretch((RectTransform)backGo.transform);
+            Image back = backGo.GetComponent<Image>();
+            back.sprite = art;
+            back.type = art.border.sqrMagnitude > 0f ? Image.Type.Sliced : Image.Type.Simple;
+            back.raycastTarget = false;
+        }
+        else
+        {
+            screen.AddComponent<Image>().color = Dim;
+        }
+
+        RectTransform panel = NewPanel("Panel", screen.transform, 760f);
+        Txt(panel, "Title", "Credits", 56, TextAlignmentOptions.Center, Color.white, 80f);
+        Txt(panel, "Names", "Made for Ludum Dare 60\n(put the team's names here)", 32, TextAlignmentOptions.Center, Muted, 120f);
+        TMP_Text unused;
+        Button back2 = Btn(panel, "BackButton", "Back", 60f, out unused);
+
+        CreditsScreen cs = screen.AddComponent<CreditsScreen>();
+        cs.backButton = back2;
+        return screen;
+    }
+
+    // The centre of the button group in the 1920x1080 layout (top-left origin). Every button is placed
+    // relative to it, so the group can be moved or scaled as one.
+    static readonly Vector2 ButtonGroupCenter = new Vector2(955f, 790f);
+    static readonly Vector2 ButtonGroupSize = new Vector2(836f, 572f);
+
+    // One of the main menu's picture buttons. left/top are where the sprite sits in the 1920x1080 layout
+    // (top-left origin); it is placed relative to the middle of its parent group.
+    static Button ArtButton(Transform parent, string name, Sprite normal, Sprite hover, float left, float top)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+        go.transform.SetParent(parent, false);
+        RectTransform rt = (RectTransform)go.transform;
+        Vector2 size = normal.rect.size;
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = size;
+        rt.anchoredPosition = new Vector2(left + size.x * 0.5f - ButtonGroupCenter.x, ButtonGroupCenter.y - (top + size.y * 0.5f));
+
+        Image img = go.GetComponent<Image>();
+        img.sprite = normal;
+        img.type = Image.Type.Simple;
+        Button b = go.GetComponent<Button>();
+        b.targetGraphic = img;
+        if (hover != null)
+        {
+            b.transition = Selectable.Transition.SpriteSwap;
+            SpriteState ss = b.spriteState;
+            ss.highlightedSprite = hover;
+            ss.selectedSprite = hover;
+            ss.pressedSprite = hover;
+            b.spriteState = ss;
+        }
+        else
+        {
+            // no separate hover picture: dim it a little, light it up on hover
+            b.transition = Selectable.Transition.ColorTint;
+            ColorBlock c = b.colors;
+            c.normalColor = new Color(0.72f, 0.72f, 0.72f, 1f);
+            c.highlightedColor = Color.white;
+            c.selectedColor = Color.white;
+            c.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+            b.colors = c;
+        }
+        return b;
+    }
+
+    // Laid out like Assets/UI/Assets/MainMenuMockup.png: the backdrop (it already has the title) and four picture buttons.
+    // Without that art it falls back to the plain text menu below.
     static GameObject BuildMainMenu(Transform parent)
+    {
+        Sprite backdrop = LoadSprite("Main Menu BACKGROUND.png");
+        Sprite play = LoadSprite("PLAY.png");
+        Sprite options = LoadSprite("OPTIONS.png");
+        Sprite credits = LoadSprite("CREDITS.png");
+        Sprite quitHover = LoadSprite("QUITHOVER.png");
+        Sprite quitNormal = LoadSprite("QUIT.png");
+        if (backdrop == null || play == null || options == null || credits == null || (quitNormal == null && quitHover == null))
+        {
+            return BuildPlainMainMenu(parent);
+        }
+
+        GameObject screen = NewScreen("MainMenuScreen", parent, false);
+        GameObject backGo = new GameObject("Backdrop", typeof(RectTransform), typeof(Image));
+        backGo.transform.SetParent(screen.transform, false);
+        Stretch((RectTransform)backGo.transform);
+        Image back = backGo.GetComponent<Image>();
+        back.sprite = backdrop;
+        back.type = backdrop.border.sqrMagnitude > 0f ? Image.Type.Sliced : Image.Type.Simple;   // 9-sliced when borders are set in the Sprite Editor
+        back.raycastTarget = false;
+
+        // (no logo here: the backdrop picture already has the title on it)
+
+        // One "Buttons" group holds all four, so you can scale or move the whole block in one go
+        // (select Buttons, use its Scale or the Rect tool). It is anchored to the screen's centre.
+        GameObject group = new GameObject("Buttons", typeof(RectTransform));
+        group.transform.SetParent(screen.transform, false);
+        RectTransform groupRt = (RectTransform)group.transform;
+        groupRt.anchorMin = groupRt.anchorMax = groupRt.pivot = new Vector2(0.5f, 0.5f);
+        groupRt.sizeDelta = ButtonGroupSize;
+        groupRt.anchoredPosition = new Vector2(ButtonGroupCenter.x - 960f, 540f - ButtonGroupCenter.y);
+
+        // positions measured from MainMenuMockup.png (sprite top-left, in a 1920x1080 layout)
+        // Hierarchy order is draw order (the last one is on top): Quit, Credits, Options, Play. The sprites
+        // overlap a little, so Play is on top of Options, Options on top of Credits, and so on.
+        Button quitB = quitNormal != null
+            ? ArtButton(group.transform, "QuitButton", quitNormal, quitHover, 951f, 871f)
+            : ArtButton(group.transform, "QuitButton", quitHover, null, 951f, 871f);   // QUIT.png is missing: QUITHOVER, dimmed until hovered
+        Button creditsB = ArtButton(group.transform, "CreditsButton", credits, LoadSprite("CREDITSHOVER.png"), 537f, 859f);
+        Button optionsB = ArtButton(group.transform, "OptionsButton", options, LoadSprite("OPTIONSHOVER.png"), 686f, 671f);
+        Button playB = ArtButton(group.transform, "PlayButton", play, LoadSprite("PLAYHOVER.png"), 785f, 504f);
+
+        MainMenuScreen ms = screen.AddComponent<MainMenuScreen>();
+        ms.playButton = playB;
+        ms.controlsButton = optionsB;
+        ms.creditsButton = creditsB;
+        ms.quitButton = quitB;
+        return screen;
+    }
+
+    static GameObject BuildPlainMainMenu(Transform parent)
     {
         GameObject screen = NewScreen("MainMenuScreen", parent, true);
         RectTransform panel = NewPanel("Panel", screen.transform, 520f);

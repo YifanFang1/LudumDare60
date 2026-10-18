@@ -48,9 +48,9 @@ public class CharacterTests
     }
 
     [Test]
-    public void UnknownIdFallsBackToBrawler()
+    public void UnknownIdFallsBackToSandbag()
     {
-        Assert.IsInstanceOf<Brawler>(CharacterList.Create(-12345));
+        Assert.IsInstanceOf<Sandbag>(CharacterList.Create(-12345));
     }
 
     [Test]

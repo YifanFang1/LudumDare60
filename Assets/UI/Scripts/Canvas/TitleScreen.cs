@@ -5,11 +5,10 @@ using UnityEngine.InputSystem;
 #endif
 
 // "PRESS ANY KEY": the arcade-style start screen. The prompt fades in and out in coarse steps.
-// Any key, click, tap or gamepad button breaks the screen like glass (ShatterEffect) and opens the main menu.
+// Any key, click, tap or gamepad button opens the main menu (MatchScreens slides the metal door over the change).
 public class TitleScreen : MonoBehaviour
 {
     public Graphic promptText;   // the blinking prompt: a RawImage / Image with your picture, or a TMP text
-    public ShatterEffect shatter;
 
     [Header("Prompt blink")]
     public float blinkPeriod = 1.6f;                // seconds for one fade in + out
@@ -47,15 +46,9 @@ public class TitleScreen : MonoBehaviour
     void Trigger(Vector2 point)
     {
         triggered = true;
-        SetPromptAlpha(1f);   // fully lit in the frame the screen is captured
+        SetPromptAlpha(1f);
         AudioManager.Confirm();
-
-        System.Action openMenu = () =>
-        {
-            if (screens != null) screens.GoTo(MenuPage.Main);
-        };
-        if (shatter != null) shatter.Play(point, openMenu, null);
-        else openMenu();
+        if (screens != null) screens.GoTo(MenuPage.Main);
     }
 
     void SetPromptAlpha(float a)

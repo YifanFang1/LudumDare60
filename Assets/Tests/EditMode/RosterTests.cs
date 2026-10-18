@@ -598,9 +598,9 @@ public class RosterTests
     }
 
     [Test]
-    public void ExecutionerWhipGrabPullsFromRange()
+    public void ExecutionerGrabPullsFromVeryCloseRange()
     {
-        GameSim sim = NewMatch(Executioner.Id, Sandbag.Id, 2400);
+        GameSim sim = NewMatch(Executioner.Id, Sandbag.Id, 1100);
         sim.Step(Buttons.Grab, None);
         for (int i = 0; i < 20 && !Saw(sim, SimEventType.Grab); i++) sim.Step(None, None);
 

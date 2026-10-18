@@ -103,6 +103,7 @@ public class HudScreen : MonoBehaviour
             resultText.fontSizeMin = 24f;
             resultText.fontSizeMax = 60f;
         }
+        EnsureMeters();
         if (!wired && resultButton != null)
         {
             MakeRematchButton();
@@ -112,6 +113,69 @@ public class HudScreen : MonoBehaviour
                 match.Leave();
             });
             wired = true;
+        }
+    }
+
+    // The canvas HUD is built without Ultimate meters (older scenes never got them), so make them here
+    // when the slots are empty: a bar and a label at the bottom corner under each fighter's side.
+    static Sprite whiteSprite;
+
+    void EnsureMeters()
+    {
+        if (leftMeter != null && rightMeter != null) return;
+        if (whiteSprite == null)
+        {
+            Texture2D t = Texture2D.whiteTexture;
+            whiteSprite = Sprite.Create(t, new Rect(0, 0, t.width, t.height), new Vector2(0.5f, 0.5f));
+        }
+        for (int side = 0; side < 2; side++)
+        {
+            bool right = side == 1;
+            if ((right ? rightMeter : leftMeter) != null) continue;
+
+            Vector2 corner = new Vector2(right ? 1f : 0f, 0f);
+            GameObject bg = new GameObject(right ? "RightMeter" : "LeftMeter", typeof(RectTransform), typeof(Image));
+            bg.transform.SetParent(transform, false);
+            RectTransform bgRt = (RectTransform)bg.transform;
+            bgRt.anchorMin = bgRt.anchorMax = bgRt.pivot = corner;
+            bgRt.anchoredPosition = new Vector2(right ? -40f : 40f, 40f);
+            bgRt.sizeDelta = new Vector2(520f, 24f);
+            Image bgImage = bg.GetComponent<Image>();
+            bgImage.sprite = whiteSprite;
+            bgImage.color = new Color(0.15f, 0.15f, 0.18f, 1f);
+
+            GameObject fillGo = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            fillGo.transform.SetParent(bg.transform, false);
+            RectTransform fillRt = (RectTransform)fillGo.transform;
+            fillRt.anchorMin = Vector2.zero;
+            fillRt.anchorMax = Vector2.one;
+            fillRt.offsetMin = new Vector2(3f, 3f);
+            fillRt.offsetMax = new Vector2(-3f, -3f);
+            Image fill = fillGo.GetComponent<Image>();
+            fill.sprite = whiteSprite;
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+            fill.fillOrigin = right ? (int)Image.OriginHorizontal.Right : (int)Image.OriginHorizontal.Left;
+            fill.fillAmount = 0f;
+            fill.color = meterColor;
+
+            GameObject labelGo = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+            labelGo.transform.SetParent(transform, false);
+            RectTransform lr = (RectTransform)labelGo.transform;
+            lr.anchorMin = lr.anchorMax = lr.pivot = corner;
+            lr.anchoredPosition = new Vector2(right ? -40f : 40f, 70f);
+            lr.sizeDelta = new Vector2(520f, 34f);
+            TextMeshProUGUI label = labelGo.GetComponent<TextMeshProUGUI>();
+            TMP_Text sample = leftName != null ? leftName : rightName;
+            if (sample != null) label.font = sample.font;
+            label.fontSize = 24f;
+            label.alignment = right ? TextAlignmentOptions.BottomRight : TextAlignmentOptions.BottomLeft;
+            label.color = Color.white;
+            label.raycastTarget = false;
+            label.text = "ULTIMATE";
+
+            if (right) { rightMeter = fill; rightUltimateReady = label; }
+            else { leftMeter = fill; leftUltimateReady = label; }
         }
     }
 
@@ -202,7 +266,12 @@ public class HudScreen : MonoBehaviour
                 meters[i].fillAmount = Mathf.Clamp01(f.meter / (float)Fighter.MeterMax);
                 meters[i].color = full ? Color.Lerp(meterColor, meterFullColor, pulse) : meterColor;
             }
-            if (ready[i] != null && ready[i].gameObject.activeSelf != full) ready[i].gameObject.SetActive(full);
+            if (ready[i] != null)
+            {
+                if (!ready[i].gameObject.activeSelf) ready[i].gameObject.SetActive(true);
+                string text = !full ? "ULTIMATE" : i == match.LocalSlot ? "ULTIMATE READY - press " + FightControls.BindingOf(7) + " to ultimate" : "ULTIMATE READY";
+                SetText(ready[i], text);
+            }
         }
     }
 

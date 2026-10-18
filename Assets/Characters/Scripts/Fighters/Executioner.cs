@@ -4,8 +4,8 @@
 //   Light (J)      Whip: 1 unit of reach. Adds a bleed stack on hit.
 //   Heavy (K)      Charged whip: hold K to charge, let go to lash. Charging adds REACH
 //                  (1.8 -> 2.8 units over 60 ticks), not damage. Adds a bleed stack.
-//   Grab (L)       Iron Maiden: a whip grab from about 2.5 units that pulls them in. 15 damage,
-//                  adds a bleed stack.
+//   Grab (L)       Iron Maiden: a very short-range grab (about 0.7 units, almost touching) that
+//                  drags them in front of him. 15 damage, adds a bleed stack.
 //   Dashes         slow and heavy, 60-tick cooldown, and a short air dash.
 //   Special (I)    Bear Trap: dropped at his feet, max 2 (a 3rd replaces the oldest). It arms after
 //                  20 ticks, waits until stepped on (jumping avoids it), and can't be blocked.
@@ -69,7 +69,7 @@ public class Executioner : BaseFighter
     {
         MoveDef m = Grab("Grab",
             totalTicks: 48, spawnTick: 10, activeTicks: 3,
-            box: new Box(300, 600, 2200, 1000),
+            box: new Box(300, 600, 400, 1000),   // reach 700: only just past his own body
             damage: 15, hitstun: 40, knockback: 60, cooldown: GrabCooldown);
         m.hitboxes[0].pullTo = 900;
         return m;
