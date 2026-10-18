@@ -19,7 +19,7 @@ public class RelayLockstepSession : MatchSessionBase
     // 6: player names ("n," message). 7: the shared kit (grab, dash, meter, Special/Ultimate,
     // rounds, pushboxes, new input bits). Both were "6" on separate branches, so the merge is 7:
     // a build with only one of them must not match a build with both. 8: hit stop.
-    const string Version = "8";
+    const string Version = "9";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 

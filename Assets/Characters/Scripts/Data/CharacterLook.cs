@@ -11,7 +11,7 @@ using UnityEngine;
 public abstract class CharacterLook : ScriptableObject
 {
     [Header("Look (optional, never affects the fight)")]
-    [Tooltip("Prefab with an Animator. Needs states named Idle, Walk, DashForward, DashBack, Hitstun, Blockstun, KO and one per move name (Light, Heavy, Grab, Special, Ultimate). Art should face RIGHT. Empty = Sprite, or a coloured box.\nFight > Create Animator for Selected Character builds one for you.")]
+    [Tooltip("Prefab with an Animator. Needs states named Idle, Walk, DashForward, DashBack, Jump, Hitstun, Blockstun, KO and one per move name (Light, Heavy, Grab, Special, Ultimate, JumpLight, JumpHeavy). Art should face RIGHT. Empty = Sprite, or a coloured box.\nFight > Create Animator for Selected Character builds one for you.")]
     public GameObject viewPrefab;
     [Tooltip("A single pose for blockout or simple characters. Ignored if a View Prefab is set. Art should face RIGHT.")]
     public Sprite sprite;

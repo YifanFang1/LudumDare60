@@ -23,7 +23,7 @@ This guide is for anyone adding a fighter. Read [ARCHITECTURE.md](../ARCHITECTUR
 
 
 ```
-Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing, meter, hitstun, KO, the state machine.
+Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing, jumping, meter, hitstun, KO, the state machine.
  ├─ BaseFighter          (Characters/BaseFighter.cs) THE TEMPLATE. The standard moveset, controls, move helpers.
  │   ├─ Samurai ... PlagueDoctor   ids 10-15, the launch roster. Placeholders: the standard moveset, unchanged
  │   ├─ Brawler          id 0, close range test character
@@ -43,6 +43,7 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 - Walking left and right (A/D), always turning to face the opponent. Fighters can't walk through each other (pushboxes).
 - **Blocking:** hold the direction *away* from the opponent while standing or walking. A blocked hit does 0 damage and still pushes you back. It also puts you in **Blockstun** for 60% of the move's hitstun: you can't act, but you keep blocking while you hold back. You can't block during your own attack, a dash or hitstun. The numbers are `BlockstunPercent` and `BlockPushPercent` in `Fighter.cs`.
 - **Dashing:** double-tap a direction (two fresh presses within 12 ticks). Toward the opponent is a forward dash. Override `ForwardDash` / `BackDash` to change them.
+- **Jumping:** hold W (alone for straight up, with A/D to jump that way). The arc is fixed once you leave the ground, you can't block in the air, and you get one air attack per jump. Bodies don't push while someone is airborne, so you can jump over the opponent. Grabs can't catch an airborne fighter. Override `JumpArc` to change the jump.
 - **Grab rules and back throws:** any hitbox with `grab` set ignores blocking but can't catch a stunned fighter; hold back when it lands to throw the victim behind you.
 - **The Ultimate meter:** fills from hits (dealt, taken and blocked). A move with `ultimate` set needs a full bar, spends it and freezes the match for a moment.
 - Hitstun, knockback, KO, best-of-3 rounds, and hitbox/hurtbox collisions.
@@ -61,7 +62,10 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 | Grab (L) | `StandardGrab`: startup 5, 12 dmg, short reach, 40 ticks if it whiffs | `GrabMove` |
 | Special (I) | `StandardSpecial`: a projectile, 10 dmg, one on screen | `SpecialMove` |
 | Ultimate (O) | `StandardUltimate`: 30 dmg strike, needs a full meter | `UltimateMove` |
+| Jump + J | `StandardJumpLight`: quick air kick, 5 dmg | `JumpLightAttack` |
+| Jump + K | `StandardJumpHeavy`: big jump-in, 10 dmg | `JumpHeavyAttack` |
 | Dashes | about 1.8 units forward and back | `ForwardDash` / `BackDash` |
+| Jump | about 1.7 units high, 1.8 units across, 37 ticks | `JumpArc` |
 | When a move is allowed | always, except one Special projectile at a time | `CanUseMove(sim, move)`: call `base.CanUseMove` for moves you don't handle |
 | Controls | Ultimate > Special > Grab > Heavy > Light if pressed together | `ChooseMove(sim, input)` (rarely needed) |
 
@@ -259,7 +263,8 @@ Run the menu again after adding a move: it only adds the missing states and clip
 | `Idle` | Standing still | Loops every `Idle Loop Ticks` (60 = 1 s) |
 | `Walk` | Walking (forward or back) | Loops every `Walk Loop Ticks` |
 | `DashForward`, `DashBack` | Dashing toward / away from the opponent | Stretched over the dash |
-| `Light`, `Heavy`, `Grab`, `Special`, `Ultimate`, ... | One per move, named like the move | Stretched over the move's length |
+| `Jump` | In the air, not attacking | First half of the clip while rising, second half while falling |
+| `Light`, `Heavy`, `Grab`, `Special`, `Ultimate`, `JumpLight`, `JumpHeavy`, ... | One per move, named like the move | Stretched over the move's length |
 | `Hitstun` | Just got hit | Stretched over the hitstun |
 | `Blockstun` | Just blocked | Stretched over the blockstun |
 | `KO` | Knocked out | Plays over 1 second, then holds the last frame |

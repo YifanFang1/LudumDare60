@@ -15,6 +15,9 @@ using UnityEngine;
 //
 // It only reads the camera, never the sim, so it cannot affect gameplay. It also runs outside
 // Play mode, so you can line layers up in the Game view without pressing Play.
+//
+// With Only During Match ticked it stays hidden in Play mode until a fight starts (behind the
+// menus, lobby and character select), and hides again when the match ends.
 [ExecuteAlways]
 [DefaultExecutionOrder(100)]   // after FightCamera has moved the camera this frame
 public class ParallaxBackground : MonoBehaviour
@@ -38,6 +41,8 @@ public class ParallaxBackground : MonoBehaviour
     [Tooltip("Optional. If the background looks black, use an Unlit sprite material.")]
     public Material material;
     public int sortingOrder = -100;           // first layer; each next layer is drawn one higher (fighters are 0)
+    [Tooltip("In Play mode, only show the background while a fight is on screen (not behind the menus). Always shown outside Play mode.")]
+    public bool onlyDuringMatch = true;
 
     [Header("The camera the layers were set up with (WorldView's default)")]
     public float referenceCameraY = 3f;
@@ -47,6 +52,7 @@ public class ParallaxBackground : MonoBehaviour
     readonly List<float> drift = new List<float>();
     Transform root;
     bool dirty = true;
+    IMatchSession match;   // found on first use; null in scenes without one (then always shown)
 
     void OnEnable() { dirty = true; }
     void OnDisable() { DestroyTiles(); }
@@ -68,6 +74,15 @@ public class ParallaxBackground : MonoBehaviour
         if (cam == null) return;
 
         if (dirty || root == null || tiles.Count != layers.Count) Rebuild();
+
+        if (!ShouldShow())
+        {
+            for (int i = 0; i < tiles.Count; i++)
+            {
+                for (int t = 0; t < tiles[i].Count; t++) tiles[i][t].enabled = false;
+            }
+            return;
+        }
 
         float zoom = cam.orthographicSize / referenceSize;
         float halfWidth = cam.orthographicSize * cam.aspect;
@@ -129,6 +144,13 @@ public class ParallaxBackground : MonoBehaviour
                     0f);
             }
         }
+    }
+
+    bool ShouldShow()
+    {
+        if (!onlyDuringMatch || !Application.isPlaying) return true;
+        if (match == null) match = SessionFinder.Find();
+        return match == null || match.Phase == MatchPhase.Playing;
     }
 
     void Rebuild()

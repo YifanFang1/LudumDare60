@@ -49,6 +49,7 @@ public static class FightControls
             Make("Grab", Buttons.Grab, "<Keyboard>/l"),
             Make("Special", Buttons.Special, "<Keyboard>/i"),
             Make("Ultimate", Buttons.Ultimate, "<Keyboard>/o"),
+            Make("Jump", Buttons.Up, "<Keyboard>/w"),   // last, because Hint() finds keys by position
             // No "Block" line: blocking is holding away from the opponent, so the Block bit is unused.
         };
 
@@ -88,7 +89,7 @@ public static class FightControls
     public static string Hint()
     {
         EnsureCreated();
-        return BindingOf(0) + "/" + BindingOf(1) + " move (tap twice: dash)   " + BindingOf(3) + " light   " + BindingOf(4) + " heavy   "
+        return BindingOf(0) + "/" + BindingOf(1) + " move (tap twice: dash)   " + BindingOf(8) + " jump   " + BindingOf(3) + " light   " + BindingOf(4) + " heavy   "
              + BindingOf(5) + " grab   " + BindingOf(6) + " special   " + BindingOf(7) + " ultimate";
     }
 

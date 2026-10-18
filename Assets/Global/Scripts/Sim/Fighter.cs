@@ -1,7 +1,7 @@
 using System;
 
 // New states go at the END so the numbers of the old ones (used in the desync hash) stay the same.
-public enum FighterStateId { Idle, Walk, Attack, Hitstun, KO, Blockstun, Dash }
+public enum FighterStateId { Idle, Walk, Attack, Hitstun, KO, Blockstun, Dash, Jump }
 
 // The engine-level base class for every character. It owns the state machine, movement,
 // blocking and getting hit. You normally do NOT subclass this directly:
@@ -17,6 +17,14 @@ public enum FighterStateId { Idle, Walk, Attack, Hitstun, KO, Blockstun, Dash }
 // was up on the tick before). Toward the opponent = forward dash, away = back dash. A dash can't
 // block or attack until it ends. Characters change their dashes with ForwardDash / BackDash.
 //
+// JUMPING: hold Up while standing or walking. The arc is fixed when you leave the ground (Up alone
+// goes straight up, Up + a direction jumps that way) and you can't steer, block or turn around in
+// the air. Once per jump you can do an air attack (ChooseAirMove: Light or Heavy by default).
+// Landing ends the jump and cancels an unfinished air attack. Bodies only push each other when
+// both fighters are on the ground, so you can jump over the opponent and land on their other side.
+// Grabs can't catch an airborne fighter. A fighter hit in the air falls, and its hitstun lasts at
+// least until it lands. Characters change their jump with JumpArc.
+//
 // TICKS: everything is counted in ticks (1 tick = 1/60 s). `stateTick` is how many ticks the
 // fighter has been in the current state; it is 0 on the first tick of a state.
 //
@@ -26,8 +34,9 @@ public abstract class Fighter
     public int index;               // 0 or 1
     public int characterId;         // which CharacterList entry this is (set by CharacterList.Create)
     public int x;                   // milli-units
-    public int y;                   // always 0 (no jumping); kept so boxes and events still have a height
+    public int y;                   // feet height in milli-units; 0 = on the ground
     public int vx;                  // milli-units per tick
+    public int vy;                  // milli-units per tick, up is positive (only while airborne)
     public int hp;
     public int facing = 1;          // 1 = facing right, -1 = facing left
     public FighterStateId state;
@@ -37,6 +46,7 @@ public abstract class Fighter
     public MoveDef move;            // the move being performed while state == Attack
     public int dashTicks;           // how long the current Dash lasts
     public int meter;               // 0..MeterMax. A full bar allows the Ultimate. Carries over between rounds.
+    public bool usedAirMove;        // this jump already had its air attack (reset on landing)
 
     // Input history, so the fighter can tell a fresh press from a held key (dashes, the Ultimate).
     public int prevInput;           // last tick's input, after FilterInput
@@ -51,6 +61,8 @@ public abstract class Fighter
     // Which move does this input start? null = none. `sim` is there so a character can check the
     // match (for example "is my fireball still on screen?"). Read it, never change it here.
     public abstract MoveDef ChooseMove(GameSim sim, int input);
+    // The same in the air (once per jump). null = no air attack for this input.
+    public virtual MoveDef ChooseAirMove(GameSim sim, int input) { return null; }
 
     // Every move this character can do. NOT used by the fight; editor tools read it, e.g. to make
     // one Animator state per move. BaseFighter lists its slots (Light, Heavy, Grab, Special,
@@ -67,6 +79,10 @@ public abstract class Fighter
     // longer or shorter.
     public virtual DashDef ForwardDash { get { return new DashDef(14, 130); } }
     public virtual DashDef BackDash { get { return new DashDef(16, 110); } }
+
+    // The jump: about 36 ticks in the air, peaking at about 1.7 units (high enough to clear a
+    // Special projectile), travelling about 1.8 units forward or back. Override to change it.
+    public virtual JumpDef JumpArc { get { return new JumpDef(180, 50); } }
 
     // ---------- optional hooks for theme mechanics / modifiers ----------
     // Change this tick's input before the fighter uses it. Return 0 to ignore the player
@@ -92,6 +108,9 @@ public abstract class Fighter
     // The second tap of a double-tap must come at most this many ticks after the first.
     public const int DashTapWindow = 12;
 
+    // Taken off vy every tick while airborne, shared by every character.
+    public const int Gravity = 10;
+
     // Ultimate meter, shared by every character (Design/DECISIONS.md D-08). With 100 HP that is
     // roughly one full bar per round. Hits from an Ultimate give nothing.
     public const int MeterMax = 1000;
@@ -116,6 +135,12 @@ public abstract class Fighter
         }
     }
 
+    // True while off the ground (jumping, or knocked out of the air and still falling).
+    public bool IsAirborne
+    {
+        get { return y > 0 || vy > 0; }
+    }
+
     public Box HurtboxWorld()
     {
         return Hurtbox.ToWorld(x, y, facing);
@@ -127,6 +152,8 @@ public abstract class Fighter
         x = startX;
         y = 0;
         vx = 0;
+        vy = 0;
+        usedAirMove = false;
         hp = MaxHp;
         facing = fighterIndex == 0 ? 1 : -1;
         move = null;
@@ -166,6 +193,10 @@ public abstract class Fighter
                 ThinkAttack(sim);
                 break;
 
+            case FighterStateId.Jump:
+                ThinkAir(sim, input);
+                break;
+
             case FighterStateId.Dash:
                 if (stateTick >= dashTicks - 1)
                 {
@@ -176,7 +207,8 @@ public abstract class Fighter
 
             case FighterStateId.Hitstun:
             case FighterStateId.Blockstun:
-                if (stateTick >= stunTicks - 1)
+                // Stun never ends in the air: a fighter hit out of a jump stays in hitstun until it lands.
+                if (stateTick >= stunTicks - 1 && !IsAirborne)
                 {
                     vx = 0;
                     EnterState(FighterStateId.Idle);
@@ -240,6 +272,17 @@ public abstract class Fighter
 
         int direction = DirectionFrom(input);
 
+        // Held, not a fresh press: holding Up keeps jumping each time you land.
+        if ((input & Buttons.Up) != 0)
+        {
+            JumpDef jump = JumpArc;
+            vx = direction * jump.forward;
+            vy = jump.up;
+            usedAirMove = false;
+            EnterState(FighterStateId.Jump);
+            return;
+        }
+
         vx = direction * WalkSpeed;
         FighterStateId wanted = vx != 0 ? FighterStateId.Walk : FighterStateId.Idle;
         if (state != wanted) EnterState(wanted);
@@ -276,8 +319,22 @@ public abstract class Fighter
         if (stateTick >= move.totalTicks - 1)
         {
             move = null;
-            EnterState(FighterStateId.Idle);
+            // An air attack that finishes before landing goes back to falling.
+            EnterState(IsAirborne ? FighterStateId.Jump : FighterStateId.Idle);
         }
+    }
+
+    // In the air the arc is fixed: the only choice is one air attack per jump.
+    void ThinkAir(GameSim sim, int input)
+    {
+        if (usedAirMove) return;
+        MoveDef chosen = ChooseAirMove(sim, input);
+        if (chosen == null || chosen.ultimate) return;   // Ultimates are ground-only (they spend meter there)
+
+        move = chosen;
+        usedAirMove = true;
+        EnterState(FighterStateId.Attack);   // vx and vy are kept, so the jump carries on
+        sim.AddEvent(SimEventType.AttackStart, index, -1, x, y, 0);
     }
 
     static int DirectionFrom(int input)
@@ -292,6 +349,31 @@ public abstract class Fighter
     public void Move(GameSim sim)
     {
         x = GameSim.ClampToArena(x + vx);
+
+        if (IsAirborne)
+        {
+            y += vy;
+            vy -= Gravity;
+            if (y <= 0) Land(sim);
+        }
+    }
+
+    void Land(GameSim sim)
+    {
+        y = 0;
+        vy = 0;
+        usedAirMove = false;
+
+        if (state == FighterStateId.Jump || state == FighterStateId.Attack)
+        {
+            // Landing cancels an air attack that hasn't finished. (Ground attacks never get here:
+            // they can only start on the ground.)
+            if (state == FighterStateId.Attack) sim.RemoveFollowHitboxes(index);
+            move = null;
+            vx = 0;
+            EnterState(FighterStateId.Idle);
+        }
+        // Hitstun keeps its knockback slide and ends on its own; KO just lies there.
     }
 
     // ---------- getting hit ----------
@@ -314,6 +396,7 @@ public abstract class Fighter
         move = null;
         sim.RemoveFollowHitboxes(index);   // being hit cancels your own melee hitboxes
         vx = away * hit.def.knockback;
+        if (vy > 0) vy = 0;                // knocked out of the air: stop rising and fall from here
 
         if (hp <= 0)
         {

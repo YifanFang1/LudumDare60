@@ -2,13 +2,14 @@
 
 Every character gets these actions. They are written **once** in the sim (`Fighter`, `BaseFighter`, `GameSim`). For now all six roster characters use the kit unchanged (D-29). A later design overrides only what it changes. The decisions behind each rule are in [DECISIONS.md](DECISIONS.md) (`D-xx`).
 
-Contents: [Controls](#controls) · [The standard moveset](#the-standard-moveset) · [Block](#block) · [Grab](#grab) · [Dash](#dash) · [Meter](#meter) · [Special and Ultimate](#special-and-ultimate) · [Rounds](#rounds) · [Pushboxes](#pushboxes) · [The new API at a glance](#the-new-api-at-a-glance) · [View, audio and AI](#view-audio-and-ai) · [What gets hashed](#what-gets-hashed) · [Extensions](#extensions-build-when-a-design-needs-them)
+Contents: [Controls](#controls) · [The standard moveset](#the-standard-moveset) · [Block](#block) · [Grab](#grab) · [Dash](#dash) · [Jump](#jump) · [Meter](#meter) · [Special and Ultimate](#special-and-ultimate) · [Rounds](#rounds) · [Pushboxes](#pushboxes) · [The new API at a glance](#the-new-api-at-a-glance) · [View, audio and AI](#view-audio-and-ai) · [What gets hashed](#what-gets-hashed) · [Extensions](#extensions-build-when-a-design-needs-them)
 
 ## Controls
 
 | Key | Action | Bit in `Sim/Buttons.cs` |
 |---|---|---|
 | A / D | Walk. Hold away from the opponent to block. Double-tap to dash. | `Left = 1`, `Right = 2` (existing) |
+| W | Jump (held), see [Jump](#jump) | `Up = 4` |
 | S | Down (unused by the sim for now, D-22) | `Down = 8` (existing) |
 | J | Light | `Light = 16` (existing) |
 | K | Heavy | `Heavy = 32` (existing) |
@@ -16,7 +17,7 @@ Contents: [Controls](#controls) · [The standard moveset](#the-standard-moveset)
 | I | Special | `Special = 256` (**new**) |
 | O | Ultimate | `Ultimate = 512` (**new**) |
 
-`Block = 64` and `Up = 4` stay reserved and unused. Add one `Make(...)` line per new button in `FightControls` and remove the `Block` line (D-02).
+`Block = 64` stays reserved and unused. Add one `Make(...)` line per new button in `FightControls` and remove the `Block` line (D-02).
 
 **If several attack buttons are pressed on the same tick**, the priority is Ultimate > Special > Grab > Heavy > Light. Attacks are checked before dashes, and dashes before walking. The **Ultimate needs a fresh press** (pressed this tick, not held on the previous one), so holding O can't fire it by accident the moment the bar fills.
 
@@ -39,6 +40,9 @@ These are `BaseFighter`'s defaults, stored as `static readonly` moves (`Standard
 | Ultimate (O) | 6 (after the freeze) | 4 | 45 | 30 | 40 | 120 | `Box(300, 0, 2000, 2200)` | A big blockable strike (D-11). Gives no meter |
 | Forward dash | - | - | 14 | - | - | speed 130 | - | Travels ~1.8 units |
 | Back dash | - | - | 16 | - | - | speed 110 | - | Travels ~1.8 units |
+| Jump Light (W, then J) | 3 | 8 | 14 | 5 | 14 | 30 | `Box(200, 0, 800, 700)` | Air only, once per jump |
+| Jump Heavy (W, then K) | 6 | 6 | 24 | 10 | 20 | 60 | `Box(100, 0, 1000, 900)` | Air only, once per jump |
+| Jump | - | - | 37 | - | - | up 180, forward 50 | - | Peaks ~1.7 units, travels ~1.8 units |
 | Perks | - | - | - | - | - | - | - | None for now (D-12, D-29) |
 
 These match the scale of the test characters (Brawler's Jab and Haymaker, Shooter's Fireball), so everything can be tested against Brawler, Shooter and Sandbag.
@@ -77,6 +81,19 @@ New state `FighterStateId.Dash` (appended **at the end** of the enum so the old 
 
 `Fighter` keeps `prevInput`, `lastTapDir` and `lastTapTick` for this. They change behaviour, so they're hashed.
 
+## Jump
+
+New state `FighterStateId.Jump` (appended at the end of the enum).
+
+- **Input:** Up **held** while in Idle or Walk (holding it keeps jumping each time you land). Attacks are checked first, then dashes, then the jump. Up alone goes straight up; Up + Left/Right jumps that way.
+- **The arc is fixed:** `vy = JumpArc.up`, `vx = direction * JumpArc.forward`. Every tick in the air `y += vy; vy -= Gravity` (`Gravity = 10`). `IsAirborne` is `y > 0 || vy > 0`. No steering, no turning around, no blocking.
+- **Air attacks:** once per jump (`usedAirMove`, reset on landing), `ChooseAirMove(sim, input)` picks one. `BaseFighter` gives Heavy > Light: `JumpHeavyAttack` / `JumpLightAttack`. An air attack that ends before landing goes back to `Jump`; landing during one cancels it and removes its hitboxes. Ultimates are ground-only.
+- **Landing:** `y = 0`, then `Jump` or an air attack becomes `Idle`. There's no landing recovery yet.
+- **Getting hit in the air:** the fighter stops rising (`vy` capped at 0) and falls. Hitstun can't end while airborne, so it lasts at least until landing. A fighter KO'd in the air falls too.
+- **Grabs** skip airborne victims. **Pushboxes** only push when both fighters are grounded, so a jump can pass over the opponent; landing overlapped pushes them apart, which makes crossups possible.
+- **Inspector characters:** `AttackButton.JumpLight` / `JumpHeavy` (at the end of the enum) bind air attacks to J / K. A character with no air bindings gets the standard ones.
+- **Per character:** override `JumpArc` (a `JumpDef { up, forward }`), `JumpLightAttack`, `JumpHeavyAttack` or `ChooseAirMove`.
+
 ## Meter
 
 `meter` is an int on `Fighter`, `0..MeterMax` (`MeterMax = 1000`). Gains (D-08) are constants in `Fighter`:
@@ -112,7 +129,7 @@ Best of 3, and the meter carries over (D-18, D-19, D-20).
 
 ## Pushboxes
 
-After both fighters move (D-21): if their bodies overlap along x (using each hurtbox's x range), push each one apart by half the overlap. If one is against a wall, the other takes all of it. **Tie-break when x is exactly equal:** fighter 0 goes left. It must be deterministic, never "whichever comes first".
+After both fighters move (D-21): if their bodies overlap along x (using each hurtbox's x range), push each one apart by half the overlap. If one is against a wall, the other takes all of it. Bodies only push while both fighters are on the ground (see [Jump](#jump)). **Tie-break when x is exactly equal:** fighter 0 goes left. It must be deterministic, never "whichever comes first".
 
 ## The new API at a glance
 
@@ -170,7 +187,7 @@ None of these touch the sim. They react to `SimEvent`s and read state.
 ## What gets hashed
 
 Everything that changes behaviour must be in `GameSim.Hash()`, or desyncs go unnoticed:
-- **Fighter:** `meter`, `dashTicks`, `prevInput`, `lastTapDir`, `lastTapTick`, plus `facing` and which `move` is playing, which the original hash missed (D-34). Also the existing fields and `HashExtra()`.
+- **Fighter:** `meter`, `dashTicks`, `prevInput`, `lastTapDir`, `lastTapTick`, `y`, `vy`, `usedAirMove`, plus `facing` and which `move` is playing, which the original hash missed (D-34). Also the existing fields and `HashExtra()`.
 - **GameSim:** `freezeTicks`, `round`, `roundsWon[0..1]`, `roundOverTicks`, and each hitbox's `owner`.
 
 **Bump `Version` in `RelayLockstepSession.cs`** when the kit lands. It changes the sim rules and the input bits.
