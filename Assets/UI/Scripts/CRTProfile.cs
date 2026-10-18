@@ -37,6 +37,14 @@ public class CRTProfile : ScriptableObject
     [Range(0f, 0.5f)] public float curvature = 0.1f;
     [Range(0f, 1f)] public float vignetteStrength = 0.5f;
 
+    [Header("Full-screen glitch (CRTSettings.SetFillGlitch / FillGlitch, used by the page transitions)")]
+    [Tooltip("Extra colour split everywhere on screen at full glitch.")]
+    [Range(0f, 0.08f)] public float fillColorSplit = 0.03f;
+    [Tooltip("Extra row wobble everywhere on screen at full glitch.")]
+    [Range(0f, 0.08f)] public float fillWaveAmount = 0.015f;
+    [Tooltip("How far bands of rows tear sideways at full glitch.")]
+    [Range(0f, 0.2f)] public float fillTear = 0.06f;
+
     [Header("Glitch (CRTSettings.Glitch, e.g. when an Ultimate hits)")]
     [Tooltip("Extra colour split at the start of a glitch. It fades back to normal.")]
     [Range(0f, 0.05f)] public float glitchColorSplit = 0.015f;

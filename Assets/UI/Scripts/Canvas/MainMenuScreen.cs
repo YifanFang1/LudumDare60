@@ -29,7 +29,13 @@ public class MainMenuScreen : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
             quitButton.gameObject.SetActive(false);   // a browser tab cannot be quit from inside the page
 #else
-            quitButton.onClick.AddListener(Quit);
+            quitButton.onClick.AddListener(() =>
+            {
+                AudioManager.Click();
+                quitButton.interactable = false;
+                // switch off like an old TV right away, then the game closes
+                TvOffEffect.Play(screens.transform, 0f, Quit);
+            });
 #endif
         }
     }
