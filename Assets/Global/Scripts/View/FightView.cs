@@ -206,6 +206,7 @@ public class FightView : MonoBehaviour
     {
         string text = null;
         if (sim.roundOverTicks > 0 || sim.IsOver) text = "K.O.";
+        else if (sim.CountdownText != "") text = sim.CountdownText;
         else if (Time.unscaledTime < bannerUntil) text = banner;
         if (text != null) GUI.Label(new Rect(0, 200, width, 50), text, bigText);
     }

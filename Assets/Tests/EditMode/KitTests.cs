@@ -920,3 +920,55 @@ public class KitTests
         Assert.AreEqual(100, sim.fighters[1].hp);
     }
 }
+
+
+// Pre-round countdown uses simulation ticks so online peers unlock together.
+public class CountdownTests
+{
+    [NUnit.Framework.Test]
+    public void CountdownBlocksInputThenUnlocksAtFight()
+    {
+        GameSim sim = new GameSim { countdownOn = true };
+        sim.Reset(1, CharacterList.Factory(0), CharacterList.Factory(0));
+        for (int i = 0; i < 180; i++)
+        {
+            NUnit.Framework.Assert.AreEqual((3 - i / 60).ToString(), sim.CountdownText);
+            sim.Step(Buttons.Right | Buttons.Light, Buttons.Left | Buttons.Heavy);
+            NUnit.Framework.Assert.AreEqual(-GameSim.StartX, sim.fighters[0].x);
+            NUnit.Framework.Assert.AreEqual(GameSim.StartX, sim.fighters[1].x);
+            NUnit.Framework.Assert.IsNull(sim.fighters[0].move);
+            NUnit.Framework.Assert.IsNull(sim.fighters[1].move);
+        }
+        NUnit.Framework.Assert.AreEqual("FIGHT!", sim.CountdownText);
+        sim.Step(Buttons.Right, 0);
+        NUnit.Framework.Assert.Greater(sim.fighters[0].x, -GameSim.StartX);
+        for (int i = 1; i < 60; i++) sim.Step(0, 0);
+        NUnit.Framework.Assert.AreEqual("", sim.CountdownText);
+    }
+
+    [NUnit.Framework.Test]
+    public void CountdownRestartsForNextRoundAndResetAndIsHashed()
+    {
+        GameSim a = new GameSim { countdownOn = true };
+        GameSim b = new GameSim { countdownOn = true };
+        a.Reset(1, CharacterList.Factory(0), CharacterList.Factory(0));
+        b.Reset(1, CharacterList.Factory(0), CharacterList.Factory(0));
+        for (int i = 0; i < 180; i++)
+        {
+            a.Step(Buttons.Light, Buttons.Heavy);
+            b.Step(Buttons.Light, Buttons.Heavy);
+            NUnit.Framework.Assert.AreEqual(a.Hash(), b.Hash());
+        }
+        b.countdownTicks = 1;
+        NUnit.Framework.Assert.AreNotEqual(a.Hash(), b.Hash());
+        a.fighters[1].hp = 0;
+        a.Step(0, 0);
+        for (int i = 0; i < GameSim.RoundEndDelay; i++) a.Step(0, 0);
+        NUnit.Framework.Assert.AreEqual(2, a.round);
+        NUnit.Framework.Assert.AreEqual("3", a.CountdownText);
+        a.Step(0, 0);
+        a.Reset(1, CharacterList.Factory(0), CharacterList.Factory(0));
+        NUnit.Framework.Assert.AreEqual(180, a.countdownTicks);
+        NUnit.Framework.Assert.AreEqual(0, a.fightBannerTicks);
+    }
+}

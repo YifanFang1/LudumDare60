@@ -39,7 +39,17 @@ public class FightCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        if (match.Phase != MatchPhase.Playing) { x = float.NaN; size = float.NaN; return; }   // next match starts from WorldView's framing
+        if (match.Phase != MatchPhase.Playing)
+        {
+            if (!float.IsNaN(size) && Camera.main != null)
+            {
+                Camera.main.orthographicSize = maxSize;
+                Camera.main.transform.position = new Vector3(0f, maxSize - floorMargin, Camera.main.transform.position.z);
+            }
+            x = size = float.NaN;
+            xVelocity = sizeVelocity = 0f;
+            return;
+        }
         Camera cam = Camera.main;
         if (cam == null) return;
 
@@ -49,11 +59,15 @@ public class FightCamera : MonoBehaviour
         // Zoom so both fighters fit with some padding, then centre between them.
         float halfNeeded = Mathf.Abs(x1 - x0) / 2f + padding;
         float targetSize = Mathf.Clamp(halfNeeded / cam.aspect, minSize, maxSize);
+        bool defeated = match.Sim.roundOverTicks > 0 || match.Sim.IsOver;
+        int winner = match.Sim.fighters[0].hp > 0 ? 0 : match.Sim.fighters[1].hp > 0 ? 1 : -1;
+        if (defeated && winner >= 0) targetSize = 2.6f;
         if (float.IsNaN(size)) size = cam.orthographicSize;
         size = Mathf.SmoothDamp(size, targetSize, ref sizeVelocity, smoothTime);
 
         float limit = Mathf.Max(0f, stageHalfWidth - size * cam.aspect);
-        float targetX = Mathf.Clamp((x0 + x1) / 2f, -limit, limit);
+        float focusX = defeated && winner >= 0 ? (winner == 0 ? x0 : x1) : (x0 + x1) / 2f;
+        float targetX = Mathf.Clamp(focusX, -limit, limit);
         if (float.IsNaN(x)) x = cam.transform.position.x;
         x = Mathf.SmoothDamp(x, targetX, ref xVelocity, smoothTime);
 
