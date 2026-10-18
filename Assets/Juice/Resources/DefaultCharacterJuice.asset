@@ -32,7 +32,7 @@ MonoBehaviour:
     scale: 1
     shake: 0
   - trigger: WhileLowHealth
-    effect: Bleed
+    effect: LightRays
     place: 1
     anchor: 0
     offset: {x: 0, y: 0}
