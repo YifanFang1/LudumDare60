@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5189441526836052901}
   - component: {fileID: 8514297983939518441}
   m_Layer: 0
-  m_Name: Background
+  m_Name: PlagueDoctorBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
