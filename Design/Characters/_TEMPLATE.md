@@ -1,6 +1,6 @@
 # <Name> (<Type>)
 
-> Copy this file to `Design/Characters/<Name>.md` when the team designs a character. Keep every heading, even if the answer is "standard" (the [standard moveset](../SHARED_KIT.md#the-standard-moveset)). Roster characters keep their id from [../README.md](../README.md) (10-15); a brand-new character takes the next free id (16 and up) and adds a row to the roster table there.
+> Copy this file to `Design/Characters/<Name>.md` when the team designs a character. Keep every heading, even if the answer is "standard" (the [standard moveset](../SHARED_KIT.md#the-standard-moveset)). Roster characters keep their id from [../README.md](../README.md) (10-15); a brand-new character takes the next free id (16 and up) and adds a row to the roster table there. For a filled-in example, see [_EXAMPLE.md](_EXAMPLE.md).
 
 **Id:** <...> · **Class:** `<Name> : BaseFighter` in `Assets/Characters/Scripts/Fighters/<Name>.cs` · **Era:** <...> · **Art style:** <who draws it, and how>
 
@@ -17,7 +17,7 @@ Write "standard" for anything that uses the [shared kit](../SHARED_KIT.md#generi
 
 | Move | Name / look | Startup | Active | Total | Dmg | Hitstun | KB | Box | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| Light (J) | | | | | | | | | |
+| Light (J) | Jab | | | | | | | | |
 | Heavy (K) | | | | | | | | | |
 | Grab (L) | | | | | | | | | |
 | Forward dash | | | | | | | | | ticks / speed |

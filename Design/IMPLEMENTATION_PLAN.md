@@ -43,18 +43,18 @@ After Phase 2, Brawler and Shooter already have grabs, dashes, a Special, an Ult
 
 | Step | What | Est. |
 |---|---|---|
-| **R1** | Six classes, one file each, in `Assets/Characters/Scripts/Fighters/`: `Samurai` (id 10), `Painter` (11), `Cowboy` (12), `Elephant` (13), `Executioner` (14), `PlagueDoctor` (15). Each one is only a header comment and its id, because `BaseFighter`'s defaults are the standard moveset (see below). Register all six in `CharacterList` (and its comment list), with the display name "Black and White Cowboy" for `Cowboy`. Add them to the soak test's pool. | 0.5h |
+| **R1** | Six classes, one file each, in `Assets/Characters/Scripts/Fighters/`: `ArcadeGuy` (id 10), `Painter` (11), `Cowboy` (12), `Elephant` (13), `Executioner` (14), `PlagueDoctor` (15). Each one is only a header comment and its id, because `BaseFighter`'s defaults are the standard moveset (see below). Register all six in `CharacterList` (and its comment list), with the display name "Black and White Cowboy" for `Cowboy`. Add them to the soak test's pool. | 0.5h |
 | **R2** | For each, a **Code Character Art** asset in a `Resources` folder (`Assets/Characters/CharacterDataBase/Resources/`) with a different `Placeholder Color` (otherwise six identical boxes can't be told apart). Run **Fight > Create Animator for Selected Character** only when an artist starts on that character: it assigns a View Prefab, which replaces the coloured box, and an empty prefab shows nothing (D-36). These are Unity Editor steps, not code. | 0.5h |
 | **R3** | Update the roster table in the root `CLAUDE.md`, the status tables in [README.md](README.md), and CHARACTERS.md. | 0.25h |
 
 What a placeholder character looks like. One file per character keeps people out of each other's files when the real designs arrive:
 
 ```csharp
-// SAMURAI. Roster character, id 10. Design target: Shoto.
+// ARCADEGUY. Roster character, id 10. Design target: Shoto.
 // PLACEHOLDER: uses BaseFighter's standard moveset unchanged (Design/SHARED_KIT.md).
 // Its real moveset, Special, Ultimate and perks will be designed by the team
 // (Design/Characters/_TEMPLATE.md). Override only what the design changes.
-public class Samurai : BaseFighter
+public class ArcadeGuy : BaseFighter
 {
     public const int Id = 10;
 }

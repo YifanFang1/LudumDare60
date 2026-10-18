@@ -25,7 +25,7 @@ This guide is for anyone adding a fighter. Read [ARCHITECTURE.md](../ARCHITECTUR
 ```
 Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing, jumping, meter, hitstun, KO, the state machine.
  ├─ BaseFighter          (Characters/BaseFighter.cs) THE TEMPLATE. The standard moveset, controls, move helpers.
- │   ├─ Samurai ... PlagueDoctor   ids 10-15, the launch roster. Placeholders: the standard moveset, unchanged
+ │   ├─ ArcadeGuy ... PlagueDoctor   ids 10-15, the launch roster. Placeholders: the standard moveset, unchanged
  │   ├─ Brawler          id 0, close range test character
  │   ├─ Shooter          id 1, long range test character
  │   ├─ Sandbag          id 2, training dummy (does nothing, never dies)
@@ -35,7 +35,7 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 
 
 - **Fighter** is shared by everyone. Change it only for rules that should apply to every character, such as a new state like jumping. Changing it changes the sim, so bump `Version` in [RelayLockstepSession.cs](../Global/Scripts/Net/RelayLockstepSession.cs).
-- **BaseFighter** is the template. It gives a character defaults for every trait, and its moves default to the **standard moveset** ([Design/SHARED_KIT.md](../../Design/SHARED_KIT.md)), so a subclass only writes what's different. A subclass that overrides nothing is already fully playable: that's what the six roster placeholders (`Samurai.cs` etc.) are.
+- **BaseFighter** is the template. It gives a character defaults for every trait, and its moves default to the **standard moveset** ([Design/SHARED_KIT.md](../../Design/SHARED_KIT.md)), so a subclass only writes what's different. A subclass that overrides nothing is already fully playable: that's what the six roster placeholders (`ArcadeGuy.cs` etc.) are.
 - **Your character** overrides a few properties. Brawler and Shooter are about 30 lines each.
 
 
@@ -43,7 +43,7 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 - Walking left and right (A/D), always turning to face the opponent. Fighters can't walk through each other (pushboxes).
 - **Blocking:** hold the direction *away* from the opponent while standing or walking. A blocked hit does 0 damage and still pushes you back. It also puts you in **Blockstun** for 60% of the move's hitstun: you can't act, but you keep blocking while you hold back. You can't block during your own attack, a dash or hitstun. The numbers are `BlockstunPercent` and `BlockPushPercent` in `Fighter.cs`.
 - **Dashing:** double-tap a direction (two fresh presses within 12 ticks). Toward the opponent is a forward dash. Override `ForwardDash` / `BackDash` to change them.
-- **Jumping:** hold W (alone for straight up, with A/D to jump that way). The arc is fixed once you leave the ground, you can't block in the air, and you get one air attack per jump. Bodies don't push while someone is airborne, so you can jump over the opponent. Grabs can't catch an airborne fighter. Override `JumpArc` to change the jump.
+- **Jumping:** hold W (alone for straight up, with A/D to jump that way). Holding A/D in the air steers a little (`AirControl`), you can't block in the air, and you get one air attack per jump. Bodies don't push while someone is airborne, so you can jump over the opponent. Grabs can't catch an airborne fighter. Override `JumpArc` to change the jump.
 - **Grab rules and back throws:** any hitbox with `grab` set ignores blocking but can't catch a stunned fighter; hold back when it lands to throw the victim behind you.
 - **The Ultimate meter:** fills from hits (dealt, taken and blocked). A move with `ultimate` set needs a full bar, spends it and freezes the match for a moment.
 - Hitstun, knockback, KO, best-of-3 rounds, and hitbox/hurtbox collisions.
@@ -65,7 +65,8 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 | Jump + J | `StandardJumpLight`: quick air kick, 5 dmg | `JumpLightAttack` |
 | Jump + K | `StandardJumpHeavy`: big jump-in, 10 dmg | `JumpHeavyAttack` |
 | Dashes | about 1.8 units forward and back | `ForwardDash` / `BackDash` |
-| Jump | about 1.7 units high, 1.8 units across, 37 ticks | `JumpArc` |
+| Jump | about 2.1 units high, 2 units across, 40 ticks | `JumpArc` |
+| Air control | a little steering with A/D in the air | `AirControl` (0 = fixed arc) |
 | When a move is allowed | always, except one Special projectile at a time | `CanUseMove(sim, move)`: call `base.CanUseMove` for moves you don't handle |
 | Controls | Ultimate > Special > Grab > Heavy > Light if pressed together | `ChooseMove(sim, input)` (rarely needed) |
 
