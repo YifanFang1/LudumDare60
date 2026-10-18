@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa5a024dae297604f829b64925f74f0e, type: 3}
-  m_Name: K3N Art
+  m_Name: Nek Art
   m_EditorClassIdentifier: LD.CharacterData::CodeCharacterArt
   viewPrefab: {fileID: 7301288279746293286, guid: 0f4a944e99abb47fc85335b29697ef67, type: 3}
   sprite: {fileID: 0}
