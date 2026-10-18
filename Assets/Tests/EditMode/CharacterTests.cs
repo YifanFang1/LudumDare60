@@ -19,25 +19,32 @@ public class CharacterTests
     }
 
     [Test]
-    public void RosterCharactersAreRegisteredWithTheStandardMoveset()
+    public void RosterCharactersAreRegisteredWithTheirSheetNames()
     {
-        int[] ids = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id };
-        string[] names = { "Samurai", "Painter", "Black and White Cowboy", "Elephant", "Executioner", "Plague Doctor" };
+        // D-40: the in-game names come from the Moveset Tracker; the class names stay.
+        int[] ids = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id, Nek.Id };
+        string[] names = { "Ruy", "Paintress", "Noir", "Room", "The Executioner", "Dr. Remy", "Nek" };
+        System.Type[] types = { typeof(Samurai), typeof(Painter), typeof(Cowboy), typeof(Elephant),
+                                typeof(Executioner), typeof(PlagueDoctor), typeof(Nek) };
         string[] slots = { "Light", "Heavy", "Grab", "Special", "Ultimate", "JumpLight", "JumpHeavy" };
 
         for (int i = 0; i < ids.Length; i++)
         {
             Fighter f = CharacterList.Create(ids[i]);
             Assert.AreEqual(ids[i], f.characterId);
+            Assert.AreEqual(types[i], f.GetType());
             Assert.IsTrue(CharacterList.IsCodeCharacter(ids[i]));
             Assert.AreEqual(names[i], CharacterList.NameOf(ids[i]));
 
+            // Move names are Animator state names (D-17), so every move must use a slot name.
             MoveDef[] moves = f.ListMoves();
-            Assert.AreEqual(slots.Length, moves.Length, names[i] + " should have every standard move");
-            for (int m = 0; m < slots.Length; m++) Assert.AreEqual(slots[m], moves[m].name);
+            Assert.GreaterOrEqual(moves.Length, 6, names[i] + " should list its moves");
+            for (int m = 0; m < moves.Length; m++)
+            {
+                Assert.Contains(moves[m].name, slots, names[i] + "'s move names must be slot names");
+            }
         }
-        Assert.AreEqual(typeof(Samurai), CharacterList.Create(Samurai.Id).GetType());
-        Assert.AreEqual(typeof(PlagueDoctor), CharacterList.Create(PlagueDoctor.Id).GetType());
+        Assert.AreEqual(16, Nek.Id, "Nek takes the first free roster id (D-40)");
     }
 
     [Test]

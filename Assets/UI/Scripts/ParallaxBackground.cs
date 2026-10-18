@@ -12,6 +12,9 @@ using UnityEngine;
 //                  1 = infinitely far (stays put on screen, like the sky)
 //   Tile           repeat the sprite left and right so the layer never ends
 //   Drift Speed    units per second the layer slides on its own (clouds, fog)
+//   Frames         optional: an animated layer (water, flickering sky). Drag the frames in order;
+//                  they loop at Frames Per Second and still tile, drift and parallax. Make every
+//                  frame the same size. Leave it empty to just show Sprite.
 //
 // It only reads the camera, never the sim, so it cannot affect gameplay. It also runs outside
 // Play mode, so you can line layers up in the Game view without pressing Play.
@@ -27,6 +30,8 @@ public class ParallaxBackground : MonoBehaviour
     {
         public string name = "Layer";
         public Sprite sprite;
+        public Sprite[] frames;               // animated layer: used instead of Sprite when not empty
+        public float framesPerSecond = 8f;
         [Range(0f, 1f)] public float followCamera = 0.5f;
         public bool tile = true;
         public float driftSpeed;
@@ -65,6 +70,7 @@ public class ParallaxBackground : MonoBehaviour
         {
             if (layers[i].scale <= 0f) layers[i].scale = 1f;
             if (layers[i].tint.a <= 0f) layers[i].tint = Color.white;
+            if (layers[i].framesPerSecond <= 0f) layers[i].framesPerSecond = 8f;
         }
     }
 
@@ -92,7 +98,8 @@ public class ParallaxBackground : MonoBehaviour
         {
             Layer layer = layers[i];
             List<SpriteRenderer> pool = tiles[i];
-            if (layer.sprite == null)
+            Sprite sprite = CurrentSprite(layer);
+            if (sprite == null)
             {
                 for (int t = 0; t < pool.Count; t++) pool[t].enabled = false;
                 continue;
@@ -112,7 +119,7 @@ public class ParallaxBackground : MonoBehaviour
             float anchorX = Mathf.Lerp(worldX, screenX, f);
             float bottomY = Mathf.Lerp(worldY, screenY, f);
 
-            Bounds b = layer.sprite.bounds;
+            Bounds b = sprite.bounds;
             float width = b.size.x * scale;
 
             // Tiled: enough copies to cover the screen plus one spare on each side.
@@ -131,7 +138,7 @@ public class ParallaxBackground : MonoBehaviour
                 sr.enabled = t < count;
                 if (!sr.enabled) continue;
 
-                sr.sprite = layer.sprite;
+                sr.sprite = sprite;
                 sr.color = layer.tint;
                 sr.sortingOrder = sortingOrder + i;
                 if (material != null) sr.sharedMaterial = material;
@@ -144,6 +151,18 @@ public class ParallaxBackground : MonoBehaviour
                     0f);
             }
         }
+    }
+
+    // The picture to draw this frame: the animation frame for the current time, or Sprite when
+    // the layer has no frames. Outside Play mode it shows the first frame, for lining layers up.
+    // Cosmetic only (real time, not sim ticks), so it can't affect the fight.
+    static Sprite CurrentSprite(Layer layer)
+    {
+        if (layer.frames == null || layer.frames.Length == 0) return layer.sprite;
+        float time = Application.isPlaying ? Time.time : 0f;
+        int index = Mathf.FloorToInt(time * layer.framesPerSecond) % layer.frames.Length;
+        Sprite frame = layer.frames[Mathf.Max(0, index)];
+        return frame != null ? frame : layer.sprite;
     }
 
     bool ShouldShow()

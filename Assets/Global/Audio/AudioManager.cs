@@ -19,6 +19,13 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] dashSounds;       // a dash starts
     public AudioClip superFlashSound;    // an Ultimate starts (the freeze)
     public AudioClip koSound;
+    // Roster extras (all optional, empty = silent).
+    public AudioClip[] reflectSounds;    // a projectile was reflected (Paintress's canvas)
+    public AudioClip[] destroySounds;    // a projectile was destroyed (Room's Vine Boom: the meme sound goes here)
+    public AudioClip telegraphSound;     // a warning outline appeared (the Guillotine)
+    public AudioClip[] summonSounds;     // Ultimate copies appeared
+    public AudioClip[] holdSounds;       // a held grab caught someone (empty = use grabSounds)
+    public AudioClip[] healSounds;       // someone healed
     public int heavyHitDamage = 10;      // Brawler: Light does 5, Heavy does 12
 
     [Header("Match")]
@@ -150,6 +157,24 @@ public class AudioManager : MonoBehaviour
                 break;
             case SimEventType.RoundStart:
                 PlayUI(roundStart != null ? roundStart : fightStart);
+                break;
+            case SimEventType.Reflect:
+                PlaySfx(reflectSounds);
+                break;
+            case SimEventType.ProjectileDestroyed:
+                PlaySfx(destroySounds);
+                break;
+            case SimEventType.Telegraph:
+                PlayUI(telegraphSound);
+                break;
+            case SimEventType.SummonSpawn:
+                PlaySfx(summonSounds);
+                break;
+            case SimEventType.Hold:
+                PlaySfx(holdSounds != null && holdSounds.Length > 0 ? holdSounds : grabSounds);
+                break;
+            case SimEventType.Heal:
+                PlaySfx(healSounds);
                 break;
         }
     }

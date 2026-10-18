@@ -61,4 +61,83 @@ public class TestFighter : BaseFighter
                      box: new Box(300, 0, 1200, 2000),
                      damage: damage, hitstun: 12, knockback: 0);
     }
+
+    // A one-hitbox projectile that tests can tweak: flies forward at `speed` from tick 2.
+    public static MoveDef ProjectileMove(int damage, int speed)
+    {
+        return Projectile("Special", totalTicks: 20, spawnTick: 2, lifetime: 200,
+                          box: new Box(400, 500, 400, 600),
+                          speed: speed, damage: damage, hitstun: 12, knockback: 0);
+    }
+
+    // A move with no hitboxes.
+    public static MoveDef PoseMove(int totalTicks)
+    {
+        return Pose("Light", totalTicks);
+    }
+}
+
+// A fighter for the kit-extension tests: every slot and every hook can be set per test, so each
+// test switches on exactly the rule it checks. Not registered, so it never shows up in the game.
+public class KitFighter : BaseFighter
+{
+    public MoveDef light, heavy, grab, special, ultimate, holdMove;
+    public bool canBlock = true;
+    public bool intangible;
+    public bool canGainMeter = true;
+    public bool ignoresStatuses;
+    public int stackMultiplier = 1;
+    public int taps;
+    public int moveEnds;
+    public HitboxDef dashHitbox;
+    public System.Action<GameSim, Fighter, HitboxInstance> modifyOutgoing;
+    public System.Action<GameSim, HitboxInstance> onSpawned;
+    public System.Action<GameSim, KitFighter> onMoveStart;
+    public System.Action<GameSim, KitFighter> onMoveTick;
+    public System.Func<MoveDef, bool> copies;
+
+    protected override MoveDef LightAttack { get { return light; } }
+    protected override MoveDef HeavyAttack { get { return heavy; } }
+    protected override MoveDef GrabMove { get { return grab; } }
+    protected override MoveDef SpecialMove { get { return special; } }
+    protected override MoveDef UltimateMove { get { return ultimate; } }
+
+    protected override bool CanUseMove(GameSim sim, MoveDef m) { return true; }   // no projectile limit
+    public override bool CanBlock { get { return canBlock; } }
+    public override bool IsIntangible { get { return intangible; } }
+    public override bool CanGainMeter { get { return canGainMeter; } }
+    public override bool IgnoresStatus(StatusKind kind) { return ignoresStatuses; }
+    public override int StackMultiplier(int count) { return stackMultiplier; }
+    public override HitboxDef DashHitbox(bool forward) { return forward ? dashHitbox : null; }
+    public override void OnTap(GameSim sim, MoveDef tapped) { taps++; }
+    public override void OnMoveEnd(GameSim sim, MoveDef ended, bool finished) { moveEnds++; }
+    public override bool SummonCopiesMove(MoveDef m) { return copies != null && copies(m); }
+
+    public override MoveDef ChooseHoldMove(GameSim sim, int input)
+    {
+        return (input & Buttons.Special) != 0 ? holdMove : null;
+    }
+
+    public override void ModifyOutgoingHit(GameSim sim, Fighter victim, HitboxInstance hit)
+    {
+        if (modifyOutgoing != null) modifyOutgoing(sim, victim, hit);
+    }
+
+    public override void OnHitboxSpawned(GameSim sim, HitboxInstance hit)
+    {
+        if (onSpawned != null) onSpawned(sim, hit);
+    }
+
+    public override void OnMoveStart(GameSim sim)
+    {
+        if (onMoveStart != null) onMoveStart(sim, this);
+    }
+
+    public override void OnMoveTick(GameSim sim)
+    {
+        if (onMoveTick != null) onMoveTick(sim, this);
+    }
+
+    // For tests that need to put a move on cooldown directly.
+    public void PutOnCooldown(MoveDef m, int ticks) { StartCooldown(m, ticks); }
 }

@@ -58,6 +58,7 @@ public class DataFighter : Fighter
             if (b.move == null || CharacterDef.IsAirButton(b.button) != air) continue;
             if ((input & CharacterDef.ButtonMask(b.button)) == 0) continue;
             if (b.move.ultimate && meter < MeterMax) continue;   // not ready: try the next binding
+            if (IsOnCooldown(b.move)) continue;                  // cooling down (D-43): try the next binding
             return b.move;
         }
         return null;
