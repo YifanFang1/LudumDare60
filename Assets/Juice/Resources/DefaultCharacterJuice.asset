@@ -22,6 +22,7 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
     ticks: 0
     everyTicks: 0
+    sticky: 0
     scale: 1
     shake: 0
   - trigger: Grab
@@ -31,6 +32,7 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
     ticks: 0
     everyTicks: 0
+    sticky: 0
     scale: 1
     shake: 0
   - trigger: WhileLowHealth
@@ -40,6 +42,7 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
     ticks: 0
     everyTicks: 0
+    sticky: 0
     scale: 1
     shake: 0
   - trigger: WhileMoving
@@ -49,5 +52,26 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
     ticks: 0
     everyTicks: 15
+    sticky: 0
+    scale: 1
+    shake: 0
+  - trigger: WhileBlocking
+    effect: LightRays
+    place: 1
+    anchor: 2
+    offset: {x: 0.5, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 1
+    scale: 1
+    shake: 0
+  - trigger: WhileMeterFull
+    effect: Magic
+    place: 1
+    anchor: 2
+    offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 0
+    sticky: 1
     scale: 1
     shake: 0
