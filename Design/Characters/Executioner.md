@@ -12,7 +12,7 @@
 | Trapper | 150 | 70 | Whip Attack/ small Range | Charge whip attack - longer range | Grab and pulls enemy into iron maiden form and does damage | Really slow and heavy | Really slow and heavy | Block- Standard | Places Traps on the ground, they inflict slow and bleed | Summons the Guillotine, if the enemy is in the path takes huge damage | Inflicts bleed damage/ which reduces enemies damage when fully inflicited | Percentage chance to inflict dismember status, slowing enemy |
 
 ## Game plan
-A slow, tough torturer who wins by attrition. He lays traps where the opponent must walk, stacks bleed with his whip until they hit weakly, and slows them with dismember so they can't escape. He controls space with a charged long whip and a mid-range whip grab. He's weak to fast opponents who jump his traps and stay out of whip range, and his dashes are slow with a long cooldown.
+A slow, tough torturer who wins by attrition. He lays traps where the opponent must walk, stacks bleed with his whip until they hit weakly, and slows them with dismember so they can't escape. He controls space with a charged long whip and a very short-range grab. He's weak to fast opponents who jump his traps and stay out of whip range, and his dashes are slow with a long cooldown.
 
 ## Stats
 | HP | Walk speed | Body (hurtbox) |
@@ -24,7 +24,7 @@ A slow, tough torturer who wins by attrition. He lays traps where the opponent m
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Light (J) | Whip | Whip Attack / small Range | 5 | 3 | 17 | 5 | 12 | 40 | `Box(400, 900, 1000, 300)` | 5 | +1 bleed stack on hit (perk 1) |
 | Heavy (K) | Charged whip | Charge whip attack - longer range | 12 after release | 4 | 32 + charge | 10 | 20 | 70 | `Box(400, 900, 1800 → 2800, 300)` | 10 | **Hold K to charge, release (confirmed, D-42).** The charge adds **reach** (1.8 → 2.8 units over 60 ticks), not damage (confirmed). +1 bleed stack |
-| Grab (L) | Iron Maiden | Grab and pulls enemy into iron maiden form and does damage | 10 (std 5) | 3 | 48 (std 40) | 15 | 40 | 60 | `Box(300, 600, 2200, 1000)` | 15 | **Whip grab, mid range (about 2.5 units); it pulls the victim in, and an iron maiden prop closes on them (confirmed).** Slower startup pays for the range |
+| Grab (L) | Iron Maiden | Grab and pulls enemy into iron maiden form and does damage | 10 (std 5) | 3 | 48 (std 40) | 15 | 40 | 60 | `Box(300, 600, 400, 1000)` | 15 | **Very short range grab (reach about 0.7 units, almost touching; changed from 2.5); it pulls the victim in, and an iron maiden prop closes on them.** |
 | Forward dash | Heavy step | Really slow and heavy | - | - | 22 | - | - | - | - | **60** | 22 ticks / 80 ≈ 1.8 units, slow. Dash cooldown 60, like Room (confirmed: "longer" for heavy characters) |
 | Back dash | Heavy step back | Really slow and heavy | - | - | 24 | - | - | - | - | **60** | 24 ticks / 70 ≈ 1.7 units |
 | Block | Block | Standard | - | - | - | 0 | 60% | 100% | - | - | Standard |
@@ -84,7 +84,7 @@ A slow, tough torturer who wins by attrition. He lays traps where the opponent m
 - `ExecutionerBleedCannotKO`.
 - `ExecutionerEveryThirdHitDismembers`.
 - `ExecutionerGuillotineIsUnblockableAndLocksTheSpot`.
-- `ExecutionerWhipGrabPullsFromRange`.
+- `ExecutionerGrabPullsFromVeryCloseRange`.
 
 ## Open questions
 **Answered (2026-10-17, all confirmed):** the charge adds reach, not damage; bleed stays as designed (up to ~30 damage over 10 s from 5 stacks); the whip grab adds a bleed stack; traps cause 10 hitstun; the Guillotine counts toward Dismember but adds no bleed; a trap arms after 20 ticks; the iron maiden is a prop.

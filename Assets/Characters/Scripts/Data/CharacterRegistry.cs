@@ -10,9 +10,25 @@ public static class CharacterRegistry
     static readonly Dictionary<int, CharacterData> byId = new Dictionary<int, CharacterData>();
     static readonly Dictionary<int, CodeCharacterArt> codeArt = new Dictionary<int, CodeCharacterArt>();
 
+    static bool loadedOnce;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Load()
     {
+        Reload();
+    }
+
+    // Loads the characters once if that has not happened yet. For editor tools (CharacterPreview)
+    // that need the roster outside Play mode, where the startup hook above never runs.
+    public static void EnsureLoaded()
+    {
+        if (!loadedOnce) Reload();
+    }
+
+    // Load every character asset again (also the editor tools' "Reload characters" button).
+    public static void Reload()
+    {
+        loadedOnce = true;
         byId.Clear();
         CharacterList.ClearData();
 

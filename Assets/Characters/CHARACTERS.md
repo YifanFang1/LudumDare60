@@ -26,8 +26,6 @@ This guide is for anyone adding a fighter. Read [ARCHITECTURE.md](../ARCHITECTUR
 Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing, jumping, meter, hitstun, KO, the state machine.
  ├─ BaseFighter          (Characters/BaseFighter.cs) THE TEMPLATE. The standard moveset, controls, move helpers.
  │   ├─ ArcadeGuy ... PlagueDoctor   ids 10-15, the launch roster. Placeholders: the standard moveset, unchanged
- │   ├─ Brawler          id 0, close range test character
- │   ├─ Shooter          id 1, long range test character
  │   ├─ Sandbag          id 2, training dummy (does nothing, never dies)
  │   └─ <your character>
  └─ DataFighter          plays inspector characters (CharacterData assets)
@@ -36,7 +34,7 @@ Fighter                  (Sim/Fighter.cs) the engine. Walking, blocking, dashing
 
 - **Fighter** is shared by everyone. Change it only for rules that should apply to every character, such as a new state like jumping. Changing it changes the sim, so bump `Version` in [RelayLockstepSession.cs](../Global/Scripts/Net/RelayLockstepSession.cs).
 - **BaseFighter** is the template. It gives a character defaults for every trait, and its moves default to the **standard moveset** ([Design/SHARED_KIT.md](../../Design/SHARED_KIT.md)), so a subclass only writes what's different. A subclass that overrides nothing is already fully playable: that's what the six roster placeholders (`ArcadeGuy.cs` etc.) are.
-- **Your character** overrides a few properties. Brawler and Shooter are about 30 lines each.
+- **Your character** overrides a few properties. The test characters Brawler and Shooter (now in `Tests/EditMode`, about 30 lines each) show the shape.
 
 
 ### What every character gets for free (from `Fighter` and `GameSim`)
@@ -80,7 +78,7 @@ Return `null` from a move slot to take that move away (e.g. a character with no 
 ## Make a new code character, step by step
 
 
-1. **Copy a character.** Duplicate `Brawler.cs` for melee or `Shooter.cs` for ranged, inside `Assets/Characters/Scripts/Fighters/`. Rename the file and the class, e.g. `Knight.cs` / `class Knight : BaseFighter`. The class name must match the file name.
+1. **Copy a character.** Duplicate an existing character such as `Samurai.cs` (melee) or `Cowboy.cs` (ranged) inside `Assets/Characters/Scripts/Fighters/`. (`Brawler.cs` and `Shooter.cs` in `Tests/EditMode` are the minimal examples.) Rename the file and the class, e.g. `Knight.cs` / `class Knight : BaseFighter`. The class name must match the file name.
 2. **Pick an id.** Set `public const int Id = 16;` using the next free number in the list at the top of [CharacterList.cs](Scripts/Fighters/CharacterList.cs) (3-9 are for test characters, 16 and up for new roster characters). Never reuse or change an id once it has been pushed: it is what gets saved and sent over the network.
 3. **Register it.** Add one line to the static constructor in `CharacterList.cs`, then add your id to the comment list above it:
    ```csharp
@@ -223,7 +221,7 @@ Brawler and Shooter also get the standard Grab, Special, Ultimate and dashes fro
 **Testing reach and damage:** in the lobby set **"Opponent:"** to Sandbag. It ignores all input (it never blocks either), and the match never ends.
 
 
-Brawler is also the fallback for unknown ids, so never delete it.
+Sandbag (id 2) is the fallback for unknown ids, so never delete it. Brawler and Shooter are test-only fighters registered by `Tests/EditMode/TestRoster.cs`.
 
 
 ## What characters look like

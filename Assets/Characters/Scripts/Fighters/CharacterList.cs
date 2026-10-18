@@ -5,9 +5,8 @@ using System.Collections.Generic;
 //
 //   ids 0-999   characters written in code (BaseFighter subclasses), listed in the static
 //               constructor below. Take the next free number and add ONE line there.
-//                 0  Brawler   (also the fallback for unknown ids, never remove it)
-//                 1  Shooter
-//                 2  Sandbag   (training dummy)
+//                0, 1         free (the old Brawler and Shooter test fighters live in Tests/EditMode now)
+//                 2  Sandbag   (training dummy; also the fallback for unknown ids, never remove it)
 //                 3-9          free, for more test characters
 //                10  Samurai          "Ruy"              the launch roster (Design/README.md),
 //                11  Painter          "Paintress"        designed in Design/Characters/. The
@@ -38,8 +37,6 @@ public static class CharacterList
 
     static CharacterList()
     {
-        Add(Brawler.Id, "Brawler", delegate { return new Brawler(); }, null);
-        Add(Shooter.Id, "Shooter", delegate { return new Shooter(); }, null);
         Add(Sandbag.Id, "Sandbag", delegate { return new Sandbag(); }, null);
 
         Add(Samurai.Id, "Ruy", delegate { return new Samurai(); }, null);
@@ -118,12 +115,12 @@ public static class CharacterList
         return entries.TryGetValue(id, out e) ? e.name : "?";
     }
 
-    // An unknown id falls back to Brawler instead of crashing, so a bad id (from the network or a
+    // An unknown id falls back to Sandbag instead of crashing, so a bad id (from the network or a
     // deleted asset) cannot take the game down.
     public static Fighter Create(int id)
     {
         Entry e;
-        if (!entries.TryGetValue(id, out e)) e = entries[0];
+        if (!entries.TryGetValue(id, out e)) e = entries[Sandbag.Id];
         Fighter f = e.make();
         f.characterId = e.id;
         return f;

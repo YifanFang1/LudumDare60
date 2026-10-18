@@ -36,8 +36,6 @@ public static class PlaceholderArt
     // from their id and name (StyleFor).
     static readonly Dictionary<int, Style> Styles = new Dictionary<int, Style>
     {
-        { 0,  new Style(0.95f, 0.55f, 0.20f, Pattern.Bands,    'B') },   // Brawler
-        { 1,  new Style(0.20f, 0.75f, 0.75f, Pattern.Dots,     'S') },   // Shooter
         { 2,  new Style(0.80f, 0.70f, 0.50f, Pattern.Checker,  'Z') },   // Sandbag
         { 10, new Style(0.25f, 0.45f, 0.95f, Pattern.Stripes,  'R') },   // Ruy
         { 11, new Style(0.95f, 0.30f, 0.75f, Pattern.Diagonal, 'P') },   // Paintress

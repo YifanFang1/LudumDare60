@@ -7,7 +7,7 @@
 //   Grab, Special, Ultimate and dashes: the template's standard ones. The Special is also a
 //   projectile, so it shares the "one on screen" limit with the Fireball.
 //
-// Id 1.
+// Id 1. Test-only, like Brawler (see TestRoster.cs).
 public class Shooter : BaseFighter
 {
     public const int Id = 1;

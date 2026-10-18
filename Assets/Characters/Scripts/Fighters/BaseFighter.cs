@@ -1,7 +1,7 @@
 // THE CHARACTER TEMPLATE. Every character written in code extends this class.
 //
 // It gives a new character sensible defaults for everything, so a subclass only writes what
-// makes it different (see Brawler.cs and Shooter.cs, about 30 lines each). The defaults are the
+// makes it different (see Tests/EditMode/Brawler.cs and Shooter.cs, about 30 lines each). The defaults are the
 // STANDARD MOVESET from Design/SHARED_KIT.md, so a character that overrides nothing is already
 // fully playable (the six roster placeholders, e.g. Samurai.cs, are exactly that):
 //

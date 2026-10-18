@@ -5,9 +5,9 @@
 //   Heavy (K)  Haymaker   slow start, long reach, big damage and knockback
 //   Grab, Special, Ultimate and dashes: the template's standard ones (see BaseFighter).
 //
-// Id 0. It is also the fallback when a character id is unknown, so it must always exist.
-// To make your own character, copy this file (or Shooter.cs for a ranged one) and follow
-// Characters/CHARACTERS.md.
+// Id 0. No longer part of the game's roster: it lives in Tests/EditMode as a plain reference fighter
+// for the sim tests (registered by TestRoster.cs). To make your own character, copy a real one from
+// Characters/Scripts/Fighters and follow Characters/CHARACTERS.md.
 public class Brawler : BaseFighter
 {
     public const int Id = 0;

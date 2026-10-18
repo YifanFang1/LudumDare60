@@ -4,15 +4,15 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 #endif
 
-public enum UiScreen { Lobby, Waiting, CharacterSelect, Hud, Main, Controls, Mode, Title }
+public enum UiScreen { Lobby, Waiting, CharacterSelect, Hud, Main, Controls, Mode, Title, Credits }
 
 // The pages you can navigate between while no match is running.
 // Play = the online lobby (quick match and rooms). Mode = the Online / Offline choice that comes after Play.
-public enum MenuPage { Main, Controls, Mode, Play, Title }
+public enum MenuPage { Main, Controls, Mode, Play, Title, Credits }
 
 // The conductor of the canvas UI: shows the one screen that matches the match phase and hides the rest.
 // Each screen is an ordinary GameObject you can restyle in the Unity editor (see Assets/UI/CANVAS_UI.md).
-// Build the default set with the menu  Fight > Build Default UI Canvas.
+// Build the default set with the menu  Fight > Rebuild Default Canvas.
 [DisallowMultipleComponent]
 public class MatchScreens : MonoBehaviour
 {
@@ -25,6 +25,9 @@ public class MatchScreens : MonoBehaviour
     public GameObject controls;
     public GameObject modeSelect;
     public GameObject titleScreen;   // "press any key" start screen
+    public GameObject credits;
+    [Tooltip("The sliding metal door played between screens. Empty = screens switch instantly.")]
+    public DoorTransition door;
 
     [Header("Options")]
     [Tooltip("Start on the Play / Controls / Quit screen. Off: start straight in the lobby.")]
@@ -51,6 +54,9 @@ public class MatchScreens : MonoBehaviour
     MenuPage previousPage;
     MenuPage pageBeforeMatch = MenuPage.Mode;
     MatchPhase lastPhase = MatchPhase.Lobby;
+    MatchPhase shownPhase;     // what is on screen right now: it follows phase/page only once the door is closed
+    MenuPage shownPage;
+    bool shownReady;
 
     // Go to another page (Main, Controls, Play = the lobby). Used by the buttons on the screens.
     public void GoTo(MenuPage next)
@@ -100,15 +106,32 @@ public class MatchScreens : MonoBehaviour
         if (phase == MatchPhase.Lobby && lastPhase != MatchPhase.Lobby) page = pageBeforeMatch;
         lastPhase = phase;
 
-        bool inMenus = phase == MatchPhase.Lobby;
-        Show(mainMenu, inMenus && page == MenuPage.Main);
-        Show(titleScreen, inMenus && page == MenuPage.Title);
-        Show(controls, inMenus && page == MenuPage.Controls);
-        Show(modeSelect, inMenus && page == MenuPage.Mode);
-        Show(lobby, inMenus && page == MenuPage.Play);
-        Show(waiting, phase == MatchPhase.Waiting);
-        Show(characterSelect, phase == MatchPhase.CharacterSelect);
-        Show(hud, phase == MatchPhase.Playing);
+        // The door covers every change of screen: the new screen only appears once it is closed.
+        if (!shownReady || door == null)
+        {
+            shownPhase = phase;
+            shownPage = page;
+            shownReady = true;
+        }
+        else if (!door.Busy && (shownPhase != phase || shownPage != page))
+        {
+            door.Run(() => { shownPhase = match.Phase; shownPage = page; ApplyScreens(); });
+        }
+        ApplyScreens();
+    }
+
+    void ApplyScreens()
+    {
+        bool inMenus = shownPhase == MatchPhase.Lobby;
+        Show(mainMenu, inMenus && shownPage == MenuPage.Main);
+        Show(titleScreen, inMenus && shownPage == MenuPage.Title);
+        Show(controls, inMenus && shownPage == MenuPage.Controls);
+        Show(modeSelect, inMenus && shownPage == MenuPage.Mode);
+        Show(lobby, inMenus && shownPage == MenuPage.Play);
+        Show(credits, inMenus && shownPage == MenuPage.Credits);
+        Show(waiting, shownPhase == MatchPhase.Waiting);
+        Show(characterSelect, shownPhase == MatchPhase.CharacterSelect);
+        Show(hud, shownPhase == MatchPhase.Playing);
     }
 
     static void Show(GameObject screen, bool on)
@@ -159,6 +182,7 @@ public class MatchScreens : MonoBehaviour
             Show(controls, editorPreview == UiScreen.Controls);
             Show(titleScreen, editorPreview == UiScreen.Title);
             Show(modeSelect, editorPreview == UiScreen.Mode);
+            Show(credits, editorPreview == UiScreen.Credits);
         };
     }
 #endif
