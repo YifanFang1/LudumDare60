@@ -3,21 +3,20 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-// The old TV switching off: the picture squashes into a bright horizontal line, the line shrinks to a dot, a
-// small cross flares at the dot and fades, then everything is black. Built from plain UI Images at runtime, so
+// The old TV switching off: the picture squashes into a bright horizontal line, the line shrinks to a dot, then
+// everything is black. Built from plain UI Images at runtime, so
 // there is nothing to set up in the scene. Used by Quit:  TvOffEffect.Play(canvasTransform, 0f, quitAction);
 public class TvOffEffect : MonoBehaviour
 {
     public float waitBefore = 0f;     // seconds to wait after the button press (0 = start at once)
     public float squashTime = 0.28f;  // picture collapses to a line
     public float lineTime = 0.2f;     // line shrinks to a dot
-    public float crossTime = 0.45f;   // the cross flares and fades
     public float blackHold = 0.25f;   // black before `done` is called
 
     static Sprite white;
 
     RectTransform root;
-    Image top, bottom, gap, black, line, crossH, crossV;
+    Image top, bottom, gap, black, line;
     Action done;
 
     // Starts the effect under `canvas` (a full-screen canvas transform). `done` runs at the very end.
@@ -95,9 +94,7 @@ public class TvOffEffect : MonoBehaviour
         // the bright strip that fills the gap between the bars
         gap = Make("Gap", new Color(1f, 1f, 1f, 0f));
         line = Make("Line", Color.white);
-        crossH = Make("CrossH", Color.white);
-        crossV = Make("CrossV", Color.white);
-        gap.enabled = line.enabled = crossH.enabled = crossV.enabled = false;
+        gap.enabled = line.enabled = false;
         // the bars must stay on top of the gap strip
         top.transform.SetAsLastSibling();
         bottom.transform.SetAsLastSibling();
@@ -142,22 +139,7 @@ public class TvOffEffect : MonoBehaviour
             yield return null;
         }
 
-        // 3: a cross flares from where the line vanished, then fades to black
-        line.enabled = false;
-        crossH.enabled = crossV.enabled = true;
-        for (float t = 0f; t < crossTime; t += Time.unscaledDeltaTime)
-        {
-            float k = t / crossTime;
-            float reach = Mathf.Lerp(4f, 150f, 1f - (1f - k) * (1f - k));    // arms stretch out quickly
-            float fade = 1f - k;
-            Color c = new Color(1f, 1f, 1f, fade);
-            crossH.color = c;
-            crossV.color = c;
-            CentreBox(crossH, reach * 2f, 3f);
-            CentreBox(crossV, 3f, reach * 2f);
-            yield return null;
-        }
-        crossH.enabled = crossV.enabled = false;
+        line.enabled = false;   // the dot is gone: straight to black
 
         yield return new WaitForSecondsRealtime(blackHold);
         if (done != null) done();
