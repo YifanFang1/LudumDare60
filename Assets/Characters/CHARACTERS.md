@@ -348,3 +348,15 @@ Your own prefab works too, as long as it has an Animator with these state names.
 
 
 
+
+## Character sounds
+
+Each character can have its own sounds. Open the character's art asset (CodeCharacterArt or CharacterData) and fill **Sfx**:
+
+- **Moves**: one entry per move name (Light, Heavy, Grab, Special, Ultimate, JumpLight, JumpHeavy) with its start clips.
+- **Attack Start**: fallback for any move with no entry.
+- **Hit / Heavy Hit / Grab / Block / Dash / Super Flash / Ko / Reflect / Destroy / Summon / Hold / Heal**: this character's own version.
+
+Anything left empty falls back to the shared lists on the AudioManager, so characters without custom sounds still work. Sounds only listen to sim events, so they can't affect the fight.
+
+Noir's empty click: a fresh Special press with no bullets left raises the `OutOfAmmo` sim event. Put `gunemptyclick` in the character's Sfx > Out Of Ammo (or the AudioManager's Out Of Ammo Sounds for everyone).
