@@ -24,6 +24,7 @@ public class WorldView : MonoBehaviour
     public bool showHitboxes = true;       // translucent yellow attack boxes
     public bool showFighterInfo = true;    // text over each fighter + a log of what hit whom
     public bool showToggles = true;        // the "Debug boxes" panel (bottom left) with checkboxes for the above
+    public bool outlineFighters = true;    // Player / Enemy outlines around the art (colours: Fight > Outline Colors)
     public Material placeholderMaterial;   // optional. If boxes look black, use an Unlit sprite material
 
     class FighterView
