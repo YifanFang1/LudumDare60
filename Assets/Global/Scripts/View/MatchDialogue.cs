@@ -25,7 +25,7 @@ public static class MatchDialogue
             sim.fighters[0].hp > 0 ? 0 : 1;
         if (winner == 2) return "DRAW!";
         if (winner != localSlot) return "DEFEAT";
-        Fighter fighter = sim.fighters[winner];
-        return fighter.hp == fighter.MaxHp ? "PERFECT VICTORY!" : "VICTORY!";
+        bool perfect = finalMatch && sim.roundsWon[winner] == 2 && sim.roundsWon[1 - winner] == 0;
+        return perfect ? "PERFECT VICTORY!" : "VICTORY!";
     }
 }

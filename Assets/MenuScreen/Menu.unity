@@ -15272,6 +15272,8 @@ MonoBehaviour:
   summonSounds: []
   holdSounds: []
   healSounds: []
+  outOfAmmoSounds:
+  - {fileID: 8300000, guid: 5d85247cb3d114ebb9b05f8ac0ce8846, type: 3}
   heavyHitDamage: 10
   fightStart: {fileID: 0}
   roundStart: {fileID: 0}

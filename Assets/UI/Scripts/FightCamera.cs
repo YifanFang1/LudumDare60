@@ -22,6 +22,7 @@ public class FightCamera : MonoBehaviour
     public float smoothTime = 0.15f;
 
     IMatchSession match;
+    MatchCinematics cinematic;
     float xVelocity;
     float sizeVelocity;
     float x = float.NaN;    // our own x and size, so screen shake and zoom punch (added on top)
@@ -30,6 +31,7 @@ public class FightCamera : MonoBehaviour
     void Awake()
     {
         match = GetComponent<IMatchSession>();
+        cinematic = GetComponent<MatchCinematics>();
         if (match == null)
         {
             Debug.LogError("FightCamera needs a component that implements IMatchSession (LocalMatchSession or RelayLockstepSession) on the same object.");
@@ -60,13 +62,17 @@ public class FightCamera : MonoBehaviour
         float halfNeeded = Mathf.Abs(x1 - x0) / 2f + padding;
         float targetSize = Mathf.Clamp(halfNeeded / cam.aspect, minSize, maxSize);
         bool defeated = match.Sim.roundOverTicks > 0 || match.Sim.IsOver;
-        int winner = match.Sim.fighters[0].hp > 0 ? 0 : match.Sim.fighters[1].hp > 0 ? 1 : -1;
-        if (defeated && winner >= 0) targetSize = 2.6f;
+        int winner = match.Sim.IsOver ? match.Sim.Winner : match.Sim.roundWinner;
+        if (winner == 2) winner = -1;
+        if (cinematic == null) cinematic = GetComponent<MatchCinematics>();
+        int focusSlot = cinematic != null ? cinematic.FocusSlot : -1;
+        if (focusSlot < 0 && defeated && winner >= 0) focusSlot = winner;
+        if (focusSlot >= 0) targetSize = 2.6f;
         if (float.IsNaN(size)) size = cam.orthographicSize;
         size = Mathf.SmoothDamp(size, targetSize, ref sizeVelocity, smoothTime);
 
         float limit = Mathf.Max(0f, stageHalfWidth - size * cam.aspect);
-        float focusX = defeated && winner >= 0 ? (winner == 0 ? x0 : x1) : (x0 + x1) / 2f;
+        float focusX = focusSlot >= 0 ? (focusSlot == 0 ? x0 : x1) : (x0 + x1) / 2f;
         float targetX = Mathf.Clamp(focusX, -limit, limit);
         if (float.IsNaN(x)) x = cam.transform.position.x;
         x = Mathf.SmoothDamp(x, targetX, ref xVelocity, smoothTime);

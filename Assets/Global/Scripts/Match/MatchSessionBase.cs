@@ -153,8 +153,9 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
         names[localSlot] = mine;
         names[1 - localSlot] = online ? "P" + (2 - localSlot) : "AI";
         Warning = "";
+        sim.introductionsOn = true;
         sim.countdownOn = true;
-        sim.roundTimerOn = true;
+        sim.roundTimerOn = online;   // no timer vs AI: rounds last until a KO
         sim.Reset(setup.seed, CharacterList.Factory(setup.p0Character), CharacterList.Factory(setup.p1Character));
 
         runner.OnTick = OnTickDone;

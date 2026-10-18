@@ -70,6 +70,7 @@ public class WorldView : MonoBehaviour
 
     void Awake()
     {
+        if (GetComponent<MatchCinematics>() == null) gameObject.AddComponent<MatchCinematics>();
         if (GetComponent<DefeatSequence>() == null) gameObject.AddComponent<DefeatSequence>();
         match = GetComponent<IMatchSession>();
         if (match == null)
@@ -315,6 +316,14 @@ public class WorldView : MonoBehaviour
                 stateName = v.animator.HasState(0, Animator.StringToHash("Held")) ? "Held" : "Hitstun";
                 t = 0f;
                 break;
+        }
+
+        MatchCinematics cinematic = GetComponent<MatchCinematics>();
+        if (cinematic != null && (cinematic.IntroActive ||
+            (cinematic.OutroActive && (f.hp > 0 || !cinematic.LoserLineFinished))))
+        {
+            stateName = "Idle";
+            t = Mathf.Repeat(Time.unscaledTime, 1f);
         }
 
         // A half-finished Animator still works: a missing state shows Idle instead.
