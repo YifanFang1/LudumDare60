@@ -13,8 +13,41 @@ MonoBehaviour:
   m_Name: DefaultCharacterJuice
   m_EditorClassIdentifier: Assembly-CSharp::CharacterJuiceProfile
   character: {fileID: 0}
-  lightAttack: Sparks
-  heavyAttack: Sparks
-  block: 
-  lowHealthAura: Bleed
-  lowHealthPercent: 40
+  useDefaultReactions: 1
+  reactions:
+  - trigger: Hit
+    effect: Sparks
+    place: 0
+    anchor: 0
+    offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 0
+    scale: 1
+    shake: 0
+  - trigger: Grab
+    effect: Sparks
+    place: 0
+    anchor: 0
+    offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 0
+    scale: 1
+    shake: 0
+  - trigger: WhileLowHealth
+    effect: Bleed
+    place: 1
+    anchor: 0
+    offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 0
+    scale: 1
+    shake: 0
+  - trigger: WhileMoving
+    effect: Dust
+    place: 1
+    anchor: 1
+    offset: {x: 0, y: 0}
+    ticks: 0
+    everyTicks: 15
+    scale: 1
+    shake: 0

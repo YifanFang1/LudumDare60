@@ -1,11 +1,13 @@
 using UnityEngine;
 
 /// <summary>
-/// Which particle effects one character uses. Effects are referred to by name (the JuiceEffect
-/// prefab's Effect Name, not case sensitive); an empty name means "no effect".
+/// One character's juice: a list of reactions, each one "when TRIGGER happens to this character,
+/// play EFFECT". Effects are referred to by name (the JuiceEffect prefab's Effect Name, not case
+/// sensitive); every built-in trigger is listed on <see cref="JuiceTriggers"/> and in the Trigger tooltip.
 /// <para>
-/// Add it to the JuiceProfile's Characters list, or set it as the profile's Default Character to
-/// cover every character that has no profile of its own.
+/// Set one as the JuiceProfile's Default Character: its reactions apply to every character.
+/// Add others to the JuiceProfile's Characters list for character-specific juice; those add to
+/// the default reactions unless Use Default Reactions is turned off.
 /// </para>
 /// </summary>
 [CreateAssetMenu(fileName = "CharacterJuiceProfile", menuName = "Scriptable Objects/CharacterJuiceProfile")]
@@ -15,15 +17,10 @@ public class CharacterJuiceProfile : ScriptableObject
     [Tooltip("The character this juice belongs to: its CharacterData, or the Code Character Art of a character written in code. Leave empty on the default profile.")]
     public CharacterLook character;
 
-    [Header("Hits this character lands (effect names)")]
-    public string lightAttack = "Sparks";
-    public string heavyAttack = "Sparks";
+    [Tooltip("Also play the Default Character profile's reactions for this character. Turn off to replace them completely. Ignored on the default profile itself.")]
+    public bool useDefaultReactions = true;
 
-    [Header("When this character blocks (effect name)")]
-    public string block = "";
-
-    [Header("Low health aura (plays while HP is at or below the threshold)")]
-    public string lowHealthAura = "";
-    [Range(0, 100)] public int lowHealthPercent = 25;
+    [Tooltip("When Trigger happens to this character, play Effect. Several rows can share a trigger, and one trigger can drive particles and shake.")]
+    public JuiceReaction[] reactions = new JuiceReaction[0];
     #endregion
 }

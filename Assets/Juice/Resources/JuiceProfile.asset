@@ -39,5 +39,6 @@ MonoBehaviour:
   crtGlitchTime: 0.5
   flashTicks: 8
   impactTicks: 16
+  lowHealthPercent: 40
   defaultCharacter: {fileID: 11400000, guid: 9d2f1c8d73e87e1429d238994f9bde76, type: 2}
   characters: []
