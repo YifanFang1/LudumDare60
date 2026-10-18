@@ -72,6 +72,13 @@ public class HudScreen : MonoBehaviour
         shownRound = 0;   // this screen is switched on for each match, so ROUND 1 is shown again
         match = SessionFinder.Find();
         if (match == null) return;
+        if (resultText != null)
+        {
+            // long names shrink to fit instead of running off the panel
+            resultText.enableAutoSizing = true;
+            resultText.fontSizeMin = 24f;
+            resultText.fontSizeMax = 60f;
+        }
         if (!wired && resultButton != null)
         {
             resultButton.onClick.AddListener(() =>
@@ -115,7 +122,7 @@ public class HudScreen : MonoBehaviour
         if (over)
         {
             int winner = sim.Winner;
-            SetText(resultText, winner == 2 ? "Draw" : match.NameOf(winner) + " wins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
+            SetText(resultText, winner == 2 ? "Draw" : match.NameOf(winner) + "\nwins " + sim.roundsWon[winner] + "-" + sim.roundsWon[1 - winner]);
         }
 
         UpdateWorldNames(sim);
