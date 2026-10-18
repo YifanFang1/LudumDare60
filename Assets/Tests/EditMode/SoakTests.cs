@@ -164,6 +164,11 @@ public class SoakTests
 
         AssertSaw(seen, SimEventType.Hit, SimEventType.Block, SimEventType.Grab, SimEventType.Dash,
                   SimEventType.SuperFlash, SimEventType.KO, SimEventType.RoundEnd);
+        // The roster's kit extensions (Design/ROSTER_PLAN.md): random play reaches all of them, so
+        // their state is checked for determinism too.
+        AssertSaw(seen, SimEventType.Telegraph, SimEventType.Reflect, SimEventType.ProjectileDestroyed,
+                  SimEventType.StatusDamage, SimEventType.Heal, SimEventType.SummonSpawn,
+                  SimEventType.SummonDestroyed, SimEventType.Hold);
     }
 
     // An aggressive bot: walk in, jab when close. Against a random opponent the match must reach

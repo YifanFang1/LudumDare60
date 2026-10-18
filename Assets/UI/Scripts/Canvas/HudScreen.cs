@@ -96,8 +96,8 @@ public class HudScreen : MonoBehaviour
         // names
         SetText(leftName, match.NameOf(0));
         SetText(rightName, match.NameOf(1));
-        SetText(leftCharacter, CharacterList.NameOf(sim.fighters[0].characterId));
-        SetText(rightCharacter, CharacterList.NameOf(sim.fighters[1].characterId));
+        SetText(leftCharacter, CharacterLine(sim.fighters[0]));
+        SetText(rightCharacter, CharacterLine(sim.fighters[1]));
 
         // info
         string info = match.IsOnline
@@ -200,6 +200,14 @@ public class HudScreen : MonoBehaviour
         bool show = who != "";
         if (superFlashText.gameObject.activeSelf != show) superFlashText.gameObject.SetActive(show);
         if (show) SetText(superFlashText, who + ": ULTIMATE!");
+    }
+
+    // The character's name, then its resources and status effects (ammo, potion, SLOW...).
+    static string CharacterLine(Fighter f)
+    {
+        string status = FighterStatusText.For(f);
+        string name = CharacterList.NameOf(f.characterId);
+        return status.Length > 0 ? name + "   " + status : name;
     }
 
     // Debug lines: hidden when Match Screens > Show Debug UI is off.

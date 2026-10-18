@@ -15,14 +15,14 @@ public class Shooter : BaseFighter
     static readonly MoveDef Poke = Melee("Light",
         totalTicks: 13, spawnTick: 3, activeTicks: 3,
         box: new Box(300, 1100, 700, 300),
-        damage: 4, hitstun: 11, knockback: 30);
+        damage: 4, hitstun: 11, knockback: 30, cooldown: LightCooldown);
 
     // Crosses the arena (16 units) in about 3 seconds. The Shooter recovers after 30 ticks, a lot
     // earlier than the fireball lands, so it can follow up or walk behind it.
     static readonly MoveDef Fireball = Projectile("Heavy",
         totalTicks: 30, spawnTick: 12, lifetime: 180,
         box: new Box(400, 900, 500, 400),
-        speed: 90, damage: 10, hitstun: 18, knockback: 60);
+        speed: 90, damage: 10, hitstun: 18, knockback: 60, cooldown: HeavyCooldown);
 
     public override int MaxHp { get { return 90; } }
     public override int WalkSpeed { get { return 50; } }

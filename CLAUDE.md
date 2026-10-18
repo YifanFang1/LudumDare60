@@ -14,18 +14,19 @@ Players fight **online** (room codes through a Cloudflare relay) or **solo vs an
 ### Roster
 | Character | Status | Notes |
 |---|---|---|
-| ArcadeGuy | In code, placeholder (id 10) | Shoto. Placeholder: standard moveset, design TBD by the team. |
-| Painter | In code, placeholder (id 11) | Rushdown. Placeholder: standard moveset, design TBD by the team. |
-| Black and White Cowboy | In code, placeholder (id 12) | Zoner. Placeholder: standard moveset, design TBD by the team. |
-| Elephant | In code, placeholder (id 13) | Grappler ("Overpowered Elephant"). Placeholder: standard moveset, design TBD by the team. |
-| Executioner | In code, placeholder (id 14) | Trapper. Placeholder: standard moveset, design TBD by the team. |
-| Plague Doctor | In code, placeholder (id 15) | Mixup. Placeholder: standard moveset, design TBD by the team. |
+| Ruy | Built (id 10, class `Samurai`) | Shoto. Charged Hadoken, invincible Shoryuken, rage perk. Was ArcadeGuy. [Design](Design/Characters/Ruy.md) |
+| Paintress | Built (id 11, class `Painter`) | Rushdown. Invincible dash, reflective canvas, control-scramble Ultimate, paint puddles. [Design](Design/Characters/Paintress.md) |
+| Noir | Built (id 12, class `Cowboy`) | Zoner. Long gun poke, 6 bullets per round, horse dashes. Was Black and White Cowboy. [Design](Design/Characters/Noir.md) |
+| Room | Built (id 13, class `Elephant`) | Grappler. 200 HP, can't block, Vine Boom, held trunk grab, clone Ultimate. [Design](Design/Characters/Room.md) |
+| The Executioner | Built (id 14, class `Executioner`) | Trapper. Traps, bleed stacks, whip grab, Guillotine. [Design](Design/Characters/Executioner.md) |
+| Dr. Remy | Built (id 15, class `PlagueDoctor`) | Mixup. Three switchable potions, rat projectile, leeches, rat-wave Ultimate. Was Plague Doctor. [Design](Design/Characters/DrRemy.md) |
+| Nek (temp name) | Built (id 16, class `Nek`) | Powerup. Arcade-style; Install meter-drain toggle replaces his Ultimate. [Design](Design/Characters/Nek.md) |
 | Brawler | In code | Close-range test character (id 0) and the fallback for unknown ids. Not a real roster character. |
 | Shooter | In code | Long-range test character (id 1): jab and a one-on-screen fireball. Not a real roster character. |
 | Sandbag | In code | Training dummy (id 2): ignores all input, refills health instead of being KO'd. |
 
 
-The plan is 6 characters at launch, with more later. **The plan, the shared moveset and every design decision are in [Design/](Design/README.md)** (start with [DECISIONS.md](Design/DECISIONS.md) and [IMPLEMENTATION_PLAN.md](Design/IMPLEMENTATION_PLAN.md)). For now all six share one standard moveset; creative design (moves, looks, Old Tech) comes from the team.
+The plan is 7 characters at launch, with more later. **The plan, the shared moveset and every design decision are in [Design/](Design/README.md)** (start with [DECISIONS.md](Design/DECISIONS.md) and [ROSTER_PLAN.md](Design/ROSTER_PLAN.md)). All seven are designed (D-40 to D-49) and built (D-50 to D-59). Until real art arrives they're drawn as code-made placeholders (own colour, pattern and letter). Old Tech and eras are still TBD.
 
 
 **Idea pool (not committed):** steampunk British zoner whose ultimate runs the opponent over with a train · Salem witch (fireball, familiar) · plague doctor · Dr. Frankenstein (+ monster) · Vietnam soldier (rocket jump with self-stun, tree-disguise or bear-trap counters, matchstick projectile) · caveman (rock bash, spear, bow, fire) · medieval knight/executioner · torture-museum character (iron maiden, brazen bull) · arcadeguy · Wall Street guy / oil tycoon / Henry Ford · printing press goons / typewriter "ink" guy (art is PNGs of a real guy posing) · philosopher whose words hurt · Sisyphus and his boulder · Little Boy vs Fat Man · Nokia-phone weapon · radio-possessing horrors · coal-mine canary · washing-machine weapon · puppet who briefly possesses the opponent.
@@ -65,13 +66,13 @@ The plan is 6 characters at launch, with more later. **The plan, the shared move
 
 
 ## Current state vs plan
-**Built:** walk, light and heavy attacks, jumping with one air attack per jump (a little air control, crossups, no air blocking), blocking by holding back (with blockstun), hitstun, KO, the **shared kit** ([Design/SHARED_KIT.md](Design/SHARED_KIT.md): grab with back throw, double-tap dashes, a Special projectile, an Ultimate with a meter and a freeze, pushboxes, best-of-3 rounds with the meter carrying over), a `BaseFighter` template whose defaults are that standard moveset, the six launch-roster characters as placeholders (ids 10-15), Brawler, Shooter and Sandbag test characters, a "Debug boxes" hitbox/hurtbox toggle panel, art for code characters (`CodeCharacterArt`) with an Animator generator (Fight > Create Animator for Selected Character), EditMode tests (including a determinism soak test over every character pair), projectiles (hitboxes that don't follow their owner), lockstep online play through the relay with desync hashes, local play vs a simple AI that uses the whole kit, the inspector character editor with live hitbox preview, a basic lobby and controls UI, and publishing character data to the server.
+**Built:** walk, light and heavy attacks, jumping with one air attack per jump (a little air control, crossups, no air blocking), blocking by holding back (with blockstun), hitstun, KO, the **shared kit** ([Design/SHARED_KIT.md](Design/SHARED_KIT.md): grab with back throw, double-tap dashes, a Special projectile, an Ultimate with a meter and a freeze, pushboxes, best-of-3 rounds with the meter carrying over), a `BaseFighter` template whose defaults are that standard moveset, **the seven launch-roster characters with their real designs** (ids 10-16: per-move cooldowns, charge and hold-to-repeat input, status effects such as slow, bleed, scramble and leeches, ground zones, held grabs, traps, reflect, Ultimate copies; see [Design/ROSTER_PLAN.md](Design/ROSTER_PLAN.md)), code-drawn placeholder art per character until real art arrives, Brawler, Shooter and Sandbag test characters, a "Debug boxes" hitbox/hurtbox toggle panel, art for code characters (`CodeCharacterArt`) with an Animator generator (Fight > Create Animator for Selected Character), EditMode tests (including a determinism soak test over every character pair), projectiles (hitboxes that don't follow their owner), lockstep online play through the relay with desync hashes, local play vs a simple AI that uses the whole kit (and asks each fighter what it can do, so it copes with every roster character), online character select, the inspector character editor with live hitbox preview, a basic lobby and controls UI, and publishing character data to the server.
 
 
 **Not built yet:**
-- **Each character's own design** (moves, Special, Ultimate, 2 perks, Old Tech). All six roster characters use the standard moveset until the team designs them ([Design/Characters/_TEMPLATE.md](Design/Characters/_TEMPLATE.md)).
+- **Real art** for the seven roster characters (code-drawn placeholders until then; see "Placeholder boxes" in CHARACTERS.md for how real art replaces them with no code).
+- **Old Tech(niques) and eras** for every character: TBD by the team (D-45).
 - **Kit extensions** (cancels, armor, status effects, teleports...): specified in [Design/SHARED_KIT.md](Design/SHARED_KIT.md#extensions-build-when-a-design-needs-them), built when a design needs one.
-- **Online character choice.** Both online players are currently Brawler.
 - **A real AI.**
 
 

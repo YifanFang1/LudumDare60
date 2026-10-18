@@ -206,5 +206,15 @@ Not scheduled (D-30). When a real character design needs one of these, build it 
 | Intangibility | `IsIntangible`: skipped by hits and pushboxes | The view hides the fighter or shows it see-through |
 | Placed hitboxes | `sim.SpawnHitboxAt(owner, def, worldX)`, `sim.CountHitboxes(owner, def)` | For traps and hitboxes at a chosen spot |
 | Telegraphs | A `Telegraph` event (x, width, duration) that the view draws as a warning outline | For attacks that need to warn before they hit |
+| Charge input | A hold phase on a move (`chargeTicks` on `Fighter`): charge then release, repeat while held, or tap vs hold (D-42) | Ruy, Nek, Executioner, Dr. Remy |
+| Grab pull | A grab that moves the victim next to the grabber before the throw (like the back throw) | Noir's lasso, Executioner's whip grab |
+| Held grab | `FighterStateId.Held` (appended): the victim is pinned for N ticks while the grabber may only use certain moves | Room's Trunk Grab |
+| Hitbox vs projectile | Hitbox flags `destroysProjectiles` / `reflectsProjectiles`, checked before hits resolve | Room's Vine Boom, Paintress's canvas |
+| Ground zones | A list of areas in `GameSim` (owner, x, width, ticksLeft, kind) that fighters react to, plus a `SpeedPercent` hook | Dr. Remy's poison cloud, Paintress's paint |
+| Dash hitboxes | A dash can spawn a follow hitbox | Room's Stampede |
+| Summons | Simple copies in `GameSim` that mimic their owner and die in one hit | Room's Address Me (the riskiest one) |
+| Seeded roll | An int hash of (seed, tick, index), with no state, for the rare pick that must look random (D-47) | Paintress's control shuffle |
+
+**Built (2026-10-17):** per-move cooldowns (D-43: Light 5, Heavy 10, Grab 15, Special 30, dashes 20 ticks, changed per character with `ModifyCooldown`), a `CanBlock` hook (D-44), and **every extension in this table**: move hooks, hit modifiers (`OnHitboxSpawned`, `ModifyOutgoingHit`, `StackMultiplier`), status effects, intangibility, placed hitboxes, telegraphs, charge input, grab pull, held grab, hitbox vs projectile, ground zones, dash hitboxes, summons and the seeded roll. Not built: *Cancels* and the victim-side `ReactToHit` (armor, parries), because no design needed them yet. How each is used: [CHARACTERS.md](../Assets/Characters/CHARACTERS.md#adding-special-rules); tests: `KitExtensionTests.cs`.
 
 Each one added means more fields in the hash and a `Version` bump.
