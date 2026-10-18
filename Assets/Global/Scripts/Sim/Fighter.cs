@@ -14,8 +14,12 @@ public enum FighterStateId { Idle, Walk, Attack, Hitstun, KO, Blockstun, Dash, J
 // you can't act but keep blocking. Blocking works the same for every character, so it lives here.
 //
 // DASHING: tap a direction twice within DashTapWindow ticks (a "fresh" press each time: the key
-// was up on the tick before). Toward the opponent = forward dash, away = back dash. A dash can't
-// block or attack until it ends. Characters change their dashes with ForwardDash / BackDash.
+// was up on the tick before), or press Dash (Shift) together with a direction. Toward the opponent
+// = forward dash, away = back dash. A dash can't block or attack until it ends. Characters change
+// their dashes with ForwardDash / BackDash.
+//
+// AIR DASH: the same inputs during a jump, once per jump. It flies straight sideways (no gravity)
+// for AirDash.ticks, then you fall again, still able to steer and to use your air attack.
 //
 // JUMPING: hold Up while standing or walking. Up alone goes straight up, Up + a direction jumps that
 // way. In the air, holding left or right nudges you that way a little (AirControl per tick, never
@@ -46,6 +50,7 @@ public abstract class Fighter
     public bool holdingBack;        // this tick's input holds away from the opponent (see IsBlocking)
     public MoveDef move;            // the move being performed while state == Attack
     public int dashTicks;           // how long the current Dash lasts
+    public bool usedAirDash;        // this jump already had its air dash (reset on landing)
     public int meter;               // 0..MeterMax. A full bar allows the Ultimate. Carries over between rounds.
     public bool usedAirMove;        // this jump already had its air attack (reset on landing)
 
@@ -80,6 +85,8 @@ public abstract class Fighter
     // longer or shorter.
     public virtual DashDef ForwardDash { get { return new DashDef(14, 130); } }
     public virtual DashDef BackDash { get { return new DashDef(16, 110); } }
+    // The air dash, either direction: about 1.3 units in a straight line. Override to change it.
+    public virtual DashDef AirDash { get { return new DashDef(12, 110); } }
 
     // The jump: about 40 ticks in the air, peaking at about 2.1 units (high enough to clear a
     // Special projectile), travelling about 2 units forward or back. Override to change it.
@@ -161,6 +168,7 @@ public abstract class Fighter
         vx = 0;
         vy = 0;
         usedAirMove = false;
+        usedAirDash = false;
         hp = MaxHp;
         facing = fighterIndex == 0 ? 1 : -1;
         move = null;
@@ -185,7 +193,7 @@ public abstract class Fighter
     {
         input = FilterInput(input);
         pressedInput = input & ~prevInput;
-        int doubleTap = TrackTaps(sim);   // recorded in every state, but only used from Idle/Walk
+        int doubleTap = TrackTaps(sim);   // recorded in every state, but only used from Idle/Walk/Jump
         stateTick++;
         OnTick(sim);
 
@@ -201,14 +209,23 @@ public abstract class Fighter
                 break;
 
             case FighterStateId.Jump:
-                ThinkAir(sim, input);
+                ThinkAir(sim, input, doubleTap);
                 break;
 
             case FighterStateId.Dash:
                 if (stateTick >= dashTicks - 1)
                 {
-                    vx = 0;
-                    EnterState(FighterStateId.Idle);
+                    if (IsAirborne)
+                    {
+                        // An air dash ends in a normal fall, keeping a jump's worth of momentum.
+                        vx = vx > 0 ? JumpArc.forward : -JumpArc.forward;
+                        EnterState(FighterStateId.Jump);
+                    }
+                    else
+                    {
+                        vx = 0;
+                        EnterState(FighterStateId.Idle);
+                    }
                 }
                 break;
 
@@ -274,9 +291,10 @@ public abstract class Fighter
             return;
         }
 
-        if (doubleTap != 0)
+        int dashDirection = DashRequest(input, doubleTap);
+        if (dashDirection != 0)
         {
-            StartDash(sim, doubleTap == Buttons.Right ? 1 : -1);
+            StartDash(sim, dashDirection);
             return;
         }
 
@@ -289,6 +307,7 @@ public abstract class Fighter
             vx = direction * jump.forward;
             vy = jump.up;
             usedAirMove = false;
+            usedAirDash = false;
             EnterState(FighterStateId.Jump);
             return;
         }
@@ -298,13 +317,31 @@ public abstract class Fighter
         if (state != wanted) EnterState(wanted);
     }
 
+    // Which way to dash this tick: +1 (right), -1 (left) or 0 (no dash). Either a double-tap, or
+    // Dash (Shift) + a direction on the tick one of them is pressed while the other is held, so
+    // holding both doesn't dash again and again.
+    int DashRequest(int input, int doubleTap)
+    {
+        if (doubleTap != 0) return doubleTap == Buttons.Right ? 1 : -1;
+        if ((input & Buttons.Dash) == 0) return 0;
+        if ((pressedInput & (Buttons.Dash | Buttons.Left | Buttons.Right)) == 0) return 0;
+        return DirectionFrom(input);   // 0 if neither or both directions are held
+    }
+
     // `worldDirection` is +1 (right) or -1 (left); toward the opponent is a forward dash.
+    // In the air it's an air dash: it flies straight (Move skips gravity during it).
     void StartDash(GameSim sim, int worldDirection)
     {
         bool forward = worldDirection == facing;
-        DashDef dash = forward ? ForwardDash : BackDash;
+        bool air = IsAirborne;
+        DashDef dash = air ? AirDash : (forward ? ForwardDash : BackDash);
         dashTicks = Math.Max(1, dash.ticks);
         vx = worldDirection * dash.speed;
+        if (air)
+        {
+            vy = 0;
+            usedAirDash = true;
+        }
         EnterState(FighterStateId.Dash);
         sim.AddEvent(SimEventType.Dash, index, -1, x, y, forward ? 1 : 0);
     }
@@ -346,12 +383,18 @@ public abstract class Fighter
         else if (vx > target) vx = Math.Max(target, vx - step);
     }
 
-    // The one air attack per jump.
-    void ThinkAir(GameSim sim, int input)
+    // In the air: the one air attack per jump, or the one air dash per jump (attack wins a tie,
+    // like on the ground).
+    void ThinkAir(GameSim sim, int input, int doubleTap)
     {
-        if (usedAirMove) return;
-        MoveDef chosen = ChooseAirMove(sim, input);
-        if (chosen == null || chosen.ultimate) return;   // Ultimates are ground-only (they spend meter there)
+        MoveDef chosen = usedAirMove ? null : ChooseAirMove(sim, input);
+        if (chosen != null && chosen.ultimate) chosen = null;   // Ultimates are ground-only (they spend meter there)
+        if (chosen == null)
+        {
+            int dashDirection = usedAirDash ? 0 : DashRequest(input, doubleTap);
+            if (dashDirection != 0) StartDash(sim, dashDirection);
+            return;
+        }
 
         move = chosen;
         usedAirMove = true;
@@ -372,7 +415,8 @@ public abstract class Fighter
     {
         x = GameSim.ClampToArena(x + vx);
 
-        if (IsAirborne)
+        // No gravity during an air dash: it flies straight, then the fall starts again.
+        if (IsAirborne && state != FighterStateId.Dash)
         {
             y += vy;
             vy -= Gravity;
@@ -385,6 +429,7 @@ public abstract class Fighter
         y = 0;
         vy = 0;
         usedAirMove = false;
+        usedAirDash = false;
 
         if (state == FighterStateId.Jump || state == FighterStateId.Attack)
         {

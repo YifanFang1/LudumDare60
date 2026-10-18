@@ -12,7 +12,7 @@ public class KitTests
     public void EveryButtonIsItsOwnBit()
     {
         int[] all = { Buttons.Left, Buttons.Right, Buttons.Up, Buttons.Down, Buttons.Light, Buttons.Heavy,
-                      Buttons.Block, Buttons.Grab, Buttons.Special, Buttons.Ultimate };
+                      Buttons.Block, Buttons.Grab, Buttons.Special, Buttons.Ultimate, Buttons.Dash };
         int seen = 0;
         for (int i = 0; i < all.Length; i++)
         {
@@ -356,6 +356,121 @@ public class KitTests
             sim.Step(Buttons.Right, None);
             Assert.LessOrEqual(f.vx, f.JumpArc.forward);
         }
+    }
+
+    // ================= Shift dash and air dash =================
+
+    static int DashEvents(GameSim sim)
+    {
+        int n = 0;
+        for (int e = 0; e < sim.events.Count; e++)
+        {
+            if (sim.events[e].type == SimEventType.Dash && sim.events[e].a == 0) n++;
+        }
+        return n;
+    }
+
+    [Test]
+    public void ShiftPlusDirectionDashes()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 8000);
+        sim.Step(Buttons.Dash | Buttons.Right, None);
+        Assert.AreEqual(FighterStateId.Dash, sim.fighters[0].state);
+        Assert.IsTrue(sim.fighters[0].IsDashingForward);
+    }
+
+    [Test]
+    public void ShiftFirstThenDirectionAlsoDashes()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 8000);
+        sim.Step(Buttons.Dash, None);
+        Assert.AreNotEqual(FighterStateId.Dash, sim.fighters[0].state, "Shift alone does nothing");
+        sim.Step(Buttons.Dash | BackP0, None);
+        Assert.AreEqual(FighterStateId.Dash, sim.fighters[0].state);
+        Assert.IsFalse(sim.fighters[0].IsDashingForward, "a back dash");
+    }
+
+    [Test]
+    public void HoldingShiftAndADirectionDashesOnlyOnce()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        int dashes = 0;
+        for (int i = 0; i < 90; i++)
+        {
+            sim.Step(Buttons.Dash | Buttons.Right, None);
+            dashes += DashEvents(sim);
+        }
+        Assert.AreEqual(1, dashes, "then it walks");
+    }
+
+    [Test]
+    public void AirDashFliesStraightThenFalls()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        Fighter f = sim.fighters[0];
+        sim.Step(Buttons.Up, None);
+        Run(sim, None, None, 8);
+        sim.Step(Buttons.Dash | Buttons.Right, None);
+        Assert.AreEqual(FighterStateId.Dash, f.state);
+        Assert.IsTrue(f.IsAirborne);
+
+        int height = f.y;
+        int startX = f.x;
+        for (int i = 1; i < f.AirDash.ticks; i++)
+        {
+            sim.Step(None, None);
+            Assert.AreEqual(height, f.y, "no gravity during an air dash");
+        }
+        Assert.Greater(f.x, startX);
+        sim.Step(None, None);
+        Assert.AreEqual(FighterStateId.Jump, f.state, "back to falling");
+        RunUntilLanded(sim, 0);
+        Assert.AreEqual(FighterStateId.Idle, f.state);
+    }
+
+    [Test]
+    public void DoubleTapAirDashes()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        sim.Step(Buttons.Up, None);
+        Run(sim, None, None, 5);
+        sim.Step(Buttons.Right, None);
+        sim.Step(None, None);
+        sim.Step(Buttons.Right, None);
+        Assert.AreEqual(FighterStateId.Dash, sim.fighters[0].state);
+        Assert.IsTrue(sim.fighters[0].IsAirborne);
+    }
+
+    [Test]
+    public void OnlyOneAirDashPerJump()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        Fighter f = sim.fighters[0];
+        sim.Step(Buttons.Up, None);
+        Run(sim, None, None, 3);
+        int dashes = 0;
+        while (f.IsAirborne)
+        {
+            sim.Step(Buttons.Dash | Buttons.Right, None);   // re-press every other tick
+            dashes += DashEvents(sim);
+            if (!f.IsAirborne) break;
+            sim.Step(None, None);
+        }
+        Assert.AreEqual(1, dashes);
+    }
+
+    [Test]
+    public void CanStillAirAttackAfterAnAirDash()
+    {
+        GameSim sim = NewMatch(Brawler.Id, Brawler.Id, 12000);
+        Fighter f = sim.fighters[0];
+        sim.Step(Buttons.Up, None);
+        Run(sim, None, None, 3);
+        sim.Step(Buttons.Dash | Buttons.Right, None);
+        Run(sim, None, None, f.AirDash.ticks);
+        Assert.AreEqual(FighterStateId.Jump, f.state);
+        sim.Step(Buttons.Light, None);
+        Assert.AreSame(BaseFighter.StandardJumpLight, f.move);
     }
 
     [Test]
