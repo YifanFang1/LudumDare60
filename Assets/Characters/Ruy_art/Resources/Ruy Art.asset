@@ -23,4 +23,20 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
-  characterId: 16
+  sfx:
+    moves: []
+    attackStart: []
+    hit: []
+    heavyHit: []
+    grab: []
+    block: []
+    dash: []
+    superFlash: {fileID: 0}
+    ko: {fileID: 0}
+    reflect: []
+    destroy: []
+    summon: []
+    hold: []
+    heal: []
+    outOfAmmo: []
+  characterId: 10
