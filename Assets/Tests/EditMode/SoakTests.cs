@@ -32,6 +32,7 @@ public class SoakTests
             Buttons.Light, Buttons.Heavy, Buttons.Grab, Buttons.Grab, Buttons.Special, Buttons.Ultimate,
             Toward | Buttons.Light, Toward | Buttons.Grab, Away | Buttons.Grab, Buttons.Down,
             Buttons.Up, Toward | Buttons.Up, Away | Buttons.Up,
+            Toward | Buttons.Dash, Away | Buttons.Dash, Buttons.Up | Toward | Buttons.Dash,
         };
 
         readonly Random rng;
@@ -119,8 +120,8 @@ public class SoakTests
             if (f.x < -GameSim.ArenaHalf || f.x > GameSim.ArenaHalf) return false;
             if (f.state == FighterStateId.Attack && f.move == null) return false;
             if (f.y < 0) return false;
-            // Only these states can be in the air (Idle, Walk, Dash, Blockstun are ground-only).
-            if (f.IsAirborne && f.state != FighterStateId.Jump && f.state != FighterStateId.Attack
+            // Only these states can be in the air (Idle, Walk, Blockstun are ground-only; Dash can be an air dash).
+            if (f.IsAirborne && f.state != FighterStateId.Jump && f.state != FighterStateId.Dash && f.state != FighterStateId.Attack
                 && f.state != FighterStateId.Hitstun && f.state != FighterStateId.KO) return false;
             if (sim.roundsWon[i] > GameSim.RoundsToWin) return false;
         }

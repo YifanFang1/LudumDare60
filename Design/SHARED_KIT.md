@@ -8,7 +8,7 @@ Contents: [Controls](#controls) · [The standard moveset](#the-standard-moveset)
 
 | Key | Action | Bit in `Sim/Buttons.cs` |
 |---|---|---|
-| A / D | Walk. Hold away from the opponent to block. Double-tap to dash. | `Left = 1`, `Right = 2` (existing) |
+| A / D | Walk. Hold away from the opponent to block. Double-tap to dash (also in the air, once per jump). | `Left = 1`, `Right = 2` (existing) |
 | W | Jump (held), see [Jump](#jump) | `Up = 4` |
 | S | Down (unused by the sim for now, D-22) | `Down = 8` (existing) |
 | J | Light | `Light = 16` (existing) |
@@ -16,6 +16,7 @@ Contents: [Controls](#controls) · [The standard moveset](#the-standard-moveset)
 | L | Grab | `Grab = 128` (**new**) |
 | I | Special | `Special = 256` (**new**) |
 | O | Ultimate | `Ultimate = 512` (**new**) |
+| Left Shift + A / D | Dash that way (same as a double-tap), also in the air | `Dash = 1024` |
 
 `Block = 64` stays reserved and unused. Add one `Make(...)` line per new button in `FightControls` and remove the `Block` line (D-02).
 
@@ -77,7 +78,9 @@ New state `FighterStateId.Dash` (appended **at the end** of the enum so the old 
 - **Input:** a fresh press (not held on the previous tick) of Left or Right, when the previous fresh press of the same direction was at most `DashTapWindow = 12` ticks earlier. Taps are recorded every tick, but a dash only starts from Idle or Walk.
 - **Direction:** toward the opponent = forward dash, away = back dash. It's decided when the dash starts.
 - **During a dash:** `vx = direction * speed` for the dash's `ticks`, then Idle. You can't block or attack. You *can* be hit and grabbed.
-- **Per character later:** override `ForwardDash` / `BackDash`, which return a `DashDef { ticks, speed }`.
+- **Shift dash:** holding `Dash` (Left Shift) with Left or Right dashes on the tick either one is freshly pressed, so holding both dashes once and then walks.
+- **Air dash:** the same inputs during a jump, once per jump (`usedAirDash`, reset on landing). It uses `AirDash` (12 ticks, speed 110, either direction), sets `vy = 0` and skips gravity while it lasts, then returns to `Jump` with a normal jump's sideways speed. An air attack is still allowed after it.
+- **Per character:** override `ForwardDash` / `BackDash` / `AirDash`, which return a `DashDef { ticks, speed }`.
 
 `Fighter` keeps `prevInput`, `lastTapDir` and `lastTapTick` for this. They change behaviour, so they're hashed.
 
@@ -188,7 +191,7 @@ None of these touch the sim. They react to `SimEvent`s and read state.
 ## What gets hashed
 
 Everything that changes behaviour must be in `GameSim.Hash()`, or desyncs go unnoticed:
-- **Fighter:** `meter`, `dashTicks`, `prevInput`, `lastTapDir`, `lastTapTick`, `y`, `vy`, `usedAirMove`, plus `facing` and which `move` is playing, which the original hash missed (D-34). Also the existing fields and `HashExtra()`.
+- **Fighter:** `meter`, `dashTicks`, `prevInput`, `lastTapDir`, `lastTapTick`, `y`, `vy`, `usedAirMove`, `usedAirDash`, plus `facing` and which `move` is playing, which the original hash missed (D-34). Also the existing fields and `HashExtra()`.
 - **GameSim:** `freezeTicks`, `round`, `roundsWon[0..1]`, `roundOverTicks`, and each hitbox's `owner`.
 
 **Bump `Version` in `RelayLockstepSession.cs`** when the kit lands. It changes the sim rules and the input bits.
