@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa5a024dae297604f829b64925f74f0e, type: 3}
   m_Name: Noir Art
   m_EditorClassIdentifier: LD.CharacterData::CodeCharacterArt
-  viewPrefab: {fileID: 2067879756364694109, guid: 99ec3375cc30d4b9dbd3c3ed495889b7, type: 3}
+  viewPrefab: {fileID: 448790510293880420, guid: 99ec3375cc30d4b9dbd3c3ed495889b7, type: 3}
   sprite: {fileID: 0}
   spriteOffsetX: 0
   spriteOffsetY: 0
@@ -23,4 +23,20 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
+  sfx:
+    moves: []
+    attackStart: []
+    hit: []
+    heavyHit: []
+    grab: []
+    block: []
+    dash: []
+    superFlash: {fileID: 0}
+    ko: {fileID: 0}
+    reflect: []
+    destroy: []
+    summon: []
+    hold: []
+    heal: []
+    outOfAmmo: []
   characterId: 12

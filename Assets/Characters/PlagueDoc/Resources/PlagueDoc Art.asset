@@ -19,7 +19,26 @@ MonoBehaviour:
   spriteScale: 1
   flipSprite: 1
   placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
+  tintByState: 1
   idleLoopTicks: 60
   walkLoopTicks: 30
-  projectileSprites: []
+  projectileSprites:
+  - visual: 
+    sprite: {fileID: 6701125874796175287, guid: a173614ec202b4059aaac8b295f909dc, type: 3}
+  sfx:
+    moves: []
+    attackStart: []
+    hit: []
+    heavyHit: []
+    grab: []
+    block: []
+    dash: []
+    superFlash: {fileID: 0}
+    ko: {fileID: 0}
+    reflect: []
+    destroy: []
+    summon: []
+    hold: []
+    heal: []
+    outOfAmmo: []
   characterId: 15
