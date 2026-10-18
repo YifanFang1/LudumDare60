@@ -96,7 +96,7 @@ MonoBehaviour:
     scale: 1
     shake: 0
   - trigger: DashBack
-    effect: Wind
+    effect: WindBackwards
     place: 1
     anchor: 2
     offset: {x: 0, y: 0}
