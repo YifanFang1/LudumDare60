@@ -2,7 +2,8 @@ using System;
 
 // Which button starts a move. (Add more here when you add buttons in Sim/Buttons.cs.)
 // New values go at the END: assets and the server file store the number.
-public enum AttackButton { Light, Heavy, Grab, Special, Ultimate }
+// JumpLight / JumpHeavy are air attacks: the same J / K keys, but only during a jump.
+public enum AttackButton { Light, Heavy, Grab, Special, Ultimate, JumpLight, JumpHeavy }
 
 [Serializable]
 public class MoveBinding
@@ -27,12 +28,18 @@ public class CharacterDef
     {
         switch (b)
         {
-            case AttackButton.Heavy: return Buttons.Heavy;
+            case AttackButton.Heavy:
+            case AttackButton.JumpHeavy: return Buttons.Heavy;
             case AttackButton.Grab: return Buttons.Grab;
             case AttackButton.Special: return Buttons.Special;
             case AttackButton.Ultimate: return Buttons.Ultimate;
             default: return Buttons.Light;
         }
+    }
+
+    public static bool IsAirButton(AttackButton b)
+    {
+        return b == AttackButton.JumpLight || b == AttackButton.JumpHeavy;
     }
 
     // A new character starts with a basic Light and Heavy punch so it is playable immediately.

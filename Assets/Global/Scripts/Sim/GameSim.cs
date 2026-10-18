@@ -31,6 +31,17 @@ public class GameSim
     public const int SuperFlashTicks = 30;
     public int freezeTicks;
 
+    // HIT STOP: when a hit connects, the whole match pauses for a few ticks so the hit feels heavy
+    // (same as the superflash: nobody moves, hitboxes don't age, input is ignored). Bigger hits
+    // pause longer; a KO pauses longest. Kept apart from freezeTicks so the view can tell them apart.
+    public const int HitStopBase = 5;        // ticks for a 0-damage hit...
+    public const int HitStopPerDamage = 3;   // ...plus 1 tick per this much damage
+    public const int HitStopMax = 16;
+    public const int BlockStop = 4;          // blocked hits pause briefly too
+    public const int KOStop = 30;            // the hit that ends a round
+    public int hitStopTicks;
+    public bool hitStopOn = true;            // a rule, not state: tests switch it off to keep their tick counts simple
+
     // ROUNDS: best of 3. A KO ends the round; after a short pause (the KO pose plays, nothing can
     // be hit) the next round starts with FRESH fighters built by the factories given to Reset.
     // Health, positions and hitboxes reset; the Ultimate meter carries over. A double KO gives
@@ -88,6 +99,7 @@ public class GameSim
         round = number;
         roundOverTicks = 0;
         freezeTicks = 0;
+        hitStopTicks = 0;
         hitboxes.Clear();
         fighters[0] = makers[0]();
         fighters[1] = makers[1]();
@@ -116,6 +128,14 @@ public class GameSim
     {
         events.Clear();
         if (IsOver) return;
+
+        // Before the round-over pause, so the KO hit gets its hit stop too.
+        if (hitStopTicks > 0)
+        {
+            hitStopTicks--;
+            tick++;
+            return;
+        }
 
         if (roundOverTicks > 0)
         {
@@ -217,8 +237,12 @@ public class GameSim
     // x, both are pushed apart by half the overlap; a fighter against the arena edge can't move,
     // so the other one takes the rest. When both stand on exactly the same spot, fighter 0 goes
     // left: the tie-break must never depend on anything but the state, or the two machines differ.
+    // Bodies only push while BOTH fighters are on the ground, so a jump can pass over the opponent;
+    // if it lands overlapping them, this pushes them apart from the landing tick on.
     void SeparateBodies()
     {
+        if (fighters[0].IsAirborne || fighters[1].IsAirborne) return;
+
         Box a = fighters[0].HurtboxWorld();
         Box b = fighters[1].HurtboxWorld();
 
@@ -261,9 +285,10 @@ public class GameSim
 
             Fighter victim = fighters[1 - h.owner];
             if (victim.state == FighterStateId.KO) continue;
-            // Grab rule: a fighter in hitstun or blockstun can't be grabbed. The grab hitbox stays
-            // alive, so it still catches them if they recover before it runs out.
-            if (h.def.grab && (victim.state == FighterStateId.Hitstun || victim.state == FighterStateId.Blockstun)) continue;
+            // Grab rule: a fighter in hitstun or blockstun, or in the air, can't be grabbed. The grab
+            // hitbox stays alive, so it still catches them if they recover or land before it runs out.
+            if (h.def.grab && (victim.state == FighterStateId.Hitstun || victim.state == FighterStateId.Blockstun
+                               || victim.IsAirborne)) continue;
 
             Box hitWorld = h.World(this);
             Box hurtWorld = victim.HurtboxWorld();
@@ -296,7 +321,17 @@ public class GameSim
             GiveMeter(attacker, victim, h);
             attacker.OnHitDealt(this, victim, h);
             victim.OnHitReceived(this, attacker, h);
+
+            if (hitStopOn) hitStopTicks = Math.Max(hitStopTicks, HitStopFor(h, victim));
         }
+    }
+
+    // How long a hit that just landed pauses the match.
+    static int HitStopFor(HitboxInstance h, Fighter victim)
+    {
+        if (victim.hp <= 0) return KOStop;
+        if (h.blocked) return BlockStop;
+        return Math.Min(HitStopMax, HitStopBase + h.def.damage / HitStopPerDamage);
     }
 
     // Ultimate meter for a hit that connected (D-08 in Design/DECISIONS.md).
@@ -336,6 +371,7 @@ public class GameSim
             int h = 17;
             h = h * 31 + tick;
             h = h * 31 + freezeTicks;
+            h = h * 31 + hitStopTicks;
             h = h * 31 + round;
             h = h * 31 + roundsWon[0];
             h = h * 31 + roundsWon[1];
@@ -344,7 +380,10 @@ public class GameSim
             {
                 Fighter f = fighters[i];
                 h = h * 31 + f.x;
+                h = h * 31 + f.y;
                 h = h * 31 + f.vx;
+                h = h * 31 + f.vy;
+                h = h * 31 + (f.usedAirMove ? 1 : 0);
                 h = h * 31 + f.hp;
                 h = h * 31 + (int)f.state;
                 h = h * 31 + f.stateTick;

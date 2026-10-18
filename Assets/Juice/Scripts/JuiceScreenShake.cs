@@ -18,6 +18,9 @@ using UnityEngine;
 /// the other fighter swings it their way. It eases to the new angle, and levels out again once nobody
 /// has landed a hit for JuiceProfile.hillTiltHoldTime seconds. It also resets when a match starts or ends.
 /// </para>
+/// <para>
+/// Zoom punch: the camera snaps in towards a point (an Ultimate hit), holds there, then eases back out.
+/// </para>
 /// </summary>
 public class JuiceScreenShake
 {
@@ -36,8 +39,14 @@ public class JuiceScreenShake
     float targetTilt;           // the angle the hill tilt is easing towards
     float tiltHoldLeft;         // seconds until the hill levels out again
 
+    Vector2 punchPoint;         // world point the zoom punch pulls towards
+    float punchHold;            // seconds it stays fully zoomed in
+    float punchAge = float.MaxValue;   // seconds since the punch started (huge = no punch)
+
     Vector3 appliedOffset;      // what we added to the camera last frame
     float appliedRoll;          // degrees we rolled the camera last frame
+    float appliedZoom;          // what we added to the orthographic size last frame
+    float lastSize;             // the orthographic size right after we changed it
     Vector3 lastPosition;       // where the camera was right after we moved it
     Quaternion lastRotation;
     bool hasApplied;
@@ -75,12 +84,24 @@ public class JuiceScreenShake
         tiltHoldLeft = profile.hillTiltHoldTime;
     }
 
-    /// <summary>Stops shaking and levels the hill. The camera returns to rest on the next Tick.</summary>
+    /// <summary>
+    /// Snaps the camera in towards <paramref name="worldPoint"/>, holds for <paramref name="hold"/>
+    /// seconds, then eases back out over JuiceProfile.zoomPunchReturnTime.
+    /// </summary>
+    public void ZoomPunch(Vector2 worldPoint, float hold)
+    {
+        punchPoint = worldPoint;
+        punchHold = Mathf.Max(0f, hold);
+        punchAge = 0f;
+    }
+
+    /// <summary>Stops shaking, levels the hill and drops any zoom punch. The camera returns to rest on the next Tick.</summary>
     public void Clear()
     {
         trauma = 0f;
         tilt = 0f;
         targetTilt = 0f;
+        punchAge = float.MaxValue;
     }
 
     /// <summary>Puts the camera back where it would be without shake (call when the manager is disabled).</summary>
@@ -89,7 +110,8 @@ public class JuiceScreenShake
         trauma = 0f;
         tilt = 0f;
         targetTilt = 0f;
-        Apply(Vector3.zero, 0f);
+        punchAge = float.MaxValue;
+        Apply(Vector3.zero, 0f, 0f);
     }
     #endregion
 
@@ -109,10 +131,21 @@ public class JuiceScreenShake
         }
         tilt = Mathf.Lerp(tilt, targetTilt, 1f - Mathf.Exp(-profile.hillTiltSpeed * dt));   // smooth, frame-rate independent
 
+        // Zoom punch: 1 while holding, then eases down to 0.
+        float punch = 0f;
+        if (punchAge < float.MaxValue)
+        {
+            punchAge += dt;
+            float back = profile.zoomPunchReturnTime > 0f ? (punchAge - punchHold) / profile.zoomPunchReturnTime : 1f;
+            if (punchAge <= punchHold) punch = 1f;
+            else if (back < 1f) punch = 1f - Mathf.SmoothStep(0f, 1f, back);
+            else punchAge = float.MaxValue;
+        }
+
         float strength = Mathf.Pow(trauma, profile.traumaExponent) * profile.shakeMultiplier;
         if (strength <= 0f)
         {
-            Apply(Vector3.zero, tilt);
+            Apply(Vector3.zero, tilt, punch);
             return;
         }
 
@@ -123,7 +156,7 @@ public class JuiceScreenShake
             0f);
         float roll = profile.maxShakeRoll * strength * Noise(SeedRoll, t);
 
-        Apply(offset, tilt + roll);
+        Apply(offset, tilt + roll, punch);
     }
     #endregion
 
@@ -134,7 +167,8 @@ public class JuiceScreenShake
         return Mathf.PerlinNoise(seed, t) * 2f - 1f;
     }
 
-    void Apply(Vector3 offset, float roll)
+    // punch: how much of the zoom punch to show, 0..1.
+    void Apply(Vector3 offset, float roll, float punch)
     {
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
@@ -149,17 +183,27 @@ public class JuiceScreenShake
         bool rotationUntouched = hasApplied && Quaternion.Angle(tr.rotation, lastRotation) < 0.001f;
         Vector3 restPosition = positionUntouched ? tr.position - appliedOffset : tr.position;
         Quaternion restRotation = rotationUntouched ? tr.rotation * Quaternion.Euler(0f, 0f, -appliedRoll) : tr.rotation;
+        bool sizeUntouched = hasApplied && Mathf.Abs(cam.orthographicSize - lastSize) < 1e-5f;
+        float restSize = sizeUntouched ? cam.orthographicSize - appliedZoom : cam.orthographicSize;
 
-        if (!hasApplied && offset == Vector3.zero && roll == 0f) return;   // nothing to undo, nothing to do
+        if (!hasApplied && offset == Vector3.zero && roll == 0f && punch <= 0f) return;   // nothing to undo, nothing to do
+
+        // Zoom punch: smaller view, and slide part of the way towards the hit.
+        float zoom = -restSize * profile.zoomPunchAmount * punch;
+        Vector2 pull = (punchPoint - (Vector2)restPosition) * profile.zoomPunchPull * punch;
+        offset += new Vector3(pull.x, pull.y, 0f);
 
         tr.position = restPosition + offset;
         tr.rotation = restRotation * Quaternion.Euler(0f, 0f, roll);
+        cam.orthographicSize = restSize + zoom;
 
         appliedOffset = offset;
         appliedRoll = roll;
+        appliedZoom = zoom;
         lastPosition = tr.position;
         lastRotation = tr.rotation;
-        hasApplied = offset != Vector3.zero || roll != 0f;
+        lastSize = cam.orthographicSize;
+        hasApplied = offset != Vector3.zero || roll != 0f || zoom != 0f;
     }
     #endregion
 }

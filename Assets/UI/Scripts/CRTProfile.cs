@@ -36,4 +36,10 @@ public class CRTProfile : ScriptableObject
     [Header("Screen Shape")]
     [Range(0f, 0.5f)] public float curvature = 0.1f;
     [Range(0f, 1f)] public float vignetteStrength = 0.5f;
+
+    [Header("Glitch (CRTSettings.Glitch, e.g. when an Ultimate hits)")]
+    [Tooltip("Extra colour split at the start of a glitch. It fades back to normal.")]
+    [Range(0f, 0.05f)] public float glitchColorSplit = 0.015f;
+    [Tooltip("Extra wave wobble at the start of a glitch. It fades back to normal.")]
+    [Range(0f, 0.05f)] public float glitchWaveAmount = 0.01f;
 }

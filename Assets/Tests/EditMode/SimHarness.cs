@@ -10,6 +10,7 @@ public static class SimHarness
     public static GameSim NewMatch(int p0Character, int p1Character, int gap)
     {
         GameSim sim = new GameSim();
+        sim.hitStopOn = false;   // the tests count ticks after hits; HitStopTests switches it back on
         sim.Reset(1, CharacterList.Factory(p0Character), CharacterList.Factory(p1Character));
         Place(sim, gap);
         return sim;
@@ -21,6 +22,7 @@ public static class SimHarness
     public static GameSim NewMatch(Fighter p0, Fighter p1, int gap)
     {
         GameSim sim = new GameSim();
+        sim.hitStopOn = false;
         sim.Reset(1, delegate { return p0; }, delegate { return p1; });
         Place(sim, gap);
         return sim;

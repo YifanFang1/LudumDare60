@@ -77,6 +77,8 @@ public class JuiceManager : MonoBehaviour
         new Dictionary<JuiceReaction, int>(),
     };
     readonly List<JuiceReaction> matched = new List<JuiceReaction>();   // scratch list, reused
+    JuiceImpactFrame impactFrame;
+    WorldView world;            // where the fighters' art lives, for the impact frame
 
     /// <summary>Same as FightControls: "Enter Play Mode without domain reload" keeps statics alive.</summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -100,6 +102,9 @@ public class JuiceManager : MonoBehaviour
         if (profile == null) profile = ScriptableObject.CreateInstance<JuiceProfile>();
         particles = new JuiceParticles(transform);
         shake = new JuiceScreenShake(profile, shakeCamera);
+        impactFrame = new JuiceImpactFrame(profile, shakeCamera, particles.Root);
+        world = GetComponent<WorldView>();
+        if (world == null) world = FindFirstObjectByType<WorldView>();
 
         // Found the same way FightView and LobbyUI find it. Without it the API still works,
         // there are just no automatic reactions to the fight.
@@ -121,6 +126,7 @@ public class JuiceManager : MonoBehaviour
     void OnDisable()
     {
         if (shake != null) shake.Restore();   // never leave the camera mid-shake
+        if (impactFrame != null) impactFrame.Stop();   // or the fighters stuck as silhouettes
 
         if (match == null) return;
         match.MatchStarted -= OnMatchStarted;
@@ -142,7 +148,7 @@ public class JuiceManager : MonoBehaviour
         float dt = Time.unscaledDeltaTime;
 
         // TODO: count down active hit flashes
-        // TODO: count down the impact frame
+        impactFrame.Tick(dt);
     }
 
     /// <summary>
@@ -347,17 +353,18 @@ public class JuiceManager : MonoBehaviour
                 bool heavy = e.amount >= profile.heavyThreshold;
                 int facing = AwayFrom(sim, e.a, e.b);
                 Shake(heavy ? profile.heavyHitTrauma : profile.lightHitTrauma);
+                if (IsUltimate(sim.fighters[e.a])) UltimateImpact(SimToWorld(e.x, e.y));
                 shake.AddHillTilt(-facing);   // facing is +1 when the attacker is on the left
                 break;
             }
 
             case SimEventType.Block:
                 Shake(profile.blockTrauma);
+                if (profile.impactOnBlockedUltimate && IsUltimate(sim.fighters[e.a])) UltimateImpact(SimToWorld(e.x, e.y));
                 break;
 
             case SimEventType.KO:
                 Shake(profile.koTrauma);
-                ImpactFrame(profile.koImpactTicks);
                 break;
         }
     }
@@ -719,7 +726,26 @@ public class JuiceManager : MonoBehaviour
     void DoImpactFrame(int ticks)
     {
         Log("ImpactFrame for " + ticks + " ticks");
-        // TODO: full-screen quad behind the fighters + fighters flashed solid black
+        if (world == null) return;
+        impactFrame.Show(ticks / 60f, world.FighterRoot(0), world.FighterRoot(1));
+    }
+
+    // The attacker is in the middle of their Ultimate. (A projectile Ultimate that lands after
+    // its thrower has recovered won't count; none of the characters have one yet.)
+    static bool IsUltimate(Fighter attacker)
+    {
+        return attacker.state == FighterStateId.Attack && attacker.move != null && attacker.move.ultimate;
+    }
+
+    // Everything an Ultimate hit gets: impact frame (with its inverted flicker), a zoom punch towards
+    // the hit that holds for the impact frame, and a CRT glitch.
+    void UltimateImpact(Vector2 pos)
+    {
+        Log("UltimateImpact at " + pos);
+        float seconds = profile.impactTicks / 60f;
+        DoImpactFrame(profile.impactTicks);
+        if (profile.zoomPunchAmount > 0f) shake.ZoomPunch(pos, seconds);
+        if (CRTSettings.Instance != null) CRTSettings.Instance.Glitch(profile.crtGlitchTime);
     }
 
     void ResetAll()
@@ -735,7 +761,8 @@ public class JuiceManager : MonoBehaviour
             lastState[i] = null;              // the first frame of the next match only records the state
             reactionsFor[i] = int.MinValue;   // re-read the profiles: the characters may have changed
         }
-        // TODO: clear flashes, impact frame
+        impactFrame.Stop();
+        // TODO: clear flashes
     }
 
     void Log(string message)
@@ -813,6 +840,20 @@ public class JuiceManager : MonoBehaviour
                   "Moves (standard moveset): Light, Heavy, Grab, Special, Ultimate\n" +
                   "Plus any name code fires with JuiceManager.Trigger(name, fighter). " +
                   "Tick Log All Triggers to watch them fire live.", this);
+    }
+
+    [ContextMenu("Test: Impact frame (1 second, easier to see)")]
+    void TestImpactFrame()
+    {
+        if (Application.isPlaying) DoImpactFrame(60);
+    }
+
+    [ContextMenu("Test: Ultimate impact (frame + zoom punch + CRT glitch) on P1")]
+    void TestUltimateImpact()
+    {
+        if (!Application.isPlaying || match == null || match.Phase != MatchPhase.Playing) return;
+        Fighter f = match.Sim.fighters[0];
+        UltimateImpact(SimToWorld(f.x, f.y + 1000));
     }
     #endregion
 }

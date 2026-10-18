@@ -73,6 +73,9 @@ public class JuiceParticles
     }
 
     #region API
+    /// <summary>The object every effect is parented to (JuiceImpactFrame recolours what is under it).</summary>
+    public Transform Root { get { return root; } }
+
     /// <summary>Plays an effect once at a point. It returns to the pool by itself when done.</summary>
     /// <param name="effect">Effect name. Empty = play nothing.</param>
     /// <param name="pos">Unity units.</param>

@@ -12,6 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b597348f8411e4aed9108a6fd5d6b6c7, type: 3}
   m_Name: TestChar 1
   m_EditorClassIdentifier: LD.CharacterData::CharacterData
+  viewPrefab: {fileID: 0}
+  sprite: {fileID: 0}
+  spriteOffsetX: 0
+  spriteOffsetY: 0
+  spriteScale: 1
+  placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
+  idleLoopTicks: 60
+  walkLoopTicks: 30
+  projectileSprites: []
   def:
     id: 691929586
     displayName: dolphin
@@ -40,6 +49,10 @@ MonoBehaviour:
           knockback: 80
           followOwner: 1
           vx: 0
+          unblockable: 0
+          grab: 0
+          visual: 
+        ultimate: 0
     - button: 0
       move:
         name: Light
@@ -57,11 +70,7 @@ MonoBehaviour:
           knockback: 40
           followOwner: 1
           vx: 0
-  viewPrefab: {fileID: 0}
-  sprite: {fileID: 0}
-  spriteOffsetX: 0
-  spriteOffsetY: 0
-  spriteScale: 1
-  placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
-  idleLoopTicks: 60
-  walkLoopTicks: 30
+          unblockable: 0
+          grab: 0
+          visual: 
+        ultimate: 0

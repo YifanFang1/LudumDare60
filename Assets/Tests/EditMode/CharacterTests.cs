@@ -23,7 +23,7 @@ public class CharacterTests
     {
         int[] ids = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id };
         string[] names = { "Samurai", "Painter", "Black and White Cowboy", "Elephant", "Executioner", "Plague Doctor" };
-        string[] slots = { "Light", "Heavy", "Grab", "Special", "Ultimate" };
+        string[] slots = { "Light", "Heavy", "Grab", "Special", "Ultimate", "JumpLight", "JumpHeavy" };
 
         for (int i = 0; i < ids.Length; i++)
         {

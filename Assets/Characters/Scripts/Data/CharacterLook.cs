@@ -11,7 +11,7 @@ using UnityEngine;
 public abstract class CharacterLook : ScriptableObject
 {
     [Header("Look (optional, never affects the fight)")]
-    [Tooltip("Prefab with an Animator. Needs states named Idle, Walk, DashForward, DashBack, Hitstun, Blockstun, KO and one per move name (Light, Heavy, Grab, Special, Ultimate). Art should face RIGHT. Empty = Sprite, or a coloured box.\nFight > Create Animator for Selected Character builds one for you.")]
+    [Tooltip("Prefab with an Animator. Needs states named Idle, Walk, DashForward, DashBack, Jump, Hitstun, Blockstun, KO and one per move name (Light, Heavy, Grab, Special, Ultimate, JumpLight, JumpHeavy). Art should face RIGHT. Empty = Sprite, or a coloured box.\nFight > Create Animator for Selected Character builds one for you.")]
     public GameObject viewPrefab;
     [Tooltip("A single pose for blockout or simple characters. Ignored if a View Prefab is set. Art should face RIGHT.")]
     public Sprite sprite;
@@ -19,6 +19,8 @@ public abstract class CharacterLook : ScriptableObject
     [Range(-2f, 2f)] public float spriteOffsetX;
     [Range(-1f, 3f)] public float spriteOffsetY;
     [Range(0.1f, 4f)] public float spriteScale = 1f;
+    [Tooltip("Tick if the art was drawn facing LEFT. The game expects art facing right, so this mirrors it (Sprite or View Prefab). The offsets above are not mirrored.")]
+    public bool flipSprite;
     public Color placeholderColor = new Color(0.3f, 0.5f, 1f);
     [Tooltip("Ticks for one loop of the Idle / Walk animation (60 ticks = 1 second).")]
     public int idleLoopTicks = 60;
@@ -26,6 +28,9 @@ public abstract class CharacterLook : ScriptableObject
 
     [Tooltip("Art for this character's projectiles. 'Visual' must match the move's visual name: \"special\" for the standard Special. Use a Center pivot; art faces RIGHT. A projectile with no art here only shows as a yellow box with the Hitboxes toggle on.")]
     public ProjectileSprite[] projectileSprites;
+
+    // -1 when flipSprite is ticked, else 1. Multiply the art's x scale by it.
+    public float SpriteFlip { get { return flipSprite ? -1f : 1f; } }
 
     // The CharacterList id this look belongs to.
     public abstract int CharacterId { get; }
