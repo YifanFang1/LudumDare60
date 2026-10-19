@@ -59,7 +59,7 @@ public static class MatchupDialogue
         new Exchange(11, 14, "I see we have an iron maiden fighting... an iron maiden.", "I will admit, this is most interesting."),
         new Exchange(14, 11, "I sense you and I could be kindred spirits."),
         new Exchange(14, 15, "You poor souls, I shall absolve you of your pain and suffering."),
-        new Exchange(11, 15, "I'm a doll brought to life, but I still think that you take the cake for being weirder.")
+        new Exchange(11, 15, "I'm a doll brought to life, but I still think that you take the cake for being weirder."),
         new Exchange(14, 10, "Repent sinner, and I might just spare you.",
             "Sinner? I hardly know her!"),
         new Exchange(10, 11, "May you rust in peace.",
