@@ -63,22 +63,44 @@ MonoBehaviour:
     sprite: {fileID: 2453409843570498188, guid: 51c8e24ad38184b8897ad43e6cb3c487, type: 3}
     scale: 0.35
     flip: 1
+  moveFlashes: []
   sfx:
-    moves: []
+    moves:
+    - move: Light
+      clips:
+      - {fileID: 8300000, guid: 85b03236daf9c5341901abdf7a093add, type: 3}
+    - move: Heavy
+      clips:
+      - {fileID: 8300000, guid: 4419ee6e099a95c47bc602a2fa58a382, type: 3}
+      - {fileID: 8300000, guid: 1d70f8a218270104d8b2a5fa03928d85, type: 3}
+      - {fileID: 8300000, guid: b19141b28ec241c43939998f802db0a1, type: 3}
+      - {fileID: 8300000, guid: 3b7fbf0a8c3f79b47a7a6f2ec3ba9a85, type: 3}
+      - {fileID: 8300000, guid: f5ec8d564b0cb0546a96922aceec1afa, type: 3}
+      - {fileID: 8300000, guid: 80b48cd282247fe478e7e9710eeea752, type: 3}
+      - {fileID: 8300000, guid: 9c42fa98c56a77a40b421e92106414b2, type: 3}
+      - {fileID: 8300000, guid: aac460262ca7ed04bb4da81031636a2e, type: 3}
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: 2ee9c5caf6eb4fe47b749da5154dbb45, type: 3}
     attackStart: []
     hit: []
     heavyHit: []
-    grab: []
-    block: []
-    dash: []
-    jump: []
-    superFlash: {fileID: 0}
+    grab:
+    - {fileID: 8300000, guid: ab41454c9775b244897559c6b938086d, type: 3}
+    block:
+    - {fileID: 8300000, guid: 33c4978d8bf91b74ca1e5513c5eb423d, type: 3}
+    dash:
+    - {fileID: 0}
+    jump:
+    - {fileID: 8300000, guid: 982fe82e26c430d43be54bc1cff7338a, type: 3}
+    superFlash: {fileID: 8300000, guid: 1cd52b14f950b97409907d7d373fc0f7, type: 3}
     ko: {fileID: 0}
     reflect: []
     destroy: []
     summon: []
     hold: []
-    heal: []
+    heal:
+    - {fileID: 8300000, guid: 328ed0fa08ea2764f90078afd60e308f, type: 3}
     powerUp: []
     outOfAmmo: []
     theme: {fileID: 8300000, guid: 2cd94bb7c9553f449b9cae1ed187fdf1, type: 3}

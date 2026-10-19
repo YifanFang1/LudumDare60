@@ -23,6 +23,7 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
+  moveFlashes: []
   sfx:
     moves:
     - move: Light
@@ -46,7 +47,9 @@ MonoBehaviour:
     - {fileID: 8300000, guid: ece2ccfb6fb6e4f9f97faad2445a2d59, type: 3}
     - {fileID: 8300000, guid: cded0e0dad4cc45cf95983b1a0c43859, type: 3}
     - {fileID: 8300000, guid: 191b623ef1df94a7f961b92f360cd7d8, type: 3}
-    superFlash: {fileID: 0}
+    jump:
+    - {fileID: 8300000, guid: 982fe82e26c430d43be54bc1cff7338a, type: 3}
+    superFlash: {fileID: 8300000, guid: aa49747aeede597408dc0ef090a31b7a, type: 3}
     ko: {fileID: 0}
     reflect: []
     destroy: []
@@ -54,7 +57,8 @@ MonoBehaviour:
     hold: []
     heal: []
     powerUp: []
-    outOfAmmo: []
+    outOfAmmo:
+    - {fileID: 8300000, guid: 5d85247cb3d114ebb9b05f8ac0ce8846, type: 3}
     theme: {fileID: 8300000, guid: d7d323c89b368734ca6eb4d59a095a0e, type: 3}
   voice:
     select:
