@@ -9484,6 +9484,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1398415825}
   m_CullTransparentMesh: 1
+--- !u!1 &1422225142 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9119122890101663134, guid: 989e7d4df062d0144bfedf71e73f3d76, type: 3}
+  m_PrefabInstance: {fileID: 2050453465}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1425915274
 GameObject:
   m_ObjectHideFlags: 0
@@ -12126,6 +12131,10 @@ PrefabInstance:
     - target: {fileID: 9119122890101663134, guid: c34b01f34eb19ff4aa521195a72a31fd, type: 3}
       propertyPath: m_Name
       value: NoirBackground
+      objectReference: {fileID: 0}
+    - target: {fileID: 9119122890101663134, guid: c34b01f34eb19ff4aa521195a72a31fd, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15766,8 +15775,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8514297983939518441, guid: 989e7d4df062d0144bfedf71e73f3d76, type: 3}
+      propertyPath: layers.Array.data[0].y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8514297983939518441, guid: 989e7d4df062d0144bfedf71e73f3d76, type: 3}
       propertyPath: layers.Array.data[0].scale
-      value: 2
+      value: 1.1
       objectReference: {fileID: 0}
     - target: {fileID: 9119122890101663134, guid: 989e7d4df062d0144bfedf71e73f3d76, type: 3}
       propertyPath: m_Name
@@ -15775,7 +15788,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9119122890101663134, guid: 989e7d4df062d0144bfedf71e73f3d76, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -16038,6 +16051,7 @@ MonoBehaviour:
   - {fileID: 35018039}
   - {fileID: 1097589504713934442}
   - {fileID: 1721425583}
+  - {fileID: 1422225142}
 --- !u!1 &2101890358
 GameObject:
   m_ObjectHideFlags: 0
@@ -17003,6 +17017,10 @@ PrefabInstance:
     - target: {fileID: 7831761717061440269, guid: 3174db26764782141add70c9e0ca290c, type: 3}
       propertyPath: m_Name
       value: ArcadeBackground
+      objectReference: {fileID: 0}
+    - target: {fileID: 7831761717061440269, guid: 3174db26764782141add70c9e0ca290c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
