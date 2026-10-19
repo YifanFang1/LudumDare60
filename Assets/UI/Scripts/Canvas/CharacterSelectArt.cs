@@ -28,7 +28,7 @@ public class CharacterSelectArt : ScriptableObject
         public Sprite sprite;
         [Tooltip("The grid tile, finished art with backing and portrait (150x200). Empty = the tile is made from backing + sprite.")]
         public Sprite select;
-        [Tooltip("The grid tile while this character is the current pick: a black silhouette on the backing (150x200).")]
+        [Tooltip("The grid tile while this character is NOT the current pick: a black silhouette on the backing (150x200). The pick shows `select` in colour.")]
         public Sprite picked;
         [Tooltip("The part of the sprite that is not transparent, in sprite pixels from its top-left (x, y, width, height). Used to centre it. Empty = the whole sprite.")]
         public Rect spriteBounds;
@@ -58,7 +58,7 @@ public class CharacterSelectArt : ScriptableObject
     public Entry[] entries;
     [Tooltip("The Random (\"?\") tile. Empty = a grey tile with a \"?\".")]
     public Sprite randomSelect;
-    [Tooltip("The Random (\"?\") tile while Random is the current pick.")]
+    [Tooltip("The dark Random (\"?\") tile, shown while Random is NOT the current pick.")]
     public Sprite randomPicked;
 
     public Entry Find(int characterId)

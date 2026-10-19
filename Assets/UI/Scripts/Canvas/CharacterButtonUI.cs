@@ -6,8 +6,8 @@ using UnityEngine.UI;
 
 // One tile of the character grid. This is a prefab (Assets/UI/Prefabs/CharacterButton.prefab):
 // the character's finished tile picture (CharacterSelectArt's `select`; without one, a coloured backing with the
-// character's head and shoulders), and a black silhouette (`picked`) while it is the chosen one, or a bright
-// frame if it has no picked picture. Characters with no
+// character's head and shoulders), covered by its black silhouette (`picked`) unless it is the current pick.
+// Tiles with no silhouette picture get a bright frame when picked instead. Characters with no
 // select art yet get their normal sprite on a plain colour and their name; the Random and locked tiles are
 // plain colour with a big symbol (see SetupSpecial).
 public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -20,7 +20,7 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
     public Image portrait;          // the character, cropped to the tile (its parent has a RectMask2D)
     public TMP_Text nameText;       // only for tiles with no art: the name, or the symbol on a special tile
     public GameObject selectedMark; // switched on for the chosen character (a bright frame)
-    public Image pickedIcon;        // covers the whole tile with the black "picked" silhouette while it is the current pick
+    public Image pickedIcon;        // covers the whole tile with the black silhouette while it is NOT the current pick
 
     // old field kept so existing prefabs still load
     public Image colorStrip;
@@ -28,7 +28,7 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
     public int CharacterId { get; private set; }
     bool locked;
     Action<int, bool> hover;
-    Sprite pickedSprite;            // null = no picked art yet: the picked tile keeps the bright frame instead
+    Sprite pickedSprite;            // null = no silhouette art yet: the tile stays in colour and uses the bright frame
 
     public void Setup(int id, Action<int> onClick, Action<int, bool> onHover = null)
     {
@@ -143,12 +143,14 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
         if (hover != null && !locked) hover(CharacterId, false);
     }
 
-    // selected = the current pick: the tile turns into its black silhouette (or the bright frame if it has none).
+    // Every tile shows its dark silhouette; the current pick (selected) lights up in colour. A tile with no
+    // silhouette art is always in colour and gets the bright frame when selected instead.
     public void SetSelected(bool selected)
     {
-        bool showPicked = selected && pickedSprite != null && pickedIcon != null;
-        if (pickedIcon != null && pickedIcon.enabled != showPicked) pickedIcon.enabled = showPicked;
-        bool frame = selected && !showPicked;
+        bool hasDark = pickedSprite != null && pickedIcon != null;
+        bool showDark = hasDark && !selected;
+        if (pickedIcon != null && pickedIcon.enabled != showDark) pickedIcon.enabled = showDark;
+        bool frame = selected && !hasDark;
         if (selectedMark != null && selectedMark.activeSelf != frame) selectedMark.SetActive(frame);
     }
 

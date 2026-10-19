@@ -1372,7 +1372,7 @@ public static class BuildFightCanvas
         Stretch(nameText.rectTransform);
         nameText.gameObject.SetActive(false);
 
-        // the black "picked" silhouette: last child, so it covers the whole tile while it is the current pick
+        // the black silhouette: last child, so it covers the whole tile while it is NOT the current pick
         GameObject pickedGo = new GameObject("Picked", typeof(RectTransform), typeof(Image));
         pickedGo.transform.SetParent(go.transform, false);
         Stretch((RectTransform)pickedGo.transform);

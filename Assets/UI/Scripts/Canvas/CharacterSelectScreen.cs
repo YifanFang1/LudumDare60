@@ -6,7 +6,8 @@ using UnityEngine.UI;
 // Character select. Online you pick your own fighter and press Ready. Vs AI it takes two steps on the same
 // screen: pick yourself and press Ready, then the grid starts fresh under "Choose an opponent" and you pick the
 // AI's fighter and press Fight! (Back on step 2 returns to step 1 with your pick kept). The steps swap through
-// the same CRT glitch as every other screen change. The current pick's tile shows as a black silhouette.
+// the same CRT glitch as every other screen change. Every tile is a dark silhouette except the current pick,
+// which shows in colour.
 // The 3x3 grid fills itself from CharacterList using the CharacterButton prefab. Hovering or clicking a tile shows
 // that character on the big panel (art from CharacterSelectArt); More opens their Background / Skills page.
 // Online, a 30 second gear counts down and confirms the current pick when it runs out.
