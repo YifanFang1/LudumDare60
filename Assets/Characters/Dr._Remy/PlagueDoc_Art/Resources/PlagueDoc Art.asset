@@ -39,6 +39,30 @@ MonoBehaviour:
     sprite: {fileID: 6701125874796175287, guid: a173614ec202b4059aaac8b295f909dc, type: 3}
     scale: 0.4
     flip: 0
+  - visual: rat_shower_1
+    sprite: {fileID: 8444607312362396526, guid: 9a1123780e07a4daea3310680f7bfdcf, type: 3}
+    scale: 0.35
+    flip: 1
+  - visual: rat_shower_2
+    sprite: {fileID: 5680949787151137997, guid: 1a46c0acb5b3a4a479cb403a138acadc, type: 3}
+    scale: 0.35
+    flip: 1
+  - visual: rat_shower_3
+    sprite: {fileID: -4510960584505170054, guid: 464b326c22d5a445b825e5f2cd8b7156, type: 3}
+    scale: 0.35
+    flip: 1
+  - visual: rat_shower_4
+    sprite: {fileID: 218559968749543180, guid: 53874f206f2614b459aea063a941ba90, type: 3}
+    scale: 0.35
+    flip: 1
+  - visual: rat_shower_5
+    sprite: {fileID: -7195416319499361767, guid: 04f6ad151935346f384f17d74f650b88, type: 3}
+    scale: 0.35
+    flip: 1
+  - visual: rat_shower_6
+    sprite: {fileID: 2453409843570498188, guid: 51c8e24ad38184b8897ad43e6cb3c487, type: 3}
+    scale: 0.35
+    flip: 1
   sfx:
     moves: []
     attackStart: []
@@ -47,6 +71,7 @@ MonoBehaviour:
     grab: []
     block: []
     dash: []
+    jump: []
     superFlash: {fileID: 0}
     ko: {fileID: 0}
     reflect: []
@@ -57,4 +82,26 @@ MonoBehaviour:
     powerUp: []
     outOfAmmo: []
     theme: {fileID: 8300000, guid: 2cd94bb7c9553f449b9cae1ed187fdf1, type: 3}
+  voice:
+    select:
+    - {fileID: 8300000, guid: ad2db77a8871c10459d249f86446a776, type: 3}
+    - {fileID: 8300000, guid: 7550d38bf87c8af42ab4b7430e255fe1, type: 3}
+    - {fileID: 8300000, guid: 97241ff6f176d8648bcec88486acfa64, type: 3}
+    roundWin:
+    - {fileID: 8300000, guid: 35f1d8633e6fc184fb96eda2bdd18f31, type: 3}
+    - {fileID: 8300000, guid: 39e87473922e8214eb08e5b242adc309, type: 3}
+    roundLose:
+    - {fileID: 8300000, guid: dd0cd12ba589e074b8514ff5eadcb784, type: 3}
+    - {fileID: 8300000, guid: b7775c8911831ac4a89b065fb1452c5d, type: 3}
+    - {fileID: 8300000, guid: 66ff149477d1dee4e810d97ae3946a90, type: 3}
+    dialogue: []
+    volume: 0.6
+    moves:
+    - move: Ultimate
+      clips:
+      - {fileID: 8300000, guid: e460cb0353a545341ba19eadc7f4b2a1, type: 3}
+    hurt:
+    - {fileID: 8300000, guid: d789c31a4d62f034ca1ea673b2eb090c, type: 3}
+    hurtChance: 0.4
+    ko: []
   characterId: 15

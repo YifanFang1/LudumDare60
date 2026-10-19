@@ -23,7 +23,7 @@ public class CharacterTests
     {
         // D-40: the in-game names come from the Moveset Tracker; the class names stay.
         int[] ids = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id, K3N.Id };
-        string[] names = { "Ruy", "Paintress", "Noir", "Ŕ̶̝͇̤͛̎Ȍ̴̢̪̗͇͂̈́̆̀̿̿̈́̀͐͗̓͠ͅO̵̯̲͕̗͐̐̌͂͗̓̆̍͊͗M̷̧̤̲̲̖͑̿", "The Executioner", "Dr. Remy", "K3N" };
+        string[] names = { "Ruy", "Paintress", "Noir", "Ŕ̶̝͇̤͛̎Ȍ̴̢̪̗͇͂̈́̆̀̿̿̈́̀͐͗̓͠ͅO̵̯̲͕̗͐̐̌͂͗̓̆̍͊͗M̷̧̤̲̲̖͑̿", "Patience", "Dr. Remy", "K3N" };
         System.Type[] types = { typeof(Samurai), typeof(Painter), typeof(Cowboy), typeof(Elephant),
                                 typeof(Executioner), typeof(PlagueDoctor), typeof(K3N) };
         string[] slots = { "Light", "Heavy", "Grab", "Special", "Ultimate", "JumpLight", "JumpHeavy" };

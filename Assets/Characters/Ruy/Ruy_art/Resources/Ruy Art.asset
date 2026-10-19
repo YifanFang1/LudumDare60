@@ -43,23 +43,18 @@ MonoBehaviour:
     outOfAmmo: []
     theme: {fileID: 8300000, guid: 5d026a0c53b4e1541bd9d3a488d149c3, type: 3}
   voice:
-    dialogue:
-    - line: You know, they call me a genie. It's cause I grant death wishes.
-      clip: {fileID: 8300000, guid: f2ea2dd0ec7d634449b2cdad9be41048, type: 3}
-    - line: That was a Ruy-ly good punch.
-      clip: {fileID: 8300000, guid: 9eb8ea25df622e941b677c940fa252ed, type: 3}
-    - line: It seems I have been thoroughly pun-nished.
-      clip: {fileID: 8300000, guid: 1628663de3661cf4aa54c68733ad66b0, type: 3}
-    - line: "Hey! That\u2019s a Ruy-crime!"
-      clip: {fileID: 8300000, guid: 47f32c55f048e4d40bc53b87f2f6a5c1, type: 3}
-    - line: You're being such a Kill-Ruy.
-      clip: {fileID: 8300000, guid: 276d50bbb63d56c4e8c3b96006a271c0, type: 3}
-    - line: Sure-you-can beat me?
-      clip: {fileID: 8300000, guid: 4ba70de99445a5a41bbe1ad07086f706, type: 3}
-    - line: Man, I'm bored, can you at least try to fight back?
-      clip: {fileID: 8300000, guid: 581e828661cc7c14db9cdf7fc9e4db0b, type: 3}
-    - line: Get dest-Ruy-ed!
-      clip: {fileID: 8300000, guid: ff14b1b9677651448bbc6fcbde8e313f, type: 3}
+    select:
+    - {fileID: 8300000, guid: f2ea2dd0ec7d634449b2cdad9be41048, type: 3}
+    - {fileID: 8300000, guid: 4ba70de99445a5a41bbe1ad07086f706, type: 3}
+    roundWin:
+    - {fileID: 8300000, guid: 9eb8ea25df622e941b677c940fa252ed, type: 3}
+    - {fileID: 8300000, guid: 581e828661cc7c14db9cdf7fc9e4db0b, type: 3}
+    - {fileID: 8300000, guid: ff14b1b9677651448bbc6fcbde8e313f, type: 3}
+    roundLose:
+    - {fileID: 8300000, guid: 1628663de3661cf4aa54c68733ad66b0, type: 3}
+    - {fileID: 8300000, guid: 47f32c55f048e4d40bc53b87f2f6a5c1, type: 3}
+    - {fileID: 8300000, guid: 276d50bbb63d56c4e8c3b96006a271c0, type: 3}
+    dialogue: []
     volume: 1
     moves:
     - move: Heavy
@@ -77,5 +72,4 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 5b27785a6edf9024188f3178c5bdb96f, type: 3}
     hurtChance: 0.4
     ko: []
-    roundWin: []
   characterId: 10

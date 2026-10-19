@@ -12,6 +12,11 @@ public class DefeatSequence : MonoBehaviour
         public SpriteOutline outline;
         public bool outlined;
     }
+    // The KO sound (AudioManager.Defeated) starts the moment the sequence starts. Tune these to
+    // line the burn up with the sound: the delay before the burn begins, and how long it takes.
+    const float BurnDelay = 0.15f;
+    const float BurnSeconds = 1.35f;
+
     readonly List<Burn> burning = new List<Burn>();
     IMatchSession match;
     WorldView world;
@@ -52,6 +57,7 @@ public class DefeatSequence : MonoBehaviour
             for (int i = 0; i < 2; i++)
             {
                 if (sim.fighters[i].hp > 0) continue;
+                AudioManager.Defeated(i);   // the KO sound starts with the burn
                 GameObject root = world != null ? world.FighterRoot(i) : null;
                 if (root == null || shader == null) continue;
                 foreach (SpriteRenderer sprite in root.GetComponentsInChildren<SpriteRenderer>(true))
@@ -76,7 +82,7 @@ public class DefeatSequence : MonoBehaviour
         int local = Mathf.Clamp(match.LocalSlot, 0, 1);
         float grey = (sim.fighters[local].hp <= 0 || (sim.timeUp && sim.roundWinner != local)) ? Mathf.SmoothStep(0f, 1f, elapsed / 0.8f) : 0f;
         Shader.SetGlobalFloat("_DefeatGrey", grey);
-        float progress = Mathf.Clamp01((elapsed - 0.15f) / 1.35f);
+        float progress = Mathf.Clamp01((elapsed - BurnDelay) / BurnSeconds);
         foreach (Burn burn in burning)
         {
             if (burn.sprite == null || burn.sprite.sprite == null) continue;

@@ -6,7 +6,6 @@ public static class CharacterDialogue
 {
     public static string Speaker(int id)
     {
-        if (id == 14) return "Patience"; // Penance / Executioner keeps id 14 and its class name
         if (id == 16) return "K3N";
         if (id == 11) return "0d3tte";
         return CharacterList.NameOf(id);
@@ -55,10 +54,11 @@ public static class CharacterDialogue
     }
 
     // One of several lines for the same moment, chosen by the variant (the same on both machines).
+    // The variant is scrambled so consecutive matches don't just step through the lines in order.
     static string Pick(int variant, params string[] lines)
     {
-        int n = lines.Length;
-        return lines[((variant % n) + n) % n];
+        uint h = (uint)variant * 2654435761u;
+        return lines[(int)((h >> 8) % (uint)lines.Length)];
     }
 
     static string Ending(CharacterDialogueMoment moment, string winning, string losing)

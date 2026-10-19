@@ -11,8 +11,9 @@
 //                  or air) is a hit (perk 1).
 //   Special (I)    Vine Boom: hits all around him and destroys enemy projectiles. Booms that land
 //                  on the same tick (his and his copies') stack: x2, x4, capped at x4.
-//   Ultimate (O)   Address Me: 4 copies at fixed spots copy his walking, Light, Heavy and Vine Boom
-//                  for 8 s. Any enemy hit destroys a copy. Their hits give no meter.
+//   Ultimate (O)   Address Me: he GROWS for 8 s. Everything is x1.5 (body, speed, dashes, hitbox
+//                  size and reach, damage, knockback, hitstun) and he has hyper armor: hits still
+//                  hurt him but never stun, push or interrupt him.
 //   Perk 1         Stampede: the forward dash hits (8 damage) and goes up to 2x further when hurt.
 //   Perk 2         Unstoppable: ignores slows, scramble and bleed's damage penalty.
 public class Elephant : BaseFighter
@@ -21,6 +22,8 @@ public class Elephant : BaseFighter
 
     public const int HoldTicks = 60;
     public const int CopyTicks = 480;
+    public const int GrowTicks = 480;       // how long the Ultimate's growth lasts: 8 s
+    public const int GrowPercent = 150;     // every number is x1.5 while grown
     public const int MaxStackMultiplier = 4;
     public static readonly int[] CopySpots = { -6000, -2000, 2000, 6000 };
     public const int CopyClearance = 1000;   // no copy closer than this to either fighter
@@ -74,9 +77,45 @@ public class Elephant : BaseFighter
         return m;
     }
 
+    // Address Me (Ultimate): he GROWS for GrowTicks. Everything is x1.5: his body, walk speed, dash,
+    // and every hitbox's size and reach, damage, knockback and hitstun. He also gets hyper armor:
+    // hits still do damage but never stun, push or interrupt him.
+    public int grownTicks;
+    public bool Grown { get { return grownTicks > 0; } }
+    static int Grow(int value) { return value * GrowPercent / 100; }
+
     public override int MaxHp { get { return 200; } }
-    public override int WalkSpeed { get { return 30; } }
-    public override Box Hurtbox { get { return new Box(-700, 0, 1400, 2300); } }
+    public override int WalkSpeed { get { return Grown ? Grow(30) : 30; } }
+    public override Box Hurtbox
+    {
+        get { return Grown ? new Box(Grow(-700), 0, Grow(1400), Grow(2300)) : new Box(-700, 0, 1400, 2300); }
+    }
+    public override bool IgnoresHitstun { get { return Grown; } }
+    public override int ScalePercent { get { return Grown ? GrowPercent : 100; } }
+    public override bool IsPoweredUp { get { return Grown; } }
+    public override string HudInfo { get { return Grown ? "GROWN" : null; } }
+    public override int HashExtra() { return grownTicks; }
+
+    public override void OnTick(GameSim sim)
+    {
+        if (hp <= 0) grownTicks = 0;
+        else if (grownTicks > 0) grownTicks--;
+    }
+
+    public override void OnHitboxSpawned(GameSim sim, HitboxInstance hit)
+    {
+        if (!Grown) return;
+        Box b = hit.box;
+        hit.box = new Box(Grow(b.x), Grow(b.y), Grow(b.w), Grow(b.h));
+        hit.hitstun = Grow(hit.hitstun);
+    }
+
+    public override void ModifyOutgoingHit(GameSim sim, Fighter victim, HitboxInstance hit)
+    {
+        if (!Grown) return;
+        hit.damage = Grow(hit.damage);
+        hit.knockback = Grow(hit.knockback);
+    }
     public override bool CanBlock { get { return false; } }
 
     protected override MoveDef LightAttack { get { return TrunkWhip; } }
@@ -86,11 +125,11 @@ public class Elephant : BaseFighter
     protected override MoveDef UltimateMove { get { return AddressMe; } }
 
     // Stampede (perk 1): longer the more he's hurt.
-    public override DashDef ForwardDash { get { return new DashDef(24 * (100 + MissingHpPercent) / 100, 80); } }
-    public override DashDef BackDash { get { return new DashDef(24, 70); } }
+    public override DashDef ForwardDash { get { return new DashDef(24 * (100 + MissingHpPercent) / 100, Grown ? Grow(80) : 80); } }
+    public override DashDef BackDash { get { return new DashDef(24, Grown ? Grow(70) : 70); } }
     public override int DashCooldown { get { return 60; } }
     // Heavy in the air too: a short, slow air dash (0.84 units; the standard is 1.3).
-    public override DashDef AirDash { get { return new DashDef(12, 70); } }
+    public override DashDef AirDash { get { return new DashDef(12, Grown ? Grow(70) : 70); } }
     public override HitboxDef DashHitbox(bool forward) { return forward ? StampedeHit : null; }
 
     public override MoveDef ChooseHoldMove(GameSim sim, int input)
@@ -107,13 +146,8 @@ public class Elephant : BaseFighter
     public override void OnMoveTick(GameSim sim)
     {
         if (move != AddressMe || stateTick != 0) return;
-        for (int i = 0; i < CopySpots.Length; i++)
-        {
-            int spot = CopySpots[i];
-            bool tooClose = System.Math.Abs(spot - sim.fighters[0].x) < CopyClearance
-                         || System.Math.Abs(spot - sim.fighters[1].x) < CopyClearance;
-            if (!tooClose) sim.SpawnSummon(index, spot, CopyTicks);
-        }
+        grownTicks = GrowTicks;   // Address Me: grow (it no longer summons copies)
+        sim.AddEvent(SimEventType.PowerUp, index, -1, x, y, 1);
     }
 
     public override bool SummonCopiesMove(MoveDef m)

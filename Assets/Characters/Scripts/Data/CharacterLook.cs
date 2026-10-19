@@ -31,6 +31,9 @@ public abstract class CharacterLook : ScriptableObject
     [Tooltip("Art for this character's projectiles. 'Visual' must match the move's visual name: \"special\" for the standard Special. Use a Center pivot; art faces RIGHT. A projectile with no art here only shows as a yellow box with the Hitboxes toggle on.")]
     public ProjectileSprite[] projectileSprites;
 
+    [Tooltip("An image flashed over the fighter (stretched to the move's attack area, the box that hurts enemies) when a move starts, then quickly faded out. 'Move' is the move name: Light, Heavy, Grab, Special, Ultimate... View only.")]
+    public MoveFlash[] moveFlashes;
+
     [Tooltip("This character's own sounds. Anything left empty falls back to the AudioManager's shared sounds.")]
     public CharacterSfx sfx = new CharacterSfx();
 
@@ -49,6 +52,14 @@ public abstract class CharacterLook : ScriptableObject
         if (projectileSprites == null || string.IsNullOrEmpty(visual)) return null;
         for (int i = 0; i < projectileSprites.Length; i++)
             if (projectileSprites[i] != null && projectileSprites[i].visual == visual) return projectileSprites[i];
+        return null;
+    }
+
+    public MoveFlash FindMoveFlash(string moveName)
+    {
+        if (moveFlashes == null || string.IsNullOrEmpty(moveName)) return null;
+        for (int i = 0; i < moveFlashes.Length; i++)
+            if (moveFlashes[i] != null && moveFlashes[i].sprite != null && moveFlashes[i].move == moveName) return moveFlashes[i];
         return null;
     }
 
@@ -71,6 +82,16 @@ public class ProjectileSprite
     public Sprite sprite;
     public float scale = 1f;    // view size multiplier (1 = the import size)
     public bool flip;           // tick if the art faces LEFT: it is mirrored so it flies the right way
+}
+
+// One entry in CharacterLook.moveFlashes: an image shown over the fighter when a move starts.
+[System.Serializable]
+public class MoveFlash
+{
+    public string move = "Special";
+    public Sprite sprite;
+    [Tooltip("Seconds to fade from fully visible to gone.")]
+    public float fadeSeconds = 0.35f;
 }
 
 // One character's sound set. Every slot is optional: empty = the AudioManager's shared sound plays.

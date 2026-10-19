@@ -11,7 +11,7 @@ public class MatchupDialogueTests
         Assert.AreEqual(a.secondText, b.secondText);
         Assert.AreEqual(10, a.firstId);
         Assert.AreEqual(12, a.secondId);
-        Assert.AreEqual("Wet Urn? What are ya' on about, Buckaroo?", a.secondText);
+        Assert.AreEqual("Wet Urn? What are you on about, Buckaroo?", a.secondText);
         GameSim sim = new GameSim();
         a.Configure(sim, 10, 0);
         Assert.AreEqual(0, sim.introFirstSlot);

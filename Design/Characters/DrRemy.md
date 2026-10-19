@@ -45,18 +45,12 @@ A frail, quick doctor who wins by choosing the right potion for the moment. Pois
 - Visual keys: `potion_slow` (projectile). The poison cloud is a zone (drawn by kind).
 
 ## Ultimate (O): Unleash the Rats. Old Tech: TBD
-"Rats run across the screen and you have to jump to minimize damage". **Confirmed:** after the 30-tick superflash, **3 low waves of rats cross the whole screen, about 0.5 s apart, 10 damage each, unblockable**. **Each wave you jump is avoided**; mistiming lets some through, which is the "minimize".
+After the 30-tick superflash and a further **60-tick (1 s) delay**, Remy sprays a **shower of 20 rats** over about 1 s (one every 3 ticks). Each rat spawns at the top middle of his hurtbox (`Box(-225, 1775, 450, 450)`) and is shot forward in a flat arc with a pseudo-random speed (vx 60-150) and a small upward kick (vy 0-30, gravity 3), so they drop to the floor roughly 2 to 7 units away. **1 damage each, unblockable**, hitstun 12, knockback 5. The sequence is fixed in code (`Scatter`), not random, so both clients agree.
 
-| Wave | Spawns on tick | Box | Speed | Lifetime | Dmg | Hitstun | KB |
-|---|---|---|---|---|---|---|---|
-| 1 | 6 | `Box(0, 0, 800, 500)` from Remy | 160 | 110 (crosses 16 units+) | 10 | 12 | 0 |
-| 2 | 36 | same | 160 | 110 | 10 | 12 | 0 |
-| 3 | 66 | same | 160 | 110 | 10 | 12 | 0 |
-
-- `unblockable`, low (500 tall). A standard jump (about 2 units high) clears it.
-- **Hitstun is kept short (12) on purpose**, so a victim hit by wave 1 recovers in time to try jumping wave 2. Otherwise one hit would make all three guaranteed.
-- Total: 80 ticks (he's helpless while the rats run, so a jump-in can punish him).
-- **Damage:** 30 if all three hit (= the standard Ultimate), 0 if all are jumped.
+- **Uninterruptable:** hyper armor for the whole move (`IgnoresHitstun`): hits still do damage but no hitstun or knockback, and the move keeps going.
+- Move length: 150 ticks (60 delay + 90).
+- Art: each rat shows one of the six `rats/Rat 1..6` sprites (visual keys `rat_shower_1`..`rat_shower_6`, scale 0.35).
+- Max damage 20 if every rat hits; how many hit depends on the opponent's distance.
 
 ## Perks
 1. **Apothecary** (confirmed): the three-potion choice of his Special *is* his perk 1 (the sheet's Perk 1 cell lists the potions).
@@ -72,7 +66,7 @@ A frail, quick doctor who wins by choosing the right potion for the moment. Pois
   - *Move hooks* (`OnMoveStart` drinks the heal, places the cloud)
 - **D-14 (one Special) still holds:** it's one button with three modes, chosen beforehand.
 - **Animator states beyond the generic ones:** the generic `Special` clip for all three, or optionally `SpecialPoison`, `SpecialHeal`, `SpecialSlow` (they'd need to go in `ListMoves()`).
-- **Projectile visual keys:** `rat`, `potion_slow`, `rats` (Ultimate waves).
+- **Projectile visual keys:** `rat`, `potion_slow`, `rat_shower_1`..`rat_shower_6` (Ultimate).
 
 ## View polish (optional)
 - HUD: the selected potion's icon next to his health bar. This is the only way to see what a tap did, so it isn't really optional.

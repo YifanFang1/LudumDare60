@@ -31,7 +31,7 @@ public class JuiceReaction
     [Tooltip("When this plays. Moments: Hit, LightHit, HeavyHit, Hit:<Move>, GotHit, GotLightHit, GotHeavyHit, Grab, " +
              "GotGrabbed, Block, AttackBlocked, AttackStart, AttackStart:<Move>, Dash, DashForward, DashBack, " +
              "SuperFlash, KnockedOut, ScoredKO, RoundStart, RoundEnd, RoundWin, RoundLose, RoundDraw, Enter<State>.\n" +
-             "While (plays as long as true): WhileMoving, WhileLowHealth, WhileMeterFull, WhileBlocking, While<State>, WhileAttack:<Move>.\n" +
+             "While (plays as long as true): WhileMoving, WhileLowHealth, WhileMeterFull, WhileBlocking, WhilePoweredUp, WhileCharging, While<State>, WhileAttack:<Move>.\n" +
              "States: Idle, Walk, Attack, Hitstun, KO, Blockstun, Dash. Moves: Light, Heavy, Grab, Special, Ultimate.\n" +
              "Or any name your own code fires with JuiceManager.Trigger. Turn on Log All Triggers on JuiceManager to see them live.")]
     public string trigger = "";
@@ -153,6 +153,10 @@ public static class JuiceTriggers
     public const string WhileMeterFull = "WhileMeterFull";
     /// <summary>Holding back, so a hit right now would be blocked.</summary>
     public const string WhileBlocking = "WhileBlocking";
+    /// <summary>Charging a move: holding the button before the charge tick (Ruy's Hadoken, K3N's Heavy).</summary>
+    public const string WhileCharging = "WhileCharging";
+    /// <summary>The fighter is in its empowered mode (Fighter.IsPoweredUp): K3N's Install, Noir's Rapid Fire.</summary>
+    public const string WhilePoweredUp = "WhilePoweredUp";
     /// <summary>Sliding sideways for any reason: walking, dashing or being knocked back. Pair it with
     /// Every Ticks on the row for footstep dust.</summary>
     public const string WhileMoving = "WhileMoving";

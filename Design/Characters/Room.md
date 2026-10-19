@@ -44,14 +44,13 @@ A huge, slow tank who **can't block** and wins by soaking damage. He walks in th
 - **Stacking (confirmed):** it stacks with **his Ultimate copies' booms**. If N booms hit the victim on the same tick, the damage is multiplied: 2 booms = ×2, 3 = ×4, so `8 × 2^(N-1)`. **Capped at ×4** (confirmed), so the worst case is 32 damage.
 - Standard Special cooldown (30).
 
-## Ultimate (O): Address Me. Old Tech: TBD
-After the 30-tick superflash, **4 copies of Room appear at fixed spots** across the arena (confirmed), **clearly marked as copies** (see-through or tinted). Spots: x = -6000, -2000, 2000, 6000, skipping any spot within 1 unit of a fighter.
-- **They mimic his movement** (confirmed): each tick a copy walks when Room walks and starts his Light, Heavy or Vine Boom when he does, from its own spot, facing the opponent. Not his Grab or dashes (confirmed), and they don't jump (D-57). Their attacks hit for real, which is what makes Vine Boom stack.
-- They take enemy projectiles for him (any hit destroys a copy, confirmed) and don't push the opponent (confirmed).
-- **Each copy dies to 1 hit** and fades after **about 8 s (480 ticks)** (confirmed).
-- **Type:** a summon. The Ultimate move itself is a 20-tick pose with no hitbox.
-- **Counterplay:** jump over or hit the copies (any hit kills one), and stay out of overlapping boom areas.
-- **Damage:** depends on stacking (see Vine Boom). Hits from copies give no meter, like any Ultimate hit (confirmed).
+## Ultimate (O): Address Me (changed 2026-10-19). Old Tech: TBD
+After the 30-tick superflash, **Room grows for 8 s (480 ticks)** and **everything is x1.5**: his body (hurtbox 1.4 x 2.3 -> 2.1 x 3.45 units), walk speed, dashes, and every hitbox's size and reach, damage, knockback and hitstun. The art is drawn 1.5x bigger from the feet.
+- **Hyper armor:** while grown, a hit that doesn't kill him still does its damage, but there is **no hitstun, no knockback and his move is never interrupted**. (Perk 2 still ignores status effects.)
+- **Replaces the old copies:** the 4 mimicking summons are gone. `SummonCopiesMove` and the summon code stay in the sim for other characters.
+- **Type:** a timed mode. The Ultimate move itself is a 20-tick pose with no hitbox; the growth starts on its first tick.
+- **Counterplay:** wait it out (he's the same slow Room afterwards), block his grab (it ignores armor but still can't catch someone in hitstun), or burst him down: the armor does not stop damage.
+- **Known limit:** his Trunk Grab still pins the victim 1.2 units in front, which is now inside his bigger body.
 
 ## Perks
 1. **Stampede** (confirmed): "Dash deals damage to the enemy: the more damage taken the further the elephant slides". His **forward dash is a hit** (8 damage, box in the table). Its distance grows with **his own missing HP**: `ticks × (100 + missingHp%) / 100`, so up to 2x at low HP. The back dash does no damage. Hook: a dash hitbox (the *Dash hitboxes* extension) and an override of `ForwardDash` that reads `hp`.

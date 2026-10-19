@@ -69,11 +69,25 @@ MonoBehaviour:
     outOfAmmo: []
     theme: {fileID: 8300000, guid: 7aeed64b587af8e459022031de3e1e3c, type: 3}
   voice:
+    select:
+    - {fileID: 8300000, guid: 83cae788c1611bb4d89310f481e33704, type: 3}
+    - {fileID: 8300000, guid: 8b49521168cccc94e960fb42ba1a3e31, type: 3}
+    - {fileID: 8300000, guid: df2cd7fd09c8ee4409130f5ba9be5d9c, type: 3}
+    roundWin:
+    - {fileID: 8300000, guid: 3a050c9fc796d2043aa0efe087ed767a, type: 3}
+    - {fileID: 8300000, guid: 58a74bb49fb1c2442a92a905c7de088c, type: 3}
+    roundLose:
+    - {fileID: 8300000, guid: 962339147f9dc344da3429a5e3171766, type: 3}
+    - {fileID: 8300000, guid: 3f14b3cd4e96b2945b6d33009c80492e, type: 3}
     dialogue: []
-    volume: 1
-    moves: []
-    hurt: []
+    volume: 0.5
+    moves:
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: 00e321a1cf44e094ea0c351362a81359, type: 3}
+    hurt:
+    - {fileID: 8300000, guid: 28e51e10840e24740a961a1764610fcb, type: 3}
+    - {fileID: 8300000, guid: 625facf2bd329034eac5b8a403269351, type: 3}
     hurtChance: 0.4
     ko: []
-    roundWin: []
   characterId: 11
