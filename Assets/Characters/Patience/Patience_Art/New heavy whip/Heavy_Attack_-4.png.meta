@@ -1,0 +1,834 @@
+fileFormatVersion: 2
+guid: f20c24846a8704d19874d968e42b23a1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2321492421903349511
+    second: Heavy_Attack_-4_0
+  - first:
+      213: -7309199079435865219
+    second: Heavy_Attack_-4_1
+  - first:
+      213: 2196984219732740988
+    second: Heavy_Attack_-4_2
+  - first:
+      213: 8903352963662780217
+    second: Heavy_Attack_-4_3
+  - first:
+      213: -4758793087647114365
+    second: Heavy_Attack_-4_4
+  - first:
+      213: -5800808588878978747
+    second: Heavy_Attack_-4_5
+  - first:
+      213: 1230824278847447662
+    second: Heavy_Attack_-4_6
+  - first:
+      213: 5125760799899981014
+    second: Heavy_Attack_-4_7
+  - first:
+      213: 2571464239607753418
+    second: Heavy_Attack_-4_8
+  - first:
+      213: -2341694462841173644
+    second: Heavy_Attack_-4_9
+  - first:
+      213: 8126525672010635838
+    second: Heavy_Attack_-4_10
+  - first:
+      213: -5748184497868629674
+    second: Heavy_Attack_-4_11
+  - first:
+      213: -9113808777859736482
+    second: Heavy_Attack_-4_12
+  - first:
+      213: 1636524803380238953
+    second: Heavy_Attack_-4_13
+  - first:
+      213: 4324611778794242148
+    second: Heavy_Attack_-4_14
+  - first:
+      213: -2577337804407742347
+    second: Heavy_Attack_-4_15
+  - first:
+      213: 4592892002487353964
+    second: Heavy_Attack_-4_16
+  - first:
+      213: 2999111151033486767
+    second: Heavy_Attack_-4_17
+  - first:
+      213: -1781831195036285071
+    second: Heavy_Attack_-4_18
+  - first:
+      213: 4568586423679716057
+    second: Heavy_Attack_-4_19
+  - first:
+      213: 129273332100029169
+    second: Heavy_Attack_-4_20
+  - first:
+      213: -5146268837125105709
+    second: Heavy_Attack_-4_21
+  - first:
+      213: -6943216639880378700
+    second: Heavy_Attack_-4_22
+  - first:
+      213: 3697565738910711947
+    second: Heavy_Attack_-4_23
+  - first:
+      213: 6578401978785878749
+    second: Heavy_Attack_-4_24
+  - first:
+      213: 4334046475493080577
+    second: Heavy_Attack_-4_25
+  - first:
+      213: -4495064163460251045
+    second: Heavy_Attack_-4_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 9
+  spritePivot: {x: 0.58, y: -0.005}
+  spritePixelsToUnits: 1400
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_0
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 26
+        width: 4225
+        height: 1989
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7077f44de09973020800000000000000
+      internalID: 2321492421903349511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_1
+      rect:
+        serializedVersion: 2
+        x: 2450
+        y: 1947
+        width: 32
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d73fc9db922809a90800000000000000
+      internalID: -7309199079435865219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_2
+      rect:
+        serializedVersion: 2
+        x: 4258
+        y: 665
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7b0f4af1814d7e10800000000000000
+      internalID: 2196984219732740988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_3
+      rect:
+        serializedVersion: 2
+        x: 4261
+        y: 657
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9379a0539501f8b70800000000000000
+      internalID: 8903352963662780217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_4
+      rect:
+        serializedVersion: 2
+        x: 4260
+        y: 608
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38b953366ee55fdb0800000000000000
+      internalID: -4758793087647114365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_5
+      rect:
+        serializedVersion: 2
+        x: 4292
+        y: 607
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54165d982536f7fa0800000000000000
+      internalID: -5800808588878978747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_6
+      rect:
+        serializedVersion: 2
+        x: 4305
+        y: 517
+        width: 55
+        height: 112
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e62e0a11924c41110800000000000000
+      internalID: 1230824278847447662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_7
+      rect:
+        serializedVersion: 2
+        x: 4310
+        y: 594
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d419a14a4c522740800000000000000
+      internalID: 5125760799899981014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_8
+      rect:
+        serializedVersion: 2
+        x: 4290
+        y: 599
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: acaa07a0a1dafa320800000000000000
+      internalID: 2571464239607753418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_9
+      rect:
+        serializedVersion: 2
+        x: 4316
+        y: 592
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4794ad9fa41a08fd0800000000000000
+      internalID: -2341694462841173644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_10
+      rect:
+        serializedVersion: 2
+        x: 4352
+        y: 451
+        width: 35
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3a5942ea0837c070800000000000000
+      internalID: 8126525672010635838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_11
+      rect:
+        serializedVersion: 2
+        x: 4363
+        y: 415
+        width: 33
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 659122587a85a30b0800000000000000
+      internalID: -5748184497868629674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_12
+      rect:
+        serializedVersion: 2
+        x: 4319
+        y: 424
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5c55dc143f358180800000000000000
+      internalID: -9113808777859736482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_13
+      rect:
+        serializedVersion: 2
+        x: 4327
+        y: 366
+        width: 40
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96a589353aa16b610800000000000000
+      internalID: 1636524803380238953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_14
+      rect:
+        serializedVersion: 2
+        x: 4356
+        y: 420
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4604082008b140c30800000000000000
+      internalID: 4324611778794242148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_15
+      rect:
+        serializedVersion: 2
+        x: 4370
+        y: 404
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57067161ce47b3cd0800000000000000
+      internalID: -2577337804407742347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_16
+      rect:
+        serializedVersion: 2
+        x: 4378
+        y: 415
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c62cdfb21fa3dbf30800000000000000
+      internalID: 4592892002487353964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_17
+      rect:
+        serializedVersion: 2
+        x: 4337
+        y: 396
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fad834fa3bbfe9920800000000000000
+      internalID: 2999111151033486767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_18
+      rect:
+        serializedVersion: 2
+        x: 4365
+        y: 388
+        width: 25
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 177072af7f9a547e0800000000000000
+      internalID: -1781831195036285071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_19
+      rect:
+        serializedVersion: 2
+        x: 4385
+        y: 402
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9da0a1d9521e66f30800000000000000
+      internalID: 4568586423679716057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_20
+      rect:
+        serializedVersion: 2
+        x: 4325
+        y: 379
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fad0ce19654bc100800000000000000
+      internalID: 129273332100029169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_21
+      rect:
+        serializedVersion: 2
+        x: 4328
+        y: 376
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d7de7c32c7c498b0800000000000000
+      internalID: -5146268837125105709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_22
+      rect:
+        serializedVersion: 2
+        x: 4354
+        y: 368
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b64955b04db4af90800000000000000
+      internalID: -6943216639880378700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_23
+      rect:
+        serializedVersion: 2
+        x: 4366
+        y: 377
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b808d61f274605330800000000000000
+      internalID: 3697565738910711947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_24
+      rect:
+        serializedVersion: 2
+        x: 4326
+        y: 356
+        width: 16
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd2524feebd2b4b50800000000000000
+      internalID: 6578401978785878749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_25
+      rect:
+        serializedVersion: 2
+        x: 4341
+        y: 356
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10e7cc38e40a52c30800000000000000
+      internalID: 4334046475493080577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heavy_Attack_-4_26
+      rect:
+        serializedVersion: 2
+        x: 4351
+        y: 364
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b520d5e85f25e91c0800000000000000
+      internalID: -4495064163460251045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Heavy_Attack_-4_0: 2321492421903349511
+      Heavy_Attack_-4_1: -7309199079435865219
+      Heavy_Attack_-4_10: 8126525672010635838
+      Heavy_Attack_-4_11: -5748184497868629674
+      Heavy_Attack_-4_12: -9113808777859736482
+      Heavy_Attack_-4_13: 1636524803380238953
+      Heavy_Attack_-4_14: 4324611778794242148
+      Heavy_Attack_-4_15: -2577337804407742347
+      Heavy_Attack_-4_16: 4592892002487353964
+      Heavy_Attack_-4_17: 2999111151033486767
+      Heavy_Attack_-4_18: -1781831195036285071
+      Heavy_Attack_-4_19: 4568586423679716057
+      Heavy_Attack_-4_2: 2196984219732740988
+      Heavy_Attack_-4_20: 129273332100029169
+      Heavy_Attack_-4_21: -5146268837125105709
+      Heavy_Attack_-4_22: -6943216639880378700
+      Heavy_Attack_-4_23: 3697565738910711947
+      Heavy_Attack_-4_24: 6578401978785878749
+      Heavy_Attack_-4_25: 4334046475493080577
+      Heavy_Attack_-4_26: -4495064163460251045
+      Heavy_Attack_-4_3: 8903352963662780217
+      Heavy_Attack_-4_4: -4758793087647114365
+      Heavy_Attack_-4_5: -5800808588878978747
+      Heavy_Attack_-4_6: 1230824278847447662
+      Heavy_Attack_-4_7: 5125760799899981014
+      Heavy_Attack_-4_8: 2571464239607753418
+      Heavy_Attack_-4_9: -2341694462841173644
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
