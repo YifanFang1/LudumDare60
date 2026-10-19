@@ -447,12 +447,74 @@ public static class BuildFightCanvas
         scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
 
         TMP_Text unused;
-        Button back2 = Btn(panel, "BackButton", "Back", 56f, out unused);
+        Button back2 = ArtLayoutButton(panel, "BackButton", "BACK.png", "BACKHOVER.png", 90f, "Back");
 
         CreditsScreen cs = screen.AddComponent<CreditsScreen>();
         cs.backButton = back2;
         cs.namesText = names;
+        AddCornerQuit(screen);
         return screen;
+    }
+
+    // A picture button that sits in a panel's vertical layout (Online, Offline, Back, Reset...). Falls back to a
+    // plain text button if the picture is missing.
+    static Button ArtLayoutButton(Transform parent, string name, string file, string hoverFile, float height, string fallbackLabel)
+    {
+        Sprite normal = LoadSprite(file);
+        if (normal == null)
+        {
+            TMP_Text missing;
+            return Btn(parent, name, fallbackLabel, height, out missing);
+        }
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+        go.transform.SetParent(parent, false);
+        Image img = go.GetComponent<Image>();
+        img.sprite = normal;
+        img.type = Image.Type.Simple;
+        img.preserveAspect = true;
+        go.GetComponent<LayoutElement>().preferredHeight = height;
+        Button b = go.GetComponent<Button>();
+        b.targetGraphic = img;
+        Sprite hover = LoadSprite(hoverFile);
+        if (hover != null)
+        {
+            b.transition = Selectable.Transition.SpriteSwap;
+            SpriteState ss = b.spriteState;
+            ss.highlightedSprite = hover;
+            ss.selectedSprite = hover;
+            ss.pressedSprite = hover;
+            b.spriteState = ss;
+        }
+        return b;
+    }
+
+    // The QUIT picture in the bottom-right corner of a menu page (see QuitButton).
+    static void AddCornerQuit(GameObject screen)
+    {
+        Sprite normal = LoadSprite("QUIT.png");
+        Sprite hover = LoadSprite("QUITHOVER.png");
+        if (normal == null) normal = hover;
+        if (normal == null) return;
+        GameObject go = new GameObject("QuitButton", typeof(RectTransform), typeof(Image), typeof(Button));
+        go.transform.SetParent(screen.transform, false);
+        Vector2 size = normal.rect.size * 0.45f;
+        Anchor((RectTransform)go.transform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-30f, 20f), size);
+        ((RectTransform)go.transform).pivot = new Vector2(1f, 0f);
+        Image img = go.GetComponent<Image>();
+        img.sprite = normal;
+        img.type = Image.Type.Simple;
+        Button b = go.GetComponent<Button>();
+        b.targetGraphic = img;
+        if (hover != null && hover != normal)
+        {
+            b.transition = Selectable.Transition.SpriteSwap;
+            SpriteState ss = b.spriteState;
+            ss.highlightedSprite = hover;
+            ss.selectedSprite = hover;
+            ss.pressedSprite = hover;
+            b.spriteState = ss;
+        }
+        go.AddComponent<QuitButton>();
     }
 
     // The centre of the button group in the 1920x1080 layout (top-left origin). Every button is placed
@@ -589,18 +651,19 @@ public static class BuildFightCanvas
         RectTransform panel = NewPanel("Panel", screen.transform, 560f);
 
         Txt(panel, "Title", "Choose mode", 56, TextAlignmentOptions.Center, Color.white, 80f);
-        Txt(panel, "NameLabel", "Your name", 22, TextAlignmentOptions.MidlineLeft, Muted, 28f);
-        TMP_InputField nameInput = InputBox(panel, "NameInput", "Enter a name", 52f);
+        Txt(panel, "NameLabel", "Your name", 22, TextAlignmentOptions.Center, Muted, 28f);
+        TMP_InputField nameInput = InputBox(panel, "NameInput", "Enter a name", 38f, 90f);
         TMP_Text unused;
-        Button online = Btn(panel, "OnlineButton", "Online", 72f, out unused);
-        Button offline = Btn(panel, "OfflineButton", "Offline (vs AI)", 72f, out unused);
-        Button back = Btn(panel, "BackButton", "Back", 60f, out unused);
+        Button online = ArtLayoutButton(panel, "OnlineButton", "ONLINE.png", "ONLINEHOVER.png", 110f, "Online");
+        Button offline = ArtLayoutButton(panel, "OfflineButton", "OFFLINE.png", "OFFLINEHOVER.png", 110f, "Offline (vs AI)");
+        Button back = ArtLayoutButton(panel, "BackButton", "BACK.png", "BACKHOVER.png", 135f, "Back");
 
         ModeSelectScreen ms = screen.AddComponent<ModeSelectScreen>();
         ms.nameInput = nameInput;
         ms.onlineButton = online;
         ms.offlineButton = offline;
         ms.backButton = back;
+        AddCornerQuit(screen);
         return screen;
     }
 
@@ -667,8 +730,8 @@ public static class BuildFightCanvas
         scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
 
         TMP_Text unused;
-        Button reset = Btn(panel, "ResetButton", "Reset to defaults", 52f, out unused);
-        Button back = Btn(panel, "BackButton", "Back", 52f, out unused);
+        Button reset = ArtLayoutButton(panel, "ResetButton", "RESET.png", "RESETHOVER.png", 90f, "Reset to defaults");
+        Button back = ArtLayoutButton(panel, "BackButton", "BACK.png", "BACKHOVER.png", 90f, "Back");
 
         ControlsScreen cs = screen.AddComponent<ControlsScreen>();
         cs.rowParent = (RectTransform)rows.transform;
@@ -676,6 +739,7 @@ public static class BuildFightCanvas
         cs.resetButton = reset;
         cs.backButton = back;
         cs.hintText = hint;
+        AddCornerQuit(screen);
         return screen;
     }
 
@@ -703,6 +767,7 @@ public static class BuildFightCanvas
         ls.joinRoomButton = join;
         ls.backButton = back;
         ls.onlineGroup = online;
+        AddCornerQuit(screen);
         return screen;
     }
 
@@ -724,6 +789,7 @@ public static class BuildFightCanvas
         ws.hintText = hint;
         ws.statusText = status;
         ws.cancelButton = cancel;
+        AddCornerQuit(screen);
         return screen;
     }
 
@@ -818,6 +884,7 @@ public static class BuildFightCanvas
         cs.backLabel = backLabel;
         cs.titleText = title;
         cs.statusText = status;
+        AddCornerQuit(screen);
         return screen;
     }
 
@@ -860,13 +927,13 @@ public static class BuildFightCanvas
         // result
         GameObject resultGo = new GameObject("ResultPanel", typeof(RectTransform), typeof(Image));
         resultGo.transform.SetParent(screen.transform, false);
-        Anchor((RectTransform)resultGo.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640f, 320f));
-        resultGo.GetComponent<Image>().color = PanelColor;
+        Anchor((RectTransform)resultGo.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(780f, 560f));
+        StylePanel(resultGo.GetComponent<Image>());
         TMP_Text resultText = FreeText(resultGo.transform, "ResultText", "", 64, TextAlignmentOptions.Center, Color.white);
-        Anchor(resultText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -20f), new Vector2(580f, 160f));
+        Anchor(resultText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(580f, 170f));
         TMP_Text unused;
         Button back = Btn(resultGo.transform, "BackToLobbyButton", "Back to lobby", 64f, out unused);
-        Anchor((RectTransform)back.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(320f, 64f));
+        Anchor((RectTransform)back.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 115f), new Vector2(320f, 64f));
         resultGo.SetActive(false);
 
         HudScreen hud = screen.AddComponent<HudScreen>();
@@ -908,7 +975,7 @@ public static class BuildFightCanvas
         fillRt.offsetMin = new Vector2(3f, 3f);
         fillRt.offsetMax = new Vector2(-3f, -3f);
         Image fill = fillGo.GetComponent<Image>();
-        fill.sprite = BuiltIn("UI/Skin/Background.psd");
+        fill.sprite = SolidSprite();   // a flat block: the rounded built-in sprite faded to nothing at the bar's ends
         fill.type = Image.Type.Filled;
         fill.fillMethod = Image.FillMethod.Horizontal;
         fill.fillOrigin = right ? (int)Image.OriginHorizontal.Right : (int)Image.OriginHorizontal.Left;
@@ -1165,10 +1232,27 @@ public static class BuildFightCanvas
         return b;
     }
 
-    static TMP_InputField InputBox(Transform parent, string name, string placeholder, float height)
+    static TMP_InputField InputBox(Transform parent, string name, string placeholder, float height, float sideInset = 0f)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image));
-        go.transform.SetParent(parent, false);
+        Transform inputParent = parent;
+        if (sideInset > 0f)
+        {
+            // a holder takes the layout slot; the box inside it stops short of the panel's edges
+            GameObject holder = new GameObject(name + "Holder", typeof(RectTransform), typeof(LayoutElement));
+            holder.transform.SetParent(parent, false);
+            holder.GetComponent<LayoutElement>().preferredHeight = height;
+            inputParent = holder.transform;
+        }
+        go.transform.SetParent(inputParent, false);
+        if (sideInset > 0f)
+        {
+            RectTransform grt = (RectTransform)go.transform;
+            grt.anchorMin = Vector2.zero;
+            grt.anchorMax = Vector2.one;
+            grt.offsetMin = new Vector2(sideInset, 0f);
+            grt.offsetMax = new Vector2(-sideInset, 0f);
+        }
         Image bg = go.GetComponent<Image>();
         bg.sprite = BuiltIn("UI/Skin/InputFieldBackground.psd");
         bg.type = Image.Type.Sliced;
@@ -1179,13 +1263,13 @@ public static class BuildFightCanvas
         RectTransform areaRt = (RectTransform)area.transform;
         areaRt.anchorMin = Vector2.zero;
         areaRt.anchorMax = Vector2.one;
-        areaRt.offsetMin = new Vector2(14f, 6f);
-        areaRt.offsetMax = new Vector2(-14f, -7f);
+        areaRt.offsetMin = new Vector2(14f, 3f);
+        areaRt.offsetMax = new Vector2(-14f, -4f);
 
-        TMP_Text hint = FreeText(area.transform, "Placeholder", placeholder, 26, TextAlignmentOptions.MidlineLeft, new Color(1f, 1f, 1f, 0.35f));
+        TMP_Text hint = FreeText(area.transform, "Placeholder", placeholder, 24, TextAlignmentOptions.Center, new Color(1f, 1f, 1f, 0.35f));
         hint.fontStyle = FontStyles.Italic;
         Stretch(hint.rectTransform);
-        TMP_Text text = FreeText(area.transform, "Text", "", 26, TextAlignmentOptions.MidlineLeft, Color.white);
+        TMP_Text text = FreeText(area.transform, "Text", "", 24, TextAlignmentOptions.Center, Color.white);
         Stretch(text.rectTransform);
 
         TMP_InputField field = go.AddComponent<TMP_InputField>();
@@ -1194,8 +1278,11 @@ public static class BuildFightCanvas
         field.textComponent = text;
         field.placeholder = hint;
 
-        LayoutElement le = go.AddComponent<LayoutElement>();
-        le.preferredHeight = height;
+        if (sideInset <= 0f)
+        {
+            LayoutElement le = go.AddComponent<LayoutElement>();
+            le.preferredHeight = height;
+        }
         return field;
     }
 
@@ -1252,6 +1339,28 @@ public static class BuildFightCanvas
 #else
         go.AddComponent<StandaloneInputModule>();
 #endif
+    }
+
+    // A plain white square sprite (Assets/UI/Assets/Solid.png, made on first use) for bars that must be opaque to the edge.
+    static Sprite SolidSprite()
+    {
+        const string path = "Assets/UI/Assets/Solid.png";
+        if (!System.IO.File.Exists(path))
+        {
+            Texture2D t = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            Color[] px = new Color[16];
+            for (int i = 0; i < px.Length; i++) px[i] = Color.white;
+            t.SetPixels(px);
+            System.IO.File.WriteAllBytes(path, t.EncodeToPNG());
+            Object.DestroyImmediate(t);
+            AssetDatabase.ImportAsset(path);
+            TextureImporter imp = (TextureImporter)AssetImporter.GetAtPath(path);
+            imp.textureType = TextureImporterType.Sprite;
+            imp.spriteBorder = Vector4.zero;
+            imp.alphaIsTransparency = true;
+            imp.SaveAndReimport();
+        }
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
     }
 
     static Sprite BuiltIn(string path)
