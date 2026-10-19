@@ -1,2 +1,36 @@
-# One person per line:  Name - Role
-# Lines starting with # are ignored. The credits page sorts by role, then by name.
+# One person per line:  Name - Role, Another Role
+# Lines starting with # are ignored. The credits page lists each person under every role they have
+# (roles are split by commas), with the roles and the names sorted A to Z.
+Kash Hodges - Music, SFX, Dialogue
+Yifan F. - Programming, Art
+Elijah J. - Programming, Voice Acting
+Annie L. - Art
+Diego P. - Art
+Ivanka H. - Writing, Art, Voice Acting
+Anika H. - Art
+Hannah L. - Art
+Gavin T. - Programming, Art, Voice Acting
+Victor Gusev - Programming
+Anthony B. - Music
+Naomi T. - Art
+ArabianDev - Art
+Karen Truong - UI/UX Design
+Kallie K. - Art
+Michael Z. - SFX, Programming
+Zoe G. - Art
+Brendan A. - Programming
+Mathew C. - Art
+Michael Bras. - Programming
+Inkwat A. - Art
+Kavan A. - Playtesting
+Alex B. - Art
+David Kim - Programming, Lore Design
+Leslie H. - Art
+Ryland D. - Programming
+Michael Bris. - Writing
+Gangyi C. - Art
+Aws A. - Voice Acting
+Milo R. - Voice Acting
+Alex D. - Art
+Clarissa R. - Art
+Brady Q. - Zeep Zorp
