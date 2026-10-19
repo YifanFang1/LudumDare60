@@ -13,13 +13,6 @@ public class CharacterSelectScreen : MonoBehaviour
     public RectTransform gridParent;            // the Content of a scroll view with a GridLayoutGroup
     public CharacterButtonUI buttonPrefab;
 
-    [Header("Tabs (vs AI only)")]
-    public GameObject tabsGroup;
-    public Button youTab;
-    public Button opponentTab;
-    public TMP_Text youTabLabel;
-    public TMP_Text opponentTabLabel;
-
     [Header("Buttons and text")]
     public Button confirmButton;                // "Fight!" vs AI, "Ready" online
     public TMP_Text confirmLabel;
@@ -56,8 +49,7 @@ public class CharacterSelectScreen : MonoBehaviour
 
     IMatchSession match;
     bool wired;
-    bool pickingOpponent;
-    bool randomYou, randomOpponent;
+    bool randomYou;   // the opponent (vs AI) is always Random; you only pick your own fighter
     readonly List<CharacterButtonUI> buttons = new List<CharacterButtonUI>();
     readonly List<int> builtIds = new List<int>();
 
@@ -73,9 +65,8 @@ public class CharacterSelectScreen : MonoBehaviour
     {
         match = SessionFinder.Find();
         if (match == null) return;
-        pickingOpponent = false;
         // every time character select opens, both sides start on Random
-        randomYou = randomOpponent = true;
+        randomYou = true;
         if (!wired) { Wire(); wired = true; }
         Rebuild();
         timeLeft = pickSeconds;
@@ -96,8 +87,6 @@ public class CharacterSelectScreen : MonoBehaviour
 
     void Wire()
     {
-        if (youTab != null) youTab.onClick.AddListener(() => { AudioManager.Click(); pickingOpponent = false; });
-        if (opponentTab != null) opponentTab.onClick.AddListener(() => { AudioManager.Click(); pickingOpponent = true; });
         if (confirmButton != null) confirmButton.onClick.AddListener(() => { AudioManager.Confirm(); ResolveRandom(); match.ConfirmCharacter(); });
         if (backButton != null) backButton.onClick.AddListener(() => { AudioManager.Click(); match.Leave(); });
         if (profile != null && profile.moreButton != null)
@@ -133,9 +122,8 @@ public class CharacterSelectScreen : MonoBehaviour
         if (GridOutOfDate()) Rebuild();
 
         bool choosesOpponent = match.ChoosesOpponent;
-        bool forOpponent = choosesOpponent && pickingOpponent;
-        int current = forOpponent ? match.OpponentCharacter : match.LocalCharacter;
-        bool randomNow = forOpponent ? randomOpponent : randomYou;
+        int current = match.LocalCharacter;
+        bool randomNow = randomYou;
 
         for (int i = 0; i < buttons.Count; i++)
         {
@@ -159,16 +147,9 @@ public class CharacterSelectScreen : MonoBehaviour
             buttons[i].SetInteractable(!match.CharacterConfirmed);
         }
 
-        if (tabsGroup != null) tabsGroup.SetActive(choosesOpponent);
-        // The tab you are on is switched off, so its "disabled" look doubles as the selected look.
-        if (youTab != null) youTab.interactable = pickingOpponent;
-        if (opponentTab != null) opponentTab.interactable = !pickingOpponent;
-        if (youTabLabel != null) youTabLabel.text = "You: " + (randomYou ? "Random" : CharacterList.NameOf(match.LocalCharacter));
-        if (opponentTabLabel != null) opponentTabLabel.text = "Opponent: " + (randomOpponent ? "Random" : CharacterList.NameOf(match.OpponentCharacter));
-
         if (titleText != null)
         {
-            string title = choosesOpponent ? "Choose characters" : "Choose your character";
+            string title = "Choose your character";
             if (!choosesOpponent && match.OpponentName.Length > 0) title += "\nvs " + match.OpponentName;
             titleText.text = title;
         }
@@ -359,8 +340,8 @@ public class CharacterSelectScreen : MonoBehaviour
             match.LocalCharacter = RandomCharacter();
             AudioManager.CharacterPicked(match.LocalCharacter);   // the rolled fighter still says their Select line
         }
-        if (randomOpponent && match.ChoosesOpponent) match.OpponentCharacter = RandomCharacter();
-        randomYou = randomOpponent = false;
+        if (match.ChoosesOpponent) match.OpponentCharacter = RandomCharacter();   // vs AI: the opponent is always Random
+        randomYou = false;
     }
 
     // Everyone except Sandbag.
@@ -380,19 +361,14 @@ public class CharacterSelectScreen : MonoBehaviour
     {
         if (match.CharacterConfirmed) return;
         AudioManager.Click();
-        bool forOpponent = match.ChoosesOpponent && pickingOpponent;
         if (id == RandomId)
         {
-            if (forOpponent) randomOpponent = true; else randomYou = true;
+            randomYou = true;
             return;
         }
         previewId = id;
-        if (forOpponent) randomOpponent = false; else randomYou = false;
-        if (forOpponent) match.OpponentCharacter = id;
-        else
-        {
-            match.LocalCharacter = id;
-            AudioManager.CharacterPicked(id);   // your character's Select voice line
-        }
+        randomYou = false;
+        match.LocalCharacter = id;
+        AudioManager.CharacterPicked(id);   // your character's Select voice line
     }
 }

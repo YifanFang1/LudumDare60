@@ -23,8 +23,20 @@ MonoBehaviour:
       y: 104
       width: 661
       height: 898
-    tilePortraitY: 0
+    spriteScale: 0
+    tilePortraitRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
     nameArt: {fileID: 21300000, guid: 16e32512e7ff146b890a7f38910bf7e0, type: 3}
+    nameBounds:
+      serializedVersion: 2
+      x: 0
+      y: 18
+      width: 278
+      height: 134
     moreArt: {fileID: 21300000, guid: b51275066ad314d00b4a3d0fd3ed7f7c, type: 3}
     backArt: {fileID: 21300000, guid: 0e665652f6ea34eed8ff7874c17fd17c, type: 3}
     miniSkill: {fileID: 21300000, guid: 4ba4ffae83ab74a089921d5c27e887d9, type: 3}
@@ -47,8 +59,20 @@ MonoBehaviour:
       y: 162
       width: 685
       height: 912
-    tilePortraitY: 0
+    spriteScale: 0
+    tilePortraitRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
     nameArt: {fileID: 21300000, guid: 631e0ebed41f441ecad157634ac60acc, type: 3}
+    nameBounds:
+      serializedVersion: 2
+      x: 0
+      y: 17
+      width: 435
+      height: 98
     moreArt: {fileID: 21300000, guid: 479497e76ca2248a9bb195db07654837, type: 3}
     backArt: {fileID: 21300000, guid: 04605f2ac80c84a36b1c29da62d08fb5, type: 3}
     miniSkill: {fileID: 21300000, guid: 86b6e2885bb1b4949bf3f201546061e9, type: 3}
@@ -74,8 +98,20 @@ MonoBehaviour:
       y: 213
       width: 692
       height: 595
-    tilePortraitY: 183.9017
+    spriteScale: 0
+    tilePortraitRect:
+      serializedVersion: 2
+      x: -13.3
+      y: -20.5
+      width: 204.1582
+      height: 183.9017
     nameArt: {fileID: 21300000, guid: 912d475cb91ef40d1be86bb746d8ca9e, type: 3}
+    nameBounds:
+      serializedVersion: 2
+      x: 8
+      y: 24
+      width: 399
+      height: 506
     moreArt: {fileID: 21300000, guid: 79ae4957ac6d548b8b8ae21fb9c4d0ba, type: 3}
     backArt: {fileID: 21300000, guid: e9f1b3c8bed054e41893bdd4c75c5039, type: 3}
     miniSkill: {fileID: 21300000, guid: b2fe9fd3b49404b5ca4992c58499b540, type: 3}
@@ -84,8 +120,11 @@ MonoBehaviour:
     - {fileID: 21300000, guid: c770868f461fd4797a4fd0cb6fa2baba, type: 3}
     - {fileID: 21300000, guid: f49717fa3c2f046b69d32d0a2072affe, type: 3}
     - {fileID: 21300000, guid: f5f1fa6213898417eb4ecfcba6521fa6, type: 3}
-    traitPositions: []
-    nameCorner: {x: 1800, y: 800}
+    traitPositions:
+    - {x: 1500, y: 40}
+    - {x: 1450, y: 125}
+    - {x: 1380, y: 220}
+    nameCorner: {x: 1800, y: 815}
     background: Coming soon.
     skills: []
   - label: Patience
@@ -98,8 +137,20 @@ MonoBehaviour:
       y: 3
       width: 617
       height: 956
-    tilePortraitY: 0
+    spriteScale: 0
+    tilePortraitRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
     nameArt: {fileID: 21300000, guid: eddb36b49143e4025a523667528300d4, type: 3}
+    nameBounds:
+      serializedVersion: 2
+      x: 0
+      y: 18
+      width: 577
+      height: 98
     moreArt: {fileID: 21300000, guid: c290d101d22444efb9c0238e87271ebc, type: 3}
     backArt: {fileID: 21300000, guid: 7b43a174c68724be1976dddefaef9a6e, type: 3}
     miniSkill: {fileID: 21300000, guid: 52b67046fef114cf49fa833be76e6d61, type: 3}
@@ -120,8 +171,20 @@ MonoBehaviour:
       y: 13
       width: 783
       height: 929
-    tilePortraitY: 0
+    spriteScale: 0
+    tilePortraitRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
     nameArt: {fileID: 21300000, guid: f8896d069127047b5979a672e2e50948, type: 3}
+    nameBounds:
+      serializedVersion: 2
+      x: 0
+      y: 17
+      width: 826
+      height: 189
     moreArt: {fileID: 21300000, guid: 449b32e701d964b9184428f371784656, type: 3}
     backArt: {fileID: 21300000, guid: d797a833eb6d748958f61ee922604caf, type: 3}
     miniSkill: {fileID: 21300000, guid: c1b9c35a7bd574853a1f1a17a285e49a, type: 3}
@@ -131,7 +194,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 8278b77fcb01649318739abdd549634b, type: 3}
     - {fileID: 21300000, guid: dc8d97929d9424e7e8d717bb922c9894, type: 3}
     traitPositions: []
-    nameCorner: {x: 1868, y: 880}
+    nameCorner: {x: 1868, y: 815}
     background: It wasn't the rats that started the plague. It was the tick infected with the plague that bit the rat and started the plague. The rats were victims too, and they need a cure. So, to gain the humans' trust, the rats went undercover. Dr. Remy was formed, saving patients with his unique set of cures... The people Dr. Remy encountered would describe them as rather quiet. "He's always mumbling to himself, a squeaky little thing." Regardless, the doctor got the job done, and learned a lot about medicine in the process. They were so close to finding the cure, but then their plans were upturned with the abduction...
     skills:
     - name: 'LIGHT: CANE JAB'
@@ -147,15 +210,27 @@ MonoBehaviour:
   - label: K3N
     characterId: 16
     backing: {fileID: 21300000, guid: 195f29febbab14b9891779ad4867c876, type: 3}
-    sprite: {fileID: 21300000, guid: d71bbd4d1058f40d1a8e3f91c448977f, type: 3}
+    sprite: {fileID: 21300000, guid: d70be9d3042dc4b21a83cc7ee05ec79a, type: 3}
     spriteBounds:
       serializedVersion: 2
-      x: 124
-      y: 185
-      width: 612
-      height: 798
-    tilePortraitY: 0
+      x: 43
+      y: 31
+      width: 39
+      height: 54
+    spriteScale: 15
+    tilePortraitRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
     nameArt: {fileID: 21300000, guid: 4db565a281b0649a9b721a26570f9b6c, type: 3}
+    nameBounds:
+      serializedVersion: 2
+      x: 0
+      y: 13
+      width: 269
+      height: 123
     moreArt: {fileID: 21300000, guid: 54bde36f5418a4b69833a0c4b2f6136f, type: 3}
     backArt: {fileID: 21300000, guid: ba8cc19db496f40efa87802221a474d7, type: 3}
     miniSkill: {fileID: 21300000, guid: 0cfc03370ee74495997c1fbc325c43aa, type: 3}
@@ -178,8 +253,20 @@ MonoBehaviour:
       y: 58
       width: 658
       height: 837
-    tilePortraitY: 0
+    spriteScale: 0
+    tilePortraitRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
     nameArt: {fileID: 21300000, guid: 43af4fb821c1f49a7aeb9877461c78b8, type: 3}
+    nameBounds:
+      serializedVersion: 2
+      x: 0
+      y: 17
+      width: 328
+      height: 113
     moreArt: {fileID: 21300000, guid: fe6feb87f298944c0bb2b9ddec222340, type: 3}
     backArt: {fileID: 21300000, guid: 27ddb3640be204a4880feb64adb6155c, type: 3}
     miniSkill: {fileID: 21300000, guid: 59cabbbdacc2c47ca8cbb362ab920c87, type: 3}

@@ -27,9 +27,13 @@ public class CharacterSelectArt : ScriptableObject
         public Sprite sprite;
         [Tooltip("The part of the sprite that is not transparent, in sprite pixels from its top-left (x, y, width, height). Used to centre it. Empty = the whole sprite.")]
         public Rect spriteBounds;
-        [Tooltip("Grid tile only: the portrait's Pos Y in the Inspector (top-anchored, so bigger = higher). 0 = automatic (head 6 px from the top).")]
-        public float tilePortraitY;
+        [Tooltip("Pixel-art pictures: how many screen pixels each picture pixel becomes. 0 = automatic (native size, shrunk to fit).")]
+        public float spriteScale;
+        [Tooltip("Grid tile only: the portrait's Rect Transform as the Inspector shows it (Pos X, Pos Y, Width, Height; top-left anchored). Width 0 = automatic placement.")]
+        public Rect tilePortraitRect;
         public Sprite nameArt;
+        [Tooltip("The part of the name picture that is not transparent (x, y, width, height from its top-left). nameCorner is where the bottom-right of THIS part goes. Empty = the whole picture.")]
+        public Rect nameBounds;
         public Sprite moreArt;
         public Sprite backArt;
         public Sprite miniSkill;

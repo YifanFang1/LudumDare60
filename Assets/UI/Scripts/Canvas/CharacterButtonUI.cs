@@ -45,10 +45,16 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
             // fill the tile's width with the character, top of the head 6 px from the top edge
             Rect b = e.spriteBounds.width > 0f ? e.spriteBounds : new Rect(0f, 0f, e.sprite.rect.width, e.sprite.rect.height);
             float s = TileWidth * 1.05f / b.width;
+            if (e.spriteScale > 0f) s = Mathf.Min(s, (TileHeight - 12f) / b.height);   // small pixel art: show all of it
             RectTransform rt = portrait.rectTransform;
             rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0f, 1f);
             rt.sizeDelta = new Vector2(e.sprite.rect.width * s, e.sprite.rect.height * s);
-            rt.anchoredPosition = new Vector2(TileWidth * 0.5f - (b.x + b.width * 0.5f) * s, e.tilePortraitY != 0f ? e.tilePortraitY : -(6f - b.y * s));
+            rt.anchoredPosition = new Vector2(TileWidth * 0.5f - (b.x + b.width * 0.5f) * s, -(6f - b.y * s));
+            if (e.tilePortraitRect.width > 0f)
+            {
+                rt.anchoredPosition = new Vector2(e.tilePortraitRect.x, e.tilePortraitRect.y);
+                rt.sizeDelta = new Vector2(e.tilePortraitRect.width, e.tilePortraitRect.height);
+            }
             if (nameText != null) nameText.gameObject.SetActive(false);
         }
         else

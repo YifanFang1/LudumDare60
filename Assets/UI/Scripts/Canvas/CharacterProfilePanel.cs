@@ -52,13 +52,18 @@ public class CharacterProfilePanel : MonoBehaviour
 
         // the character: native size (shrunk only if taller than the panel), bottom on the screen edge
         float h = e.sprite.rect.height;
-        float s = h > 1000f ? 1000f / h : 1f;
+        float s = e.spriteScale > 0f ? e.spriteScale : (h > 1000f ? 1000f / h : 1f);
         Rect b = e.spriteBounds.width > 0f ? e.spriteBounds : new Rect(0f, 0f, e.sprite.rect.width, h);
-        Put(sprite, e.sprite, SpriteCenterX - (b.x + b.width * 0.5f) * s, 1080f - h * s, e.sprite.rect.width * s, h * s);
+        // the opaque part's bottom edge sits on the bottom of the screen (pictures with empty space under the feet too)
+        Put(sprite, e.sprite, SpriteCenterX - (b.x + b.width * 0.5f) * s, 1080f - (b.y + b.height) * s, e.sprite.rect.width * s, h * s);
         sprite.preserveAspect = false;
 
         if (e.nameArt != null)
-            Put(nameArt, e.nameArt, e.nameCorner.x - e.nameArt.rect.width, e.nameCorner.y - e.nameArt.rect.height, e.nameArt.rect.width, e.nameArt.rect.height);
+        {
+            // the bottom-right corner of the picture's visible part sits on nameCorner (pictures with empty space around the lettering line up too)
+            Rect nb = e.nameBounds.width > 0f ? e.nameBounds : new Rect(0f, 0f, e.nameArt.rect.width, e.nameArt.rect.height);
+            Put(nameArt, e.nameArt, e.nameCorner.x - (nb.x + nb.width), e.nameCorner.y - (nb.y + nb.height), e.nameArt.rect.width, e.nameArt.rect.height);
+        }
         else Hide(nameArt);
         if (fallbackName != null) fallbackName.gameObject.SetActive(false);
 

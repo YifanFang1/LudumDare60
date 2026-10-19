@@ -831,7 +831,7 @@ public static class BuildFightCanvas
             CharacterProfilePanel.Place(logoImage.rectTransform, 795f, -4f, logo.width * 0.28f, logo.height * 0.28f);
         }
 
-        // ----- list page: frame, grid, Back / Fight, tabs (vs AI), status -----
+        // ----- list page: frame, grid, Back / Fight -----
         GameObject list = new GameObject("ListPage", typeof(RectTransform));
         list.transform.SetParent(stage, false);
         Stretch((RectTransform)list.transform);
@@ -852,29 +852,6 @@ public static class BuildFightCanvas
 
         Button backBtn = PlacedArtButton(list.transform, "BackButton", LoadSprite("BACK.png"), LoadSprite("BACKHOVER.png"), 85f, 872f);
         Button confirm = PlacedArtButton(list.transform, "ConfirmButton", SelectSprite("General/fight.png"), SelectSprite("General/fight_hover.png"), 424f, 872f);
-
-        TMP_Text title = FreeText(list.transform, "TitleText", "Choose your character", 26, TextAlignmentOptions.Center, Muted);
-        CharacterProfilePanel.Place(title.rectTransform, 780f, 405f, 440f, 70f);
-        UseFont(title, font);
-
-        GameObject tabs = new GameObject("Tabs", typeof(RectTransform), typeof(VerticalLayoutGroup));
-        tabs.transform.SetParent(list.transform, false);
-        CharacterProfilePanel.Place((RectTransform)tabs.transform, 800f, 490f, 440f, 132f);
-        VerticalLayoutGroup tabLayout = tabs.GetComponent<VerticalLayoutGroup>();
-        tabLayout.spacing = 12f;
-        tabLayout.childControlWidth = true;
-        tabLayout.childControlHeight = true;
-        tabLayout.childForceExpandWidth = true;
-        tabLayout.childForceExpandHeight = true;
-        TMP_Text youLabel;
-        TMP_Text oppLabel;
-        Button youTab = Btn(tabs.transform, "YouTab", "You", 60f, out youLabel);
-        Button oppTab = Btn(tabs.transform, "OpponentTab", "Opponent", 60f, out oppLabel);
-        youLabel.fontSize = 24;
-        oppLabel.fontSize = 24;
-
-        TMP_Text status = FreeText(list.transform, "StatusText", "", 24, TextAlignmentOptions.Center, new Color(0.75f, 0.95f, 0.40f));
-        CharacterProfilePanel.Place(status.rectTransform, 780f, 640f, 440f, 100f);
 
         // ----- the gear timer (shown on both pages) -----
         GameObject gearGo = new GameObject("TimerGear", typeof(RectTransform), typeof(Image));
@@ -981,17 +958,10 @@ public static class BuildFightCanvas
         CharacterSelectScreen cs = screen.AddComponent<CharacterSelectScreen>();
         cs.gridParent = (RectTransform)gridGo.transform;
         cs.buttonPrefab = buttonPrefab;
-        cs.tabsGroup = tabs;
-        cs.youTab = youTab;
-        cs.opponentTab = oppTab;
-        cs.youTabLabel = youLabel;
-        cs.opponentTabLabel = oppLabel;
         cs.confirmButton = confirm;
         cs.confirmLabel = null;
         cs.backButton = backBtn;
         cs.backLabel = null;
-        cs.titleText = title;
-        cs.statusText = status;
         cs.listPage = list;
         cs.detailsPage = details;
         cs.profile = profile;
@@ -1064,6 +1034,8 @@ public static class BuildFightCanvas
         if (imp.spriteImportMode != SpriteImportMode.Single) { imp.spriteImportMode = SpriteImportMode.Single; dirty = true; }
         if (imp.mipmapEnabled) { imp.mipmapEnabled = false; dirty = true; }
         if (!imp.alphaIsTransparency) { imp.alphaIsTransparency = true; dirty = true; }
+        bool pixel = relativePath.StartsWith("K3N/");
+        if (pixel && imp.filterMode != FilterMode.Point) { imp.filterMode = FilterMode.Point; dirty = true; }
         if (imp.maxTextureSize < 2048) { imp.maxTextureSize = 2048; dirty = true; }
         if (imp.textureCompression != TextureImporterCompression.Uncompressed) { imp.textureCompression = TextureImporterCompression.Uncompressed; dirty = true; }
         if (dirty) imp.SaveAndReimport();
@@ -1141,9 +1113,9 @@ public static class BuildFightCanvas
             // Odette: arrow-shaped banners hug the right edge (x is clamped to fit)
             new object[] { "ODETTE", Painter.Id, "Odette", 3, new Vector2(1868f, 800f),
                 new[] { new Vector2(1915f, 40f), new Vector2(1915f, 270f), new Vector2(1915f, 375f) } },
-            new object[] { "ROOM", Elephant.Id, "Room", 3, new Vector2(1800f, 800f), null, 183.9017f },
+            new object[] { "ROOM", Elephant.Id, "Room", 3, new Vector2(1800f, 815f), new[] { new Vector2(1500f, 40f), new Vector2(1450f, 125f), new Vector2(1380f, 220f) }, new Rect(-13.3f, -20.5f, 204.1582f, 183.9017f) },
             new object[] { "PATIENCE", Executioner.Id, "Patience", 1, new Vector2(1868f, 830f) },
-            new object[] { "DR_REMY", PlagueDoctor.Id, "Dr. Remy", 3, new Vector2(1868f, 880f) },
+            new object[] { "DR_REMY", PlagueDoctor.Id, "Dr. Remy", 3, new Vector2(1868f, 815f) },
             new object[] { "K3N", K3N.Id, "K3N", 3, new Vector2(1868f, 830f) },
             new object[] { "NOIR", Cowboy.Id, "Noir", 3, new Vector2(1868f, 830f) },
         };
@@ -1159,8 +1131,10 @@ public static class BuildFightCanvas
             e.label = (string)defs[d][2];
             e.backing = SelectSprite(folder + "/backing.png");
             e.sprite = SelectSprite(folder + "/sprite.png");
+            if (id == K3N.Id) e.spriteScale = 15f;   // ArcadeIdle1 is tiny pixel art (39x54 px of character), blown up crisp
             e.spriteBounds = OpaqueBounds(e.sprite);
             e.nameArt = SelectSprite(folder + "/name.png");
+            e.nameBounds = OpaqueBounds(e.nameArt);
             e.moreArt = SelectSprite(folder + "/more.png");
             e.backArt = SelectSprite(folder + "/back.png");
             e.miniSkill = SelectSprite(folder + "/mini_skill.png");
@@ -1168,9 +1142,9 @@ public static class BuildFightCanvas
             int n = (int)defs[d][3];
             e.traits = new Sprite[n];
             for (int t = 0; t < n; t++) e.traits[t] = SelectSprite(folder + "/trait_" + (t + 1) + ".png");
-            if (isNew) e.nameCorner = (Vector2)defs[d][4];
-            if (isNew && defs[d].Length > 5 && defs[d][5] != null) e.traitPositions = (Vector2[])defs[d][5];
-            if ((isNew || e.tilePortraitY == 0f) && defs[d].Length > 6) e.tilePortraitY = (float)defs[d][6];
+            if (isNew || id == PlagueDoctor.Id || id == Elephant.Id) e.nameCorner = (Vector2)defs[d][4];   // these two are laid out by hand here
+            if ((isNew || id == Elephant.Id) && defs[d].Length > 5 && defs[d][5] != null) e.traitPositions = (Vector2[])defs[d][5];
+            if (defs[d].Length > 6) e.tilePortraitRect = (Rect)defs[d][6];   // a hand-set Inspector layout, always reapplied
             if (isNew || string.IsNullOrEmpty(e.background)) e.background = "Coming soon.";
             if (id == PlagueDoctor.Id && (isNew || e.background == "Coming soon.")) FillRemyText(e);
             entries.Add(e);
