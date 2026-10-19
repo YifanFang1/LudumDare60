@@ -28,8 +28,11 @@ public class RelayLockstepSession : MatchSessionBase
     // 15: synchronized two-character introduction before the countdown.
     // 16: round timer is 80 seconds.
     // 17: ordered matchup dialogue with synchronized reading time.
+    // 18: lob rat, back-walk speed while blocking, held grabs, K3N triple-jab Special.
+    // 19: Room's Ultimate grows him 1.5x with hyper armor (no more copies).
     // 22: completed matchup intro sheet, including replies and mirror-match timing.
-    const string Version = "22";
+    // 20: Remy's Ultimate waits 1 s, then showers rats. 24: it is uninterruptable (hyper armor).
+    const string Version = "24";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 

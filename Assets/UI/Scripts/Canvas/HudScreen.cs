@@ -56,6 +56,8 @@ public class HudScreen : MonoBehaviour
 
     [Header("Round timer (top middle)")]
     public TMP_Text timerText;                   // made at run time when empty
+    public Color timerBackdropColor = new Color(0f, 0f, 0f, 0.85f);   // black plate behind the clock
+    GameObject timerBackdrop;
     public Color timerColor = Color.white;
     public Color timerLowColor = new Color(1f, 0.35f, 0.3f);   // the last 10 seconds
 
@@ -254,6 +256,17 @@ public class HudScreen : MonoBehaviour
         TMP_Text sample = leftName != null ? leftName : rightName;
         if (timerText == null)
         {
+            // Black plate behind the clock, made first so it draws underneath.
+            timerBackdrop = new GameObject("TimerBackdrop", typeof(RectTransform), typeof(Image));
+            timerBackdrop.transform.SetParent(transform, false);
+            RectTransform brt = (RectTransform)timerBackdrop.transform;
+            brt.anchorMin = brt.anchorMax = brt.pivot = new Vector2(0.5f, 1f);
+            brt.anchoredPosition = new Vector2(0f, -8f);
+            brt.sizeDelta = new Vector2(150f, 96f);
+            Image plate = timerBackdrop.GetComponent<Image>();
+            plate.color = timerBackdropColor;
+            plate.raycastTarget = false;
+
             GameObject go = new GameObject("TimerText", typeof(RectTransform), typeof(TextMeshProUGUI));
             go.transform.SetParent(transform, false);
             RectTransform rt = (RectTransform)go.transform;
@@ -311,6 +324,7 @@ public class HudScreen : MonoBehaviour
         if (timerText == null) return;
         bool show = sim.roundTimerOn;
         if (timerText.gameObject.activeSelf != show) timerText.gameObject.SetActive(show);
+        if (timerBackdrop != null && timerBackdrop.activeSelf != show) timerBackdrop.SetActive(show);
         if (!show) return;
         int seconds = Mathf.CeilToInt(Mathf.Max(0, sim.roundTimeTicks) / 60f);
         SetText(timerText, seconds.ToString());

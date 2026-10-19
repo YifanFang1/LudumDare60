@@ -6565,7 +6565,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 10, y: 30}
+  m_AnchoredPosition: {x: 10, y: 29.999878}
   m_SizeDelta: {x: 358.4, y: 201.6}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1010453011
@@ -8024,7 +8024,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -10}
+  m_AnchoredPosition: {x: 0, y: -9.999878}
   m_SizeDelta: {x: -160, y: -360}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1149174700
@@ -8186,7 +8186,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1152043980
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8199,10 +8199,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ec6945e4cb8a436f915e3006600aa98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterPreview
-  characterId: 15
+  characterId: 16
   character: {fileID: 0}
-  moveIndex: 0
-  tick: 0
+  moveIndex: 3
+  tick: 24
   playing: 0
   playSpeed: 1
   faceRight: 1
@@ -8222,7 +8222,7 @@ Transform:
   m_GameObject: {fileID: 1152043979}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13.03, y: -7.03, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13106,6 +13106,7 @@ MonoBehaviour:
   pipWonColor: {r: 0.62, g: 0.95, b: 0.35, a: 1}
   pipEmptyColor: {r: 0.07, g: 0.09, b: 0.08, a: 1}
   timerText: {fileID: 0}
+  timerBackdropColor: {r: 0, g: 0, b: 0, a: 0.85}
   timerColor: {r: 1, g: 1, b: 1, a: 1}
   timerLowColor: {r: 1, g: 0.35, b: 0.3, a: 1}
   bannerText: {fileID: 0}
@@ -13762,7 +13763,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 30}
+  m_AnchoredPosition: {x: 0, y: 29.999878}
   m_SizeDelta: {x: 640, y: 360}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1837278497
@@ -15645,7 +15646,7 @@ MonoBehaviour:
   confirm: {fileID: 8300000, guid: 211a4d6cab23d4f65a3ffc73a42b0140, type: 3}
   pageSwitch: {fileID: 8300000, guid: cd1d88815db944007a656ccbce40dda4, type: 3}
   glitchSound: {fileID: 8300000, guid: db51424db52a74773912055c97d1b2c0, type: 3}
-  glassBreak: {fileID: 8300000, guid: dfb9d6ed109d1424aa25f5151c317cdc, type: 3}
+  glassBreak: {fileID: 8300000, guid: 071394c3aceed4675ada5194e7399044, type: 3}
   tvOff: {fileID: 8300000, guid: abc45c7d861a449879abb4b90ef90298, type: 3}
   menuMusic: {fileID: 8300000, guid: a56bae3fbbd637e4ba060afb8cc5528b, type: 3}
   characterSelectMusic: {fileID: 8300000, guid: a56bae3fbbd637e4ba060afb8cc5528b, type: 3}
