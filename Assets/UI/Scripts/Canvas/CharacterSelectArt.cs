@@ -60,6 +60,8 @@ public class CharacterSelectArt : ScriptableObject
     public Sprite randomSelect;
     [Tooltip("The dark Random (\"?\") tile, shown while Random is NOT the current pick.")]
     public Sprite randomPicked;
+    [Tooltip("The \"Choose an opponent\" title, shown instead of \"Choose a renegade\" while picking the AI's fighter. Used when the screen has no separate Opponent Title object.")]
+    public Sprite opponentTitle;
 
     public Entry Find(int characterId)
     {

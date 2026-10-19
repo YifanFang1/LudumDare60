@@ -42,6 +42,9 @@ MonoBehaviour:
     - move: Special
       clips:
       - {fileID: 8300000, guid: 5fbcf76fd3999424ab9ae525489185c8, type: 3}
+    - move: Ultimate
+      clips:
+      - {fileID: 8300000, guid: c882f6c92c378b6418d072c459cd7765, type: 3}
     attackStart: []
     hit:
     - {fileID: 8300000, guid: cb454c82bde36184e8791fbcd24dbe1f, type: 3}
@@ -54,6 +57,7 @@ MonoBehaviour:
     block: []
     dash:
     - {fileID: 8300000, guid: f61b2389a2df2cd4ea8aafb2311d73df, type: 3}
+    jump: []
     superFlash: {fileID: 8300000, guid: c17973d27cd8e754aad7427a754045c3, type: 3}
     ko: {fileID: 0}
     reflect: []

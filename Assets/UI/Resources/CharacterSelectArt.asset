@@ -209,8 +209,10 @@ MonoBehaviour:
     skillBlock: {fileID: 21300000, guid: 5877075bb94d7432585c648d648e579a, type: 3}
     traits:
     - {fileID: 21300000, guid: fd10b3f7298dd44adb7bb9315b1370e6, type: 3}
+    - {fileID: 21300000, guid: 2f75488e74809f446b99787b503d8432, type: 3}
     traitPositions:
     - {x: 1915, y: 8}
+    - {x: 1915, y: 130}
     nameCorner: {x: 1868, y: 830}
     background: "Believed to be the messenger of a deity brought into existence by a cult, Patience carries out judgment upon those whom their deity has deemed the scourge of humankind: the ones who do not feel guilt or seek redemption for their transgressions. For these people, Patience feels only wrath, contempt, and disgust, and Patience will ensure that they seek atonement whether they want to or not. Patience does have a soft spot for those who punish themselves through feelings of pure remorse and seek atonement before Patience's involvement. For these people, Patience will come to them and provide them a way to obtain absolution for their transgressions. Patience does not hate humanity; rather, they hate the pain and unhappiness that humanity causes, and they seek to purge the pain and unhappiness in the world, no matter the cost."
     skills:
@@ -425,3 +427,4 @@ MonoBehaviour:
     skills: []
   randomSelect: {fileID: 21300000, guid: 58b3e02a8e3e9ea41b154c822285ef3b, type: 3}
   randomPicked: {fileID: 21300000, guid: eeb6c470485be964482f24e0b777215a, type: 3}
+  opponentTitle: {fileID: 21300000, guid: afe5f58a83884ed4bba44ac76d3b52a9, type: 3}
