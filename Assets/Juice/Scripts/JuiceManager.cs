@@ -104,7 +104,7 @@ public class JuiceManager : MonoBehaviour
         shake = new JuiceScreenShake(profile, shakeCamera);
         impactFrame = new JuiceImpactFrame(profile, shakeCamera, particles.Root);
         world = GetComponent<WorldView>();
-        if (world == null) world = FindFirstObjectByType<WorldView>();
+        if (world == null) world = FindAnyObjectByType<WorldView>();
 
         // Found the same way FightView and LobbyUI find it. Without it the API still works,
         // there are just no automatic reactions to the fight.
