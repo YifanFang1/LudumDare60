@@ -1,19 +1,32 @@
 using UnityEngine;
 
-// One character's voice: spoken dialogue and short combat shouts. Lives on the character's art
-// asset (CharacterLook.voice). Every slot is optional: an empty slot just stays quiet.
+// One character's voice. Lives on the character's art asset (CharacterLook.voice). Every slot is
+// optional: an empty slot just stays quiet.
 //
-// Dialogue lines are matched by their TEXT. The intro exchanges are in MatchupDialogue.cs and the
-// win/lose lines are in CharacterDialogue.cs: copy the line from there (or from the screen) into
-// 'Line' and drag the recording into 'Clip'. Capitals, spaces and punctuation don't matter, so
-// "Sure-you-can beat me?" also matches "sure you can beat me".
+//   Select       when you pick this character on the character select screen
+//   Round Win    after YOUR character wins a round that doesn't end the match
+//   Round Lose   after YOUR character loses a round that doesn't end the match
+//   Dialogue     the pre-match intro exchanges (MatchupDialogue.cs), matched by TEXT: copy the line
+//                into 'Line' and drag the recording into 'Clip'. Capitals, spaces and punctuation
+//                don't matter. The end-of-match dialogue box is never voiced.
+//   Moves, Hurt, KO   combat shouts
 //
-// The AudioManager plays all of this on a separate source per fighter, at normal pitch, and a new
-// line from the same fighter cuts off the one before (so shouts never pile up).
+// Only your own character's Select and Round Win/Lose lines play (online, each player hears their
+// own). Nothing is voiced on the match win or loss itself.
+//
+// The AudioManager plays voices on a separate source per fighter, at normal pitch, and a new line
+// from the same fighter cuts off the one before (so shouts never pile up).
 [System.Serializable]
 public class CharacterVoice
 {
-    [Tooltip("Spoken versions of this character's on-screen lines (intro exchanges, win and lose lines). 'Line' must match the text on screen.")]
+    [Tooltip("Played when you pick this character on the character select screen. Picked at random.")]
+    public AudioClip[] select;
+    [Tooltip("Played after YOUR character wins a round that doesn't end the match.")]
+    public AudioClip[] roundWin;
+    [Tooltip("Played after YOUR character loses a round that doesn't end the match.")]
+    public AudioClip[] roundLose;
+
+    [Tooltip("Spoken versions of this character's pre-match intro lines (MatchupDialogue.cs). 'Line' must match the text on screen.")]
     public VoiceLine[] dialogue;
 
     [Range(0f, 1f)]
@@ -29,8 +42,6 @@ public class CharacterVoice
     public float hurtChance = 0.4f;
     [Tooltip("Getting knocked out.")]
     public AudioClip[] ko;
-    [Tooltip("Winning a round (not the last one: the win line covers that).")]
-    public AudioClip[] roundWin;
 
     // The clip for a line of on-screen text, or null.
     public AudioClip FindLine(string text)

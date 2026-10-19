@@ -59,5 +59,23 @@ MonoBehaviour:
     heal: []
     powerUp: []
     outOfAmmo: []
-    theme: {fileID: 8300000, guid: 0ffd9992ee1417f4294b71148279ca89, type: 3}
+    theme: {fileID: 8300000, guid: 5e3b0e2c81178c345bbd0fa75c9169f8, type: 3}
+  voice:
+    select:
+    - {fileID: 8300000, guid: 77cbf3258cd7cab429a9dd2e0a502c65, type: 3}
+    roundWin:
+    - {fileID: 8300000, guid: 77cbf3258cd7cab429a9dd2e0a502c65, type: 3}
+    roundLose: []
+    dialogue: []
+    volume: 1
+    moves:
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: 77cbf3258cd7cab429a9dd2e0a502c65, type: 3}
+    - move: Ultimate
+      clips:
+      - {fileID: 8300000, guid: c882f6c92c378b6418d072c459cd7765, type: 3}
+    hurt: []
+    hurtChance: 0.4
+    ko: []
   characterId: 13

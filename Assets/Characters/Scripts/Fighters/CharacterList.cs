@@ -12,7 +12,7 @@ using System.Collections.Generic;
 //                11  Painter          "Paintress"        designed in Design/Characters/. The
 //                12  Cowboy           "Noir"             class names are older than the
 //                13  Elephant         "Room"             in-game names (D-40) and are kept
-//                14  Executioner      "The Executioner"  to avoid churn.
+//                14  Executioner      "Patience"         to avoid churn.
 //                15  PlagueDoctor     "Dr. Remy"
 //                16  K3N              "K3N"
 //                17+          free, for new roster characters
@@ -43,7 +43,7 @@ public static class CharacterList
         Add(Painter.Id, "Paintress", delegate { return new Painter(); }, null);
         Add(Cowboy.Id, "Noir", delegate { return new Cowboy(); }, null);
         Add(Elephant.Id, "Ŕ̶̝͇̤͛̎Ȍ̴̢̪̗͇͂̈́̆̀̿̿̈́̀͐͗̓͠ͅO̵̯̲͕̗͐̐̌͂͗̓̆̍͊͗M̷̧̤̲̲̖͑̿", delegate { return new Elephant(); }, null);
-        Add(Executioner.Id, "The Executioner", delegate { return new Executioner(); }, null);
+        Add(Executioner.Id, "Patience", delegate { return new Executioner(); }, null);
         Add(PlagueDoctor.Id, "Dr. Remy", delegate { return new PlagueDoctor(); }, null);
         Add(K3N.Id, "K3N", delegate { return new K3N(); }, null);
     }

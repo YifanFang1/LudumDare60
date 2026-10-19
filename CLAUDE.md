@@ -18,7 +18,7 @@ Players fight **online** (room codes through a Cloudflare relay) or **solo vs an
 | Paintress | Built (id 11, class `Painter`) | Rushdown. Invincible dash, reflective canvas, control-scramble Ultimate, paint puddles. [Design](Design/Characters/Paintress.md) |
 | Noir | Built (id 12, class `Cowboy`) | Zoner. Long gun poke, 6 bullets per round, horse dashes. Was Black and White Cowboy. [Design](Design/Characters/Noir.md) |
 | Room | Built (id 13, class `Elephant`) | Grappler. 200 HP, can't block, Vine Boom, held trunk grab, clone Ultimate. [Design](Design/Characters/Room.md) |
-| The Executioner | Built (id 14, class `Executioner`) | Trapper. Traps, bleed stacks, whip grab, Guillotine. [Design](Design/Characters/Executioner.md) |
+| Patience | Built (id 14, class `Executioner`) | Trapper. Was The Executioner. Traps, bleed stacks, whip grab, Guillotine. [Design](Design/Characters/Executioner.md) |
 | Dr. Remy | Built (id 15, class `PlagueDoctor`) | Mixup. Three switchable potions, rat projectile, leeches, rat-wave Ultimate. Was Plague Doctor. [Design](Design/Characters/DrRemy.md) |
 | Nek (temp name) | Built (id 16, class `Nek`) | Powerup. Arcade-style; Install meter-drain toggle replaces his Ultimate. [Design](Design/Characters/Nek.md) |
 | Brawler | In code | Close-range test character (id 0) and the fallback for unknown ids. Not a real roster character. |

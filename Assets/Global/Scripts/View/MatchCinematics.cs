@@ -68,7 +68,7 @@ public class MatchCinematics : MonoBehaviour
             if (IntroActive)
                 return match.Sim.introTicks > match.Sim.introSecondTicks ? IntroExchange.firstText : IntroExchange.secondText;
             return slot < 0 ? "" : CharacterDialogue.Line(match.Sim.fighters[slot].characterId, Moment,
-                match.Sim.seed + slot + match.Sim.round);
+                match.Sim.introVariant + slot + match.Sim.round);   // introVariant changes every match, also vs AI
         }
     }
 
