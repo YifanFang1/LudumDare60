@@ -661,6 +661,11 @@ public class GameSim
         if (h.blocked) AddEvent(SimEventType.Block, h.owner, 1 - h.owner, h.hitX, h.hitY, 0);
         else if (h.def.grab) AddEvent(SimEventType.Grab, h.owner, 1 - h.owner, h.hitX, h.hitY, h.damage);
         else AddEvent(SimEventType.Hit, h.owner, 1 - h.owner, h.hitX, h.hitY, h.damage);
+
+        // Tell the view whether this was an Ultimate's hitbox (impact frames). Cosmetic: no state changes.
+        SimEvent e = events[events.Count - 1];
+        e.ultimate = h.fromUltimate;
+        events[events.Count - 1] = e;
     }
 
     void ApplyHit(HitboxInstance h, bool allowHold)

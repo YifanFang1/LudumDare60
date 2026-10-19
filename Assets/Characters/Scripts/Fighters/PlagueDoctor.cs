@@ -132,6 +132,10 @@ public class PlagueDoctor : BaseFighter
     protected override MoveDef HeavyAttack { get { return ThrowRemy; } }
     protected override MoveDef GrabMove { get { return LeechGrab; } }
     protected override MoveDef SpecialMove { get { return SelectedPotionMove; } }
+
+    // HUD row: three potion icons, the picked one lit.
+    public override int AmmoMax { get { return 3; } }
+    public override bool HudIconOn(int slot) { return slot == selectedPotion; }
     protected override MoveDef UltimateMove { get { return UnleashTheRats; } }
 
     public override DashDef ForwardDash { get { return new DashDef(10, 120); } }

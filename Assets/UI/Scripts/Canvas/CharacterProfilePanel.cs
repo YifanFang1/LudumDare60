@@ -81,8 +81,13 @@ public class CharacterProfilePanel : MonoBehaviour
 
         for (int i = 0; minis != null && i < minis.Length; i++)
         {
-            if (e.miniSkill == null) { Hide(minis[i]); continue; }
-            Put(minis[i], e.miniSkill, 1375f + 125f * i, 825f, e.miniSkill.rect.width, e.miniSkill.rect.height);
+            // this slot's own icon if set, else the plain Mini Skill square; icons are fitted into the square's size
+            Sprite icon = e.skillIcons != null && i < e.skillIcons.Length ? e.skillIcons[i] : null;
+            Sprite shown = icon != null ? icon : e.miniSkill;
+            if (shown == null) { Hide(minis[i]); continue; }
+            Sprite size = e.miniSkill != null ? e.miniSkill : shown;
+            Put(minis[i], shown, 1375f + 125f * i, 825f, size.rect.width, size.rect.height);
+            if (minis[i] != null) minis[i].preserveAspect = true;
         }
 
         Sprite more = details ? e.backArt : e.moreArt;

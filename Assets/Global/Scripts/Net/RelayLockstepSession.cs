@@ -32,8 +32,8 @@ public class RelayLockstepSession : MatchSessionBase
     // 19: Room's Ultimate grows him 1.5x with hyper armor (no more copies).
     // 22: completed matchup intro sheet, including replies and mirror-match timing.
     // 20: Remy's Ultimate waits 1 s, then showers rats. 24: it is uninterruptable (hyper armor).
-    // 25: K3N's Light is slower to start and reaches further (spawn 8, 4 active, 1600x500 box). 26: K3N's Charged Punch is slower and long (spawn 20, 7 active, 4000x500 box). 27: K3N's Grab is slower (spawn 17, 10 active, box 400,700,700,1000). 28: K3N's Special has three retimed hitboxes.
-    const string Version = "29";
+    // 25: K3N's Light is slower to start and reaches further (spawn 8, 4 active, 1600x500 box). 26: K3N's Charged Punch is slower and long (spawn 20, 7 active, 4000x500 box). 27: K3N's Grab is slower (spawn 17, 10 active, box 400,700,700,1000). 28: K3N's Special has three retimed hitboxes. 30: Ruy's Hadoken spawns higher (box y 1300). 31: K3N's Install Special has five hitboxes, and every Install attack drains 150 of the bar.
+    const string Version = "31";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 
