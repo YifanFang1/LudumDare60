@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a173614ec202b4059aaac8b295f909dc
+guid: d53e30a27af244c73997bfb4ab59d3bf
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6701125874796175287
-    second: Plague Doctor Potion - Poison_0
+      213: 2562034983933048709
+    second: Plague Doctor Potion - Heal_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,10 +49,10 @@ TextureImporter:
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 0
-  alignment: 9
-  spritePivot: {x: 0.4186223, y: 0.47195256}
-  spritePixelsToUnits: 100
-  spriteBorder: {x: 683, y: 505, z: 1082, w: 400}
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 800
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -115,23 +115,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Plague Doctor Potion - Poison_0
+      name: Plague Doctor Potion - Heal_0
       rect:
         serializedVersion: 2
-        x: 692
-        y: 502
-        width: 612
-        height: 763
-      alignment: 9
-      pivot: {x: 0.5, y: 0.4}
+        x: 710
+        y: 369
+        width: 684
+        height: 1238
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7bf9762aa7e2ffc50800000000000000
-      internalID: 6701125874796175287
+      spriteID: 587f37f5e3d2e8320800000000000000
+      internalID: 2562034983933048709
       vertices: []
       indices: 
       edges: []
@@ -140,8 +140,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    spriteID: 
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -150,7 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Plague Doctor Potion - Poison_0: 6701125874796175287
+      Plague Doctor Potion - Heal_0: 2562034983933048709
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
