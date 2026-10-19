@@ -144,6 +144,7 @@ public class WorldView : MonoBehaviour
             }
             else
             {
+                Debug.LogWarning("Couldn't find sprite or prefab for characterId: " + sim.fighters[i].characterId);
                 v.placeholder = NewQuad("Fighter" + i + " (placeholder)", 0);
                 v.placeholder.sprite = PlaceholderArt.FighterSprite(sim.fighters[i].characterId);
                 v.facingTab = NewQuad("Facing" + i, 1);
