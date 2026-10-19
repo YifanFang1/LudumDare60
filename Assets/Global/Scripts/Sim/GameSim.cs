@@ -40,7 +40,15 @@ public class GameSim
     public bool introductionsOn;
     public const int IntroLineTicks = 240;
     public int introTicks;
-    public int IntroSlot { get { return introTicks > IntroLineTicks ? 0 : introTicks > 0 ? 1 : -1; } }
+    public int introFirstSlot;
+    public int introFirstTicks = IntroLineTicks;
+    public int introSecondTicks = IntroLineTicks;
+    public int introVariant;
+    public int IntroSlot { get { return introTicks > introSecondTicks ? introFirstSlot : introTicks > 0 ? 1 - introFirstSlot : -1; } }
+    public int IntroLineElapsedTicks
+    {
+        get { return introTicks > introSecondTicks ? introFirstTicks + introSecondTicks - introTicks : introSecondTicks - introTicks; }
+    }
     public const int CountdownTicks = 180;
     public const int FightBannerTicks = 60;
     public int countdownTicks;
@@ -134,7 +142,7 @@ public class GameSim
 
         round = number;
         roundOverTicks = 0;
-        introTicks = introductionsOn && number == 1 ? IntroLineTicks * 2 : 0;
+        introTicks = introductionsOn && number == 1 ? introFirstTicks + introSecondTicks : 0;
         roundTimeTicks = RoundTimeTicks;
         timeUp = false;
         roundWinner = -1;
@@ -821,6 +829,10 @@ public class GameSim
             h = h * 31 + roundsWon[1];
             h = h * 31 + roundOverTicks;
             h = h * 31 + introTicks;
+            h = h * 31 + introFirstSlot;
+            h = h * 31 + introFirstTicks;
+            h = h * 31 + introSecondTicks;
+            h = h * 31 + introVariant;
             h = h * 31 + countdownTicks;
             h = h * 31 + fightBannerTicks;
             for (int i = 0; i < 2; i++)
