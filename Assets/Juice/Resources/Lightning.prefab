@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Charge
       objectReference: {fileID: 0}
+    - target: {fileID: 513113186323074922, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 543383898413777170, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -305,6 +309,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.separateAxes
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: ShapeModule.radius.value
       value: 6
       objectReference: {fileID: 0}
@@ -314,7 +322,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: NoiseModule.strength.scalar
-      value: 8
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthY.scalar
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.scalar
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: InitialModule.startSize.scalar
@@ -326,11 +342,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: NoiseModule.strength.minScalar
-      value: 6
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: InitialModule.startSpeed.scalar
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthY.minScalar
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minScalar
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: NoiseModule.strength.minMaxState
@@ -407,6 +431,14 @@ PrefabInstance:
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: SubModule.subEmitters.Array.data[0].properties
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.maxCurve.m_Curve.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minCurve.m_Curve.Array.size
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: SubModule.subEmitters.Array.data[0].emitProbability
@@ -489,11 +521,67 @@ PrefabInstance:
       value: 0.14195012
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.maxCurve.m_Curve.Array.data[1].time
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minCurve.m_Curve.Array.data[1].time
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: NoiseModule.remap.maxCurve.m_Curve.Array.data[2].outWeight
       value: 0.19775403
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
       propertyPath: NoiseModule.remap.maxCurve.m_Curve.Array.data[3].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.maxCurve.m_Curve.Array.data[0].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.maxCurve.m_Curve.Array.data[1].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minCurve.m_Curve.Array.data[0].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minCurve.m_Curve.Array.data[1].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.maxCurve.m_Curve.Array.data[0].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.maxCurve.m_Curve.Array.data[1].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minCurve.m_Curve.Array.data[0].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minCurve.m_Curve.Array.data[1].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.maxCurve.m_Curve.Array.data[0].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.maxCurve.m_Curve.Array.data[1].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minCurve.m_Curve.Array.data[0].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
+      propertyPath: NoiseModule.strengthZ.minCurve.m_Curve.Array.data[1].outWeight
       value: 0.33333334
       objectReference: {fileID: 0}
     - target: {fileID: 4854602485665850467, guid: 3d20dc6e83a236c469a09b82fd72a652, type: 3}
