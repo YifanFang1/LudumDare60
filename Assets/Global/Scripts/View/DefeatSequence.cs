@@ -50,6 +50,9 @@ public class DefeatSequence : MonoBehaviour
         }
         // Let the losing character finish speaking before applying the death / burn effect.
         if (sim.IsOver && cinematic != null && !cinematic.LoserLineFinished) return;
+        // Wait out an impact frame (an Ultimate KO): starting now would save its white silhouette
+        // material as the fighter's own and leave them white after the round.
+        if (!started && JuiceManager.ImpactFrameShowing) return;
         if (!started && (sim.roundOverTicks > 0 || sim.IsOver))
         {
             started = true;
