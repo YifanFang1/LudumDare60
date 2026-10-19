@@ -23,17 +23,18 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
+  moveFlashes: []
   sfx:
     moves:
     - move: Light
       clips:
-      - {fileID: 8300000, guid: 39c42c948cbe4c3ebbcd789ba94e340d, type: 3}
+      - {fileID: 8300000, guid: 7d7f770e646544cf8b2fb9429d57d380, type: 3}
     - move: Heavy
       clips:
-      - {fileID: 8300000, guid: 0fecb92eed6046eba625cc555879915e, type: 3}
+      - {fileID: 8300000, guid: 7fc8ab2847a94e6d8cef19919b6482c6, type: 3}
     - move: Grab
       clips:
-      - {fileID: 8300000, guid: 8d2893e5a1c64090ac6f2aa5e0f4214a, type: 3}
+      - {fileID: 8300000, guid: 7d7f770e646544cf8b2fb9429d57d380, type: 3}
     - move: Special
       clips:
       - {fileID: 8300000, guid: 5dc755cace484fa2a9e9b5fcdd55a1f3, type: 3}
@@ -41,9 +42,12 @@ MonoBehaviour:
       clips:
       - {fileID: 8300000, guid: 1dfbfdc9607641599dab747f20f17c4a, type: 3}
     attackStart: []
-    hit: []
-    heavyHit: []
-    grab: []
+    hit:
+    - {fileID: 8300000, guid: 39c42c948cbe4c3ebbcd789ba94e340d, type: 3}
+    heavyHit:
+    - {fileID: 8300000, guid: 0fecb92eed6046eba625cc555879915e, type: 3}
+    grab:
+    - {fileID: 8300000, guid: 8d2893e5a1c64090ac6f2aa5e0f4214a, type: 3}
     block:
     - {fileID: 8300000, guid: 71673bc9a8b842929d1873b2866717ea, type: 3}
     dash:

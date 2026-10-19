@@ -47,71 +47,38 @@ MonoBehaviour:
   layers:
   - name: Sky
     sprite: {fileID: -9159480699041110673, guid: d9cf77d28005d4bf2b1fe92432401733, type: 3}
-    frames: []
-    framesPerSecond: 8
-    followCamera: 0.9
+    frames:
+    - {fileID: 21300000, guid: f9d8555978ce1a54a9a1deda59de1641, type: 3}
+    - {fileID: 21300000, guid: 49c4097a965ed3344b7d404dd3b04832, type: 3}
+    - {fileID: 21300000, guid: 019881e3712e2544781b1fff42a2022a, type: 3}
+    - {fileID: 21300000, guid: ddd80d994ea523047b3a1fdcbea7846d, type: 3}
+    - {fileID: 21300000, guid: 16682ae4d78e1a44ca68cd87a9c9a47d, type: 3}
+    - {fileID: 21300000, guid: cff79588349cf044c91f43bd86d19519, type: 3}
+    - {fileID: 21300000, guid: aab3e3ccee3795d48ba40d34fa5ccf5b, type: 3}
+    - {fileID: 21300000, guid: 6aba3ec2565b77e46893d32737efd703, type: 3}
+    - {fileID: 21300000, guid: 27d7aefc1c406924db5baa8fb784f056, type: 3}
+    - {fileID: 21300000, guid: 9c858bc79b90fe945ab5ecab10896f83, type: 3}
+    - {fileID: 21300000, guid: da5f24955e29a5146b91444d7293a83c, type: 3}
+    - {fileID: 21300000, guid: 3d004ad833ba5fa4a8ae697a96373352, type: 3}
+    - {fileID: 21300000, guid: 94aa622f221e81246b3d716474655128, type: 3}
+    - {fileID: 21300000, guid: bcfe2fe8395739f45b7f231563b47dc0, type: 3}
+    - {fileID: 21300000, guid: 85b5858009564924896f9629c2144510, type: 3}
+    - {fileID: 21300000, guid: a44716b5c9de2d648a72d917d8cfb8b4, type: 3}
+    - {fileID: 21300000, guid: faa07cf4a5409c146ade57aa796085c5, type: 3}
+    - {fileID: 21300000, guid: b3ec4b31c5a394443aa1eaf6f2f8b93d, type: 3}
+    - {fileID: 21300000, guid: 5fbc884d1652ae440bed16133490d14b, type: 3}
+    - {fileID: 21300000, guid: e51c59f4ffdd10844a0efb6d27d7e733, type: 3}
+    - {fileID: 21300000, guid: e88bef45441a43546a5f5cd1854041ce, type: 3}
+    - {fileID: 21300000, guid: 240ff9aa703084447bbee360dbcdd1c7, type: 3}
+    - {fileID: 21300000, guid: 7112584f86dfefc40a7f78ba670d4a28, type: 3}
+    - {fileID: 21300000, guid: 8c235e3320ef96546b65a9c46755649d, type: 3}
+    framesPerSecond: 6
+    followCamera: 0
     tile: 0
     driftSpeed: 0
     x: 0
     y: 0
     scale: 1
-    tint: {r: 1, g: 1, b: 1, a: 1}
-  - name: Bell
-    sprite: {fileID: 21300000, guid: 06a79d9b43032954ab9ec82084860172, type: 3}
-    frames:
-    - {fileID: 21300000, guid: 06a79d9b43032954ab9ec82084860172, type: 3}
-    - {fileID: 21300000, guid: a0a0bb64c696a2e4b9f60dd15d8c81e3, type: 3}
-    - {fileID: 21300000, guid: 101a3d42d9356a84583f40d397bd7a2e, type: 3}
-    framesPerSecond: 2
-    followCamera: 0.6
-    tile: 0
-    driftSpeed: 0
-    x: 2
-    y: 6.6
-    scale: 7
-    tint: {r: 1, g: 1, b: 1, a: 1}
-  - name: Background
-    sprite: {fileID: 21300000, guid: 981d43d1c3aa39449a673e0c9cd3e819, type: 3}
-    frames:
-    - {fileID: 21300000, guid: 981d43d1c3aa39449a673e0c9cd3e819, type: 3}
-    - {fileID: 21300000, guid: d4452cb594c80874e9ce6af4d963791b, type: 3}
-    - {fileID: 21300000, guid: 8df153bc84a1bdb46849e8259135ba22, type: 3}
-    - {fileID: 21300000, guid: b78718e72111cc845b9e2f01f8b2b875, type: 3}
-    - {fileID: 21300000, guid: 9cbbfc6efbc581248bed75178a38d24d, type: 3}
-    framesPerSecond: 5
-    followCamera: 0.6
-    tile: 0
-    driftSpeed: 0
-    x: 0
-    y: -0.93
-    scale: 8
-    tint: {r: 1, g: 1, b: 1, a: 1}
-  - name: Midground
-    sprite: {fileID: 21300000, guid: 9e84bf173a0d6204fb3606a19bbf94b5, type: 3}
-    frames:
-    - {fileID: 21300000, guid: 9e84bf173a0d6204fb3606a19bbf94b5, type: 3}
-    - {fileID: 21300000, guid: d58660e433244e54eb9d0af2ca6f144e, type: 3}
-    - {fileID: 21300000, guid: 9f8f746740933b94f8df627e93fcd49f, type: 3}
-    - {fileID: 21300000, guid: 9e279c9fd32002d4c8a54f2291711ef3, type: 3}
-    - {fileID: 21300000, guid: efb20aac86937894e9770f334bbc196f, type: 3}
-    framesPerSecond: 3
-    followCamera: 0.35
-    tile: 0
-    driftSpeed: 0
-    x: 0
-    y: -0.81
-    scale: 8
-    tint: {r: 1, g: 1, b: 1, a: 1}
-  - name: Foreground
-    sprite: {fileID: 21300000, guid: a8762d2e14879be4c99a9935ae8cb10f, type: 3}
-    frames: []
-    framesPerSecond: 8
-    followCamera: 0
-    tile: 0
-    driftSpeed: 0
-    x: 0
-    y: -1.28
-    scale: 8
     tint: {r: 1, g: 1, b: 1, a: 1}
   material: {fileID: 0}
   sortingOrder: -100
