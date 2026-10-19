@@ -501,17 +501,26 @@ public class HudScreen : MonoBehaviour
             CharacterLook look = CharacterRegistry.GetLook(f.characterId);
             Sprite lit = look != null && look.ammoLitSprite != null ? look.ammoLitSprite : Circle();
             Sprite empty = look != null && look.ammoEmptySprite != null ? look.ammoEmptySprite : Circle();
-            int loaded = f.AmmoLit;
+            Sprite[] icons = look != null ? look.hudIcons : null;
+            bool perSlot = icons != null && icons.Length > 0;   // a different icon per slot (Remy's potions)
             // Unlimited ammo (Rapid Fire) lights every bullet and makes them pulse gold.
             Color litColor = f.IsPoweredUp ? Color.Lerp(Color.white, new Color(1f, 0.85f, 0.2f), 0.4f + 0.6f * Mathf.PingPong(Time.unscaledTime * 4f, 1f)) : Color.white;
             for (int i = 0; i < ammoIcons[side].Length; i++)
             {
                 Image img = ammoIcons[side][i];
-                bool on = i < loaded;
+                bool on = f.HudIconOn(i);
                 bool exists = i < max;
                 if (img.enabled != exists) img.enabled = exists;
-                img.sprite = on ? lit : empty;
-                img.color = on ? litColor : new Color(1f, 1f, 1f, 0.45f);
+                if (perSlot)
+                {
+                    img.sprite = icons[Mathf.Min(i, icons.Length - 1)];
+                    img.color = on ? Color.white : new Color(0.3f, 0.3f, 0.3f, 0.7f);   // unpicked potions are dimmed
+                }
+                else
+                {
+                    img.sprite = on ? lit : empty;
+                    img.color = on ? litColor : new Color(1f, 1f, 1f, 0.45f);
+                }
             }
         }
     }

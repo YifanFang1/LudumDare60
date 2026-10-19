@@ -24,7 +24,17 @@ MonoBehaviour:
   walkLoopTicks: 30
   ammoLitSprite: {fileID: -8189792276811800741, guid: 584e9808258e34f9986fe0160bcbe75f, type: 3}
   ammoEmptySprite: {fileID: -8311563565995484431, guid: 584e9808258e34f9986fe0160bcbe75f, type: 3}
-  projectileSprites: []
+  projectileSprites:
+  - visual: gun
+    sprite: {fileID: 684337887656328383, guid: e48ddc2a3888b46a4ac2abd349cba6df, type: 3}
+    scale: 0.083
+    flip: 0
+    frames: []
+    framesPerSecond: 12
+    loop: 0
+    lingerSeconds: 0
+    playOnTelegraph: 0
+    outline: 0
   moveFlashes: []
   sfx:
     moves:

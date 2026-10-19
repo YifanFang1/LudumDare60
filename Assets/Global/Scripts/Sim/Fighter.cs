@@ -208,7 +208,11 @@ public abstract class Fighter
     public virtual bool IsPoweredUp { get { return false; } }
     // COSMETIC: a limited-ammo fighter (Noir) reports its magazine for the HUD's bullet row. AmmoMax 0 = no row.
     public virtual int AmmoMax { get { return 0; } }
+    // COSMETIC, editor tools only: true for a move used only while powered up (K3N's Install attacks), so the Character Preview can label it and show its Install_ animation.
+    public virtual bool IsPoweredMove(MoveDef m) { return false; }
     public virtual int AmmoLit { get { return 0; } }
+    // Which HUD slot is lit. Default: the first AmmoLit slots (bullets). Remy lights just the potion he has picked.
+    public virtual bool HudIconOn(int slot) { return slot < AmmoLit; }
     // Hyper armor: a hit that doesn't kill still does its damage, but there is no hitstun, no
     // knockback and the fighter's move isn't interrupted (Room while grown).
     public virtual bool IgnoresHitstun { get { return false; } }

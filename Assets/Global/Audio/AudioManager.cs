@@ -269,7 +269,21 @@ public class AudioManager : MonoBehaviour
     // few there are, since it's the feedback for your click). Called by CharacterSelectScreen.
     public static void CharacterPicked(int id)
     {
-        if (instance != null) instance.SpeakSelect(id);
+        if (instance != null) {
+            instance.SpeakSelect(id);
+            CharacterLook look = CharacterRegistry.GetLook(id);
+            CharacterSfx sfx = look != null ? look.sfx : null;
+            // 2. Assign the character's theme clip if available
+            if (sfx != null && sfx.theme != null)
+            {
+                instance.characterSelectMusic = sfx.theme;
+            }
+            else
+            {
+                // Fallback to default menu music if no theme exists
+                instance.characterSelectMusic = null; 
+            }
+        }
     }
 
     void SpeakSelect(int id)
@@ -527,6 +541,7 @@ public class AudioManager : MonoBehaviour
                 if (sim.roundCallTicks > 0 || sim.countdownTicks > earlyTicks) return null;
                 return song;
             default:
+                instance.characterSelectMusic = null;
                 return menuMusic;
         }
     }
@@ -555,7 +570,7 @@ public class AudioManager : MonoBehaviour
                 musicFade = 0f;
                 if (clip != null) music.Play();
                 else music.Stop();
-            }
+            };
         }
         else if (clip != null)
         {

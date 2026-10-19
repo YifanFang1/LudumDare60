@@ -24,6 +24,7 @@ MonoBehaviour:
   walkLoopTicks: 30
   projectileSprites:
   - visual: trap
+    outline: 1
     sprite: {fileID: 520256503147680049, guid: a3c88ff0e4fb144e1a7e066d90f267ed, type: 3}
     scale: 0.1
     flip: 0

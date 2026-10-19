@@ -1,0 +1,247 @@
+{
+    "moves": [
+        {
+            "name": "Light",
+            "totalTicks": 16,
+            "cooldown": 5,
+            "hitboxes": [
+                {
+                    "spawnTick": 8,
+                    "lifetime": 4,
+                    "damage": 5,
+                    "hitstun": 12,
+                    "knockback": 40,
+                    "x": 400,
+                    "y": 1000,
+                    "w": 1600,
+                    "h": 500,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Heavy",
+            "totalTicks": 28,
+            "cooldown": 10,
+            "hitboxes": [
+                {
+                    "spawnTick": 20,
+                    "lifetime": 7,
+                    "damage": 12,
+                    "hitstun": 20,
+                    "knockback": 80,
+                    "x": 300,
+                    "y": 900,
+                    "w": 4000,
+                    "h": 500,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Grab",
+            "totalTicks": 40,
+            "cooldown": 15,
+            "hitboxes": [
+                {
+                    "spawnTick": 17,
+                    "lifetime": 10,
+                    "damage": 12,
+                    "hitstun": 40,
+                    "knockback": 30,
+                    "x": 400,
+                    "y": 700,
+                    "w": 700,
+                    "h": 1000,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Special",
+            "totalTicks": 25,
+            "cooldown": 30,
+            "hitboxes": [
+                {
+                    "spawnTick": 7,
+                    "lifetime": 2,
+                    "damage": 1,
+                    "hitstun": 10,
+                    "knockback": 1,
+                    "x": 500,
+                    "y": 1000,
+                    "w": 1600,
+                    "h": 600,
+                    "vx": 0
+                },
+                {
+                    "spawnTick": 10,
+                    "lifetime": 6,
+                    "damage": 1,
+                    "hitstun": 10,
+                    "knockback": 1,
+                    "x": 300,
+                    "y": 0,
+                    "w": 2000,
+                    "h": 2000,
+                    "vx": 0
+                },
+                {
+                    "spawnTick": 21,
+                    "lifetime": 2,
+                    "damage": 1,
+                    "hitstun": 10,
+                    "knockback": 1,
+                    "x": 300,
+                    "y": 1000,
+                    "w": 2600,
+                    "h": 700,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "JumpLight",
+            "totalTicks": 14,
+            "cooldown": 0,
+            "hitboxes": [
+                {
+                    "spawnTick": 3,
+                    "lifetime": 8,
+                    "damage": 5,
+                    "hitstun": 14,
+                    "knockback": 30,
+                    "x": 200,
+                    "y": 0,
+                    "w": 800,
+                    "h": 700,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "JumpHeavy",
+            "totalTicks": 24,
+            "cooldown": 0,
+            "hitboxes": [
+                {
+                    "spawnTick": 6,
+                    "lifetime": 6,
+                    "damage": 10,
+                    "hitstun": 20,
+                    "knockback": 60,
+                    "x": 100,
+                    "y": 0,
+                    "w": 1000,
+                    "h": 900,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Light",
+            "totalTicks": 16,
+            "cooldown": 5,
+            "hitboxes": [
+                {
+                    "spawnTick": 6,
+                    "lifetime": 4,
+                    "damage": 5,
+                    "hitstun": 12,
+                    "knockback": 40,
+                    "x": 400,
+                    "y": 1000,
+                    "w": 2700,
+                    "h": 500,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Heavy",
+            "totalTicks": 28,
+            "cooldown": 10,
+            "hitboxes": [
+                {
+                    "spawnTick": 18,
+                    "lifetime": 7,
+                    "damage": 12,
+                    "hitstun": 20,
+                    "knockback": 80,
+                    "x": -4000,
+                    "y": 0,
+                    "w": 8000,
+                    "h": 4500,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Special",
+            "totalTicks": 25,
+            "cooldown": 30,
+            "hitboxes": [
+                {
+                    "spawnTick": 4,
+                    "lifetime": 2,
+                    "damage": 1,
+                    "hitstun": 10,
+                    "knockback": 1,
+                    "x": 500,
+                    "y": 1000,
+                    "w": 3000,
+                    "h": 600,
+                    "vx": 0
+                },
+                {
+                    "spawnTick": 5,
+                    "lifetime": 6,
+                    "damage": 1,
+                    "hitstun": 10,
+                    "knockback": 1,
+                    "x": 300,
+                    "y": 0,
+                    "w": 2000,
+                    "h": 2000,
+                    "vx": 0
+                },
+                {
+                    "spawnTick": 12,
+                    "lifetime": 2,
+                    "damage": 1,
+                    "hitstun": 10,
+                    "knockback": 1,
+                    "x": 300,
+                    "y": 1000,
+                    "w": 2700,
+                    "h": 700,
+                    "vx": 0
+                },
+                {
+                    "spawnTick": 17,
+                    "lifetime": 2,
+                    "damage": 1,
+                    "hitstun": 10,
+                    "knockback": 1,
+                    "x": 300,
+                    "y": 1000,
+                    "w": 3803,
+                    "h": 700,
+                    "vx": 0
+                },
+                {
+                    "spawnTick": 22,
+                    "lifetime": 2,
+                    "damage": 1,
+                    "hitstun": 10,
+                    "knockback": 1,
+                    "x": -3387,
+                    "y": 0,
+                    "w": 7461,
+                    "h": 4329,
+                    "vx": 0
+                }
+            ]
+        }
+    ]
+}

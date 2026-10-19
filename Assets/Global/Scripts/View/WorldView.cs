@@ -369,6 +369,15 @@ public class WorldView : MonoBehaviour
                 {
                     stateName = f.move.name;
                     t = tick / (float)Mathf.Max(1, f.move.totalTicks);
+                    if (v.data.clipMidpointAtHit && f.move.hitboxes != null && f.move.hitboxes.Length > 0)
+                    {
+                        // startup plays up to 0.5 and holds there until the first hitbox spawns, then the rest plays
+                        int spawn = int.MaxValue;
+                        for (int hb = 0; hb < f.move.hitboxes.Length; hb++) spawn = Mathf.Min(spawn, f.move.hitboxes[hb].spawnTick);
+                        int total = Mathf.Max(1, f.move.totalTicks);
+                        if (spawn > 0 && spawn < total)
+                            t = tick < spawn ? 0.5f * tick / spawn : 0.5f + 0.5f * (tick - spawn) / (float)(total - spawn);
+                    }
                 }
                 break;
             case FighterStateId.Jump:
@@ -502,6 +511,15 @@ public class WorldView : MonoBehaviour
             SpriteRenderer sr = projectileArt[used++];
             sr.enabled = true;
             sr.sprite = sprite;
+            // Art marked "outline" (Patience's trap) gets the owner's Player / Enemy outline, like the fighters.
+            SpriteOutline art = sr.GetComponent<SpriteOutline>();
+            if (!placeholder && outlineFighters && entry != null && entry.outline)
+            {
+                if (art == null) art = sr.gameObject.AddComponent<SpriteOutline>();
+                art.style = h.owner == match.LocalSlot ? SpriteOutline.Style.Player : SpriteOutline.Style.Enemy;
+                if (!art.enabled) art.enabled = true;
+            }
+            else if (art != null && art.enabled) art.enabled = false;
             Box b = h.World(sim);
             sr.transform.position = new Vector3((b.x + b.w / 2f) * Scale, (b.y + b.h / 2f) * Scale, 0f);
             if (placeholder)
@@ -548,6 +566,8 @@ public class WorldView : MonoBehaviour
             SpriteRenderer gsr = projectileArt[used++];
             gsr.enabled = true;
             gsr.sprite = frame;
+            SpriteOutline gout = gsr.GetComponent<SpriteOutline>();
+            if (gout != null && gout.enabled) gout.enabled = false;   // this pooled renderer may have had a trap outline
             gsr.transform.position = gh.position;
             float gsize = gh.entry.scale > 0f ? gh.entry.scale : 1f;
             float gdir = gh.entry.flip ? -gh.facing : gh.facing;
