@@ -34,6 +34,9 @@ public abstract class CharacterLook : ScriptableObject
     [Tooltip("This character's own sounds. Anything left empty falls back to the AudioManager's shared sounds.")]
     public CharacterSfx sfx = new CharacterSfx();
 
+    [Tooltip("This character's voice: spoken intro and win/lose lines, and combat shouts. See CharacterVoice.cs.")]
+    public CharacterVoice voice = new CharacterVoice();
+
     // -1 when flipSprite is ticked, else 1. Multiply the art's x scale by it.
     public float SpriteFlip { get { return flipSprite ? -1f : 1f; } }
 
@@ -41,6 +44,14 @@ public abstract class CharacterLook : ScriptableObject
     public abstract int CharacterId { get; }
 
     // The sprite for a projectile's visual name, or null if this look has none.
+    public ProjectileSprite FindProjectileEntry(string visual)
+    {
+        if (projectileSprites == null || string.IsNullOrEmpty(visual)) return null;
+        for (int i = 0; i < projectileSprites.Length; i++)
+            if (projectileSprites[i] != null && projectileSprites[i].visual == visual) return projectileSprites[i];
+        return null;
+    }
+
     public Sprite FindProjectileSprite(string visual)
     {
         if (projectileSprites == null || string.IsNullOrEmpty(visual)) return null;
@@ -58,6 +69,8 @@ public class ProjectileSprite
 {
     public string visual = "special";
     public Sprite sprite;
+    public float scale = 1f;    // view size multiplier (1 = the import size)
+    public bool flip;           // tick if the art faces LEFT: it is mirrored so it flies the right way
 }
 
 // One character's sound set. Every slot is optional: empty = the AudioManager's shared sound plays.
@@ -79,6 +92,8 @@ public class CharacterSfx
     public AudioClip[] block;
     [Tooltip("This character dashing.")]
     public AudioClip[] dash;
+    [Tooltip("This character jumping off the ground.")]
+    public AudioClip[] jump;
     [Tooltip("This character's Ultimate freeze.")]
     public AudioClip superFlash;
     [Tooltip("This character being knocked out.")]

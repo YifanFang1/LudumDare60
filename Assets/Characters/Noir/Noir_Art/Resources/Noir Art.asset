@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa5a024dae297604f829b64925f74f0e, type: 3}
+  m_Name: Noir Art
+  m_EditorClassIdentifier: LD.CharacterData::CodeCharacterArt
+  viewPrefab: {fileID: 448790510293880420, guid: 99ec3375cc30d4b9dbd3c3ed495889b7, type: 3}
+  sprite: {fileID: 0}
+  spriteOffsetX: 0
+  spriteOffsetY: 0
+  spriteScale: 1
+  flipSprite: 0
+  placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
+  tintByState: 1
+  idleLoopTicks: 60
+  walkLoopTicks: 30
+  projectileSprites: []
+  sfx:
+    moves:
+    - move: Light
+      clips:
+      - {fileID: 8300000, guid: 8e509ef83bd1a405ca2099c2b33a60f9, type: 3}
+    - move: Heavy
+      clips:
+      - {fileID: 8300000, guid: 53aff74da55744aa297b2e42a24e7879, type: 3}
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: da1cf85f7de924e4e9b9ff2bf786194a, type: 3}
+    attackStart: []
+    hit: []
+    heavyHit: []
+    grab:
+    - {fileID: 8300000, guid: 5ac8f337cb64b4d3f8c330b04d25f571, type: 3}
+    block: []
+    dash:
+    - {fileID: 8300000, guid: d591c0af5997549f38ae3c239cb2e18f, type: 3}
+    - {fileID: 8300000, guid: 03bcb06de5a30477cbdf1b295b22a4f3, type: 3}
+    - {fileID: 8300000, guid: ece2ccfb6fb6e4f9f97faad2445a2d59, type: 3}
+    - {fileID: 8300000, guid: cded0e0dad4cc45cf95983b1a0c43859, type: 3}
+    - {fileID: 8300000, guid: 191b623ef1df94a7f961b92f360cd7d8, type: 3}
+    superFlash: {fileID: 0}
+    ko: {fileID: 0}
+    reflect: []
+    destroy: []
+    summon: []
+    hold: []
+    heal: []
+    powerUp: []
+    outOfAmmo: []
+    theme: {fileID: 8300000, guid: d7d323c89b368734ca6eb4d59a095a0e, type: 3}
+  characterId: 12

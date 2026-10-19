@@ -16,6 +16,8 @@ public class HitboxDef
     public int knockback;            // milli-units per tick the victim is pushed away
     public bool followOwner = true;  // true = melee, moves with the fighter. false = projectile
     public int vx;                   // forward speed in milli-units per tick (projectiles only)
+    public int vy;                   // lob: starting upward speed in milli-units per tick (projectiles only, with gravity)
+    public int gravity;              // lob: pulls vy down by this much every tick. 0 = flies straight. A lob ends when its box reaches the ground
     public bool unblockable;         // hits even if the victim is blocking
     // A grab: ignores blocking, but can't catch a victim in hitstun or blockstun (so grabs can't
     // end a blocked string for free or extend combos). Holding back when it lands = back throw.

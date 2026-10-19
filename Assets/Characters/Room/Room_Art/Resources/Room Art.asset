@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa5a024dae297604f829b64925f74f0e, type: 3}
+  m_Name: Room Art
+  m_EditorClassIdentifier: LD.CharacterData::CodeCharacterArt
+  viewPrefab: {fileID: 479440288555010871, guid: 6170a0ab626404d5ba452a94ad0ca6b2, type: 3}
+  sprite: {fileID: 0}
+  spriteOffsetX: 0
+  spriteOffsetY: 0
+  spriteScale: 1
+  flipSprite: 1
+  placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
+  tintByState: 1
+  idleLoopTicks: 60
+  walkLoopTicks: 30
+  projectileSprites: []
+  sfx:
+    moves:
+    - move: Light
+      clips:
+      - {fileID: 8300000, guid: cdc198f7e7d296944a7da3b5c6fb2ae5, type: 3}
+      - {fileID: 8300000, guid: 085275b4508aee241b4882ce963011e5, type: 3}
+      - {fileID: 8300000, guid: 5444450164ba3564d95f12c75f11f6cf, type: 3}
+    - move: Heavy
+      clips:
+      - {fileID: 8300000, guid: cdc198f7e7d296944a7da3b5c6fb2ae5, type: 3}
+      - {fileID: 8300000, guid: 085275b4508aee241b4882ce963011e5, type: 3}
+      - {fileID: 8300000, guid: 5444450164ba3564d95f12c75f11f6cf, type: 3}
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: 5fbcf76fd3999424ab9ae525489185c8, type: 3}
+    attackStart: []
+    hit:
+    - {fileID: 8300000, guid: cb454c82bde36184e8791fbcd24dbe1f, type: 3}
+    heavyHit:
+    - {fileID: 8300000, guid: 6f0a7dca8c7a8a84c8a15bb81735a7ca, type: 3}
+    grab:
+    - {fileID: 8300000, guid: cdc198f7e7d296944a7da3b5c6fb2ae5, type: 3}
+    - {fileID: 8300000, guid: 085275b4508aee241b4882ce963011e5, type: 3}
+    - {fileID: 8300000, guid: 5444450164ba3564d95f12c75f11f6cf, type: 3}
+    block: []
+    dash:
+    - {fileID: 8300000, guid: f61b2389a2df2cd4ea8aafb2311d73df, type: 3}
+    superFlash: {fileID: 8300000, guid: c17973d27cd8e754aad7427a754045c3, type: 3}
+    ko: {fileID: 0}
+    reflect: []
+    destroy: []
+    summon: []
+    hold: []
+    heal: []
+    powerUp: []
+    outOfAmmo: []
+    theme: {fileID: 8300000, guid: 0ffd9992ee1417f4294b71148279ca89, type: 3}
+  characterId: 13

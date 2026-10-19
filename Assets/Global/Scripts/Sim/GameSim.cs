@@ -40,9 +40,23 @@ public class GameSim
     public bool introductionsOn;
     public const int IntroLineTicks = 240;
     public int introTicks;
-    public int IntroSlot { get { return introTicks > IntroLineTicks ? 0 : introTicks > 0 ? 1 : -1; } }
+    public int introFirstSlot;
+    public int introFirstTicks = IntroLineTicks;
+    public int introSecondTicks = IntroLineTicks;
+    public int introVariant;
+    public int IntroSlot { get { return introTicks > introSecondTicks ? introFirstSlot : introTicks > 0 ? 1 - introFirstSlot : -1; } }
+    public int IntroLineElapsedTicks
+    {
+        get { return introTicks > introSecondTicks ? introFirstTicks + introSecondTicks - introTicks : introSecondTicks - introTicks; }
+    }
     public const int CountdownTicks = 180;
     public const int FightBannerTicks = 60;
+    // ROUND CALL: "ROUND 1" / "FINAL ROUND" on its own, after the intros and before the 3-2-1, so the
+    // announcer never talks over the dialogue. Sessions switch it on; tests that only want the
+    // countdown leave it off. Nobody can act during it, like the countdown.
+    public bool roundCallOn;
+    public const int RoundCallTicks = 126;   // 2.1 seconds (Announcer_Round1 is 3.1 s, so it runs a little into the 3-2-1)
+    public int roundCallTicks;
     public int countdownTicks;
     public int fightBannerTicks;
     public string CountdownText
@@ -134,10 +148,11 @@ public class GameSim
 
         round = number;
         roundOverTicks = 0;
-        introTicks = introductionsOn && number == 1 ? IntroLineTicks * 2 : 0;
+        introTicks = introductionsOn && number == 1 ? introFirstTicks + introSecondTicks : 0;
         roundTimeTicks = RoundTimeTicks;
         timeUp = false;
         roundWinner = -1;
+        roundCallTicks = roundCallOn ? RoundCallTicks : 0;
         countdownTicks = countdownOn ? CountdownTicks : 0;
         fightBannerTicks = 0;
         freezeTicks = 0;
@@ -194,7 +209,13 @@ public class GameSim
             return;
         }
 
-        // Consume synchronized input ticks without applying them during the countdown.
+        // Then the round call, then the countdown: input ticks are consumed without being applied.
+        if (roundCallTicks > 0)
+        {
+            roundCallTicks--;
+            tick++;
+            return;
+        }
         if (countdownTicks > 0)
         {
             countdownTicks--;
@@ -307,6 +328,7 @@ public class GameSim
         h.def = def;
         h.originX = x;
         h.originY = y;
+        h.vy = def.vy;
         h.facing = facing;
         h.lifetime = lifetime;
         h.placed = placed;
@@ -755,10 +777,20 @@ public class GameSim
         for (int i = hitboxes.Count - 1; i >= 0; i--)
         {
             HitboxInstance h = hitboxes[i];
-            if (!h.FollowsOwner) h.originX += h.facing * h.def.vx;
+            bool landed = false;
+            if (!h.FollowsOwner)
+            {
+                h.originX += h.facing * h.def.vx;
+                if (h.def.gravity != 0)
+                {
+                    h.originY += h.vy;
+                    h.vy -= h.def.gravity;
+                    landed = h.originY + h.box.y <= 0;   // a lob ends when its box reaches the ground
+                }
+            }
             h.age++;
             if (!h.def.untilHit) h.lifetime--;
-            if ((h.lifetime <= 0 && !h.def.untilHit) || h.hasHit) hitboxes.RemoveAt(i);
+            if ((h.lifetime <= 0 && !h.def.untilHit) || h.hasHit || landed) hitboxes.RemoveAt(i);
         }
     }
 
@@ -821,6 +853,11 @@ public class GameSim
             h = h * 31 + roundsWon[1];
             h = h * 31 + roundOverTicks;
             h = h * 31 + introTicks;
+            h = h * 31 + introFirstSlot;
+            h = h * 31 + introFirstTicks;
+            h = h * 31 + introSecondTicks;
+            h = h * 31 + introVariant;
+            h = h * 31 + roundCallTicks;
             h = h * 31 + countdownTicks;
             h = h * 31 + fightBannerTicks;
             for (int i = 0; i < 2; i++)
@@ -869,6 +906,8 @@ public class GameSim
                 h = h * 31 + hb.owner;
                 h = h * 31 + hb.lifetime;
                 h = h * 31 + hb.originX;
+                h = h * 31 + hb.originY;
+                h = h * 31 + hb.vy;
                 h = h * 31 + hb.facing;
                 h = h * 31 + hb.age;
                 h = h * 31 + hb.damage;

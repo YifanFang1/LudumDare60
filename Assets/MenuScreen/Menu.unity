@@ -6565,7 +6565,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 10, y: 30}
+  m_AnchoredPosition: {x: 10, y: 29.999878}
   m_SizeDelta: {x: 358.4, y: 201.6}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1010453011
@@ -8024,7 +8024,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -10}
+  m_AnchoredPosition: {x: 0, y: -9.999878}
   m_SizeDelta: {x: -160, y: -360}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1149174700
@@ -8186,7 +8186,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1152043980
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8199,10 +8199,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ec6945e4cb8a436f915e3006600aa98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterPreview
-  characterId: -1
+  characterId: 15
   character: {fileID: 0}
   moveIndex: 0
-  tick: 0
+  tick: 19
   playing: 0
   playSpeed: 1
   faceRight: 1
@@ -8222,7 +8222,7 @@ Transform:
   m_GameObject: {fileID: 1152043979}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13.03, y: -7.03, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13762,7 +13762,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 30}
+  m_AnchoredPosition: {x: 0, y: 29.999878}
   m_SizeDelta: {x: 640, y: 360}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1837278497
@@ -15621,6 +15621,7 @@ MonoBehaviour:
   blockSounds: []
   grabSounds: []
   dashSounds: []
+  jumpSounds: []
   superFlashSound: {fileID: 0}
   koSound: {fileID: 0}
   reflectSounds: []
@@ -15633,23 +15634,27 @@ MonoBehaviour:
   outOfAmmoSounds:
   - {fileID: 8300000, guid: 5d85247cb3d114ebb9b05f8ac0ce8846, type: 3}
   heavyHitDamage: 10
-  fightStart: {fileID: 0}
-  roundStart: {fileID: 0}
-  winJingle: {fileID: 0}
-  loseJingle: {fileID: 0}
-  drawJingle: {fileID: 0}
+  round1Sound: {fileID: 8300000, guid: cb57a4bad4252e14499caa36668fa6f7, type: 3}
+  round2Sound: {fileID: 8300000, guid: 7e3f4d0ad0a6acd46963c522ce9bb3d7, type: 3}
+  finalRoundSound: {fileID: 8300000, guid: 577a6a5ef94e3384189c6147e7a47ff8, type: 3}
+  countdownSound: {fileID: 8300000, guid: b40df67341fe281478bb8d3975ae7a6d, type: 3}
+  winJingle: {fileID: 8300000, guid: 441eff9327e847e4a8052f2f6b3a3754, type: 3}
+  loseJingle: {fileID: 8300000, guid: ee2cb4fcf2922b74887fbbe3f0048ccb, type: 3}
+  drawJingle: {fileID: 8300000, guid: 3f055d04074428c428004ac317299647, type: 3}
   buttonClick: {fileID: 8300000, guid: 211a4d6cab23d4f65a3ffc73a42b0140, type: 3}
   confirm: {fileID: 8300000, guid: 211a4d6cab23d4f65a3ffc73a42b0140, type: 3}
   pageSwitch: {fileID: 8300000, guid: cd1d88815db944007a656ccbce40dda4, type: 3}
   glitchSound: {fileID: 8300000, guid: db51424db52a74773912055c97d1b2c0, type: 3}
   glassBreak: {fileID: 8300000, guid: dfb9d6ed109d1424aa25f5151c317cdc, type: 3}
   tvOff: {fileID: 8300000, guid: abc45c7d861a449879abb4b90ef90298, type: 3}
-  menuMusic: {fileID: 8300000, guid: 726fed668e1e8104996c65324109379e, type: 3}
-  characterSelectMusic: {fileID: 0}
-  fightMusic: {fileID: 0}
+  menuMusic: {fileID: 8300000, guid: a56bae3fbbd637e4ba060afb8cc5528b, type: 3}
+  characterSelectMusic: {fileID: 8300000, guid: a56bae3fbbd637e4ba060afb8cc5528b, type: 3}
+  fightMusic: {fileID: 8300000, guid: a0565e8203b3e4f4496821ffe94142bd, type: 3}
   sfxVolume: 1
   uiVolume: 0.8
   musicVolume: 0.5
+  voiceVolume: 1
+  logMissingVoiceLines: 0
 --- !u!114 &2075206614
 MonoBehaviour:
   m_ObjectHideFlags: 0

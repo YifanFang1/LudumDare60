@@ -71,8 +71,7 @@ public class Executioner : BaseFighter
             totalTicks: 48, spawnTick: 10, activeTicks: 3,
             box: new Box(300, 600, 400, 1000),   // reach 700: only just past his own body
             damage: 15, hitstun: 40, knockback: 60, cooldown: GrabCooldown);
-        m.hitboxes[0].pullTo = 900;
-        return m;
+        return HoldGrab(m);
     }
 
     static MoveDef MakeGuillotine()

@@ -1,0 +1,79 @@
+using System;
+
+// Unvoiced pre-match exchanges from the team sheet. Class names and roster ids are unchanged:
+// Ruy=10, 0d3tte/Painter=11, Noir=12, ROOM/Elephant=13, Patience/Penance/Executioner=14,
+// Dr. Remy=15, K3N/Nek=16. Blank rows are omitted; a single supplied line stays a single turn.
+public static class MatchupDialogue
+{
+    public sealed class Exchange
+    {
+        public readonly int firstId, secondId;
+        public readonly string firstText, secondText;
+        public Exchange(int firstId, int secondId, string firstText, string secondText = null)
+        {
+            this.firstId = firstId; this.secondId = secondId;
+            this.firstText = firstText; this.secondText = secondText;
+        }
+        public void Configure(GameSim sim, int slot0Id, int variant)
+        {
+            sim.introFirstSlot = firstId == slot0Id ? 0 : 1;
+            sim.introFirstTicks = ReadingTicks(firstText);
+            sim.introSecondTicks = string.IsNullOrEmpty(secondText) ? 0 : ReadingTicks(secondText);
+            sim.introVariant = variant;
+        }
+    }
+
+    // 30 characters/second plus a reading pause; at least four seconds per line.
+    public static int ReadingTicks(string text) { return Math.Max(GameSim.IntroLineTicks, 90 + text.Length * 2); }
+
+    static readonly Exchange[] exchanges =
+    {
+        new Exchange(10, 16, "Who are you supposed to be?", "Uhhh, I can be anything I want to be!"),
+        new Exchange(16, 10, "Prepare to get humbled like the side character you are",
+            "Let's not get it twisted, you're the only side I see. I'm usually the main course, but today I'm feeling like dessert since I'm gonna be a dish best served cold"),
+        new Exchange(10, 12, "We'd make a pretty good Western together, whaddya think, Partner?", "Wet Urn? What are you on about Buckaroo?"),
+        new Exchange(12, 10, "Anyone ever tell you that you seem overconfident.",
+            "Honestly no. Maybe it's because I'm too tall, cause it seems people never speak up to their superiors."),
+        new Exchange(10, 13, "What did the envelope that got left at the mail office without any stamps say?",
+            "Your games do not amuse me mortal. Now die with more dignity than your humor."),
+        new Exchange(13, 10, "Your resistance is futile. Compared to me you are a worm facing a mountain.",
+            "Eh, I think size is irrelephant to the worthiness of a challenger."),
+        new Exchange(10, 14, "Tick tock. Tick tock. ... Let's get this fight started, my patience is running thin.",
+            "You will suffer for the transgressions of terrible comedy."),
+        new Exchange(14, 10, "Repent for your sins and I might just spare you."),
+        new Exchange(11, 10, "I have never met someone that could sum up the word brute so perfectly until now."),
+        new Exchange(10, 15, "Uh, what's with the rat?"),
+        new Exchange(12, 16, "Howdy, it's strange seeing a new face around these parts.", "Don't worry, I plan to get very aquainted"),
+        new Exchange(16, 13, "Do you actually think I'm strong enough to humble Ruy?",
+            "I do not care enough about mortal affairs to give you a response, but suppose I did, then I think that you're on your way"),
+        new Exchange(13, 16, "You seem different from the others, Are you the one that I dragged here"),
+        new Exchange(16, 14, "You know, I always thought that you were the coolest"),
+        new Exchange(11, 16, "Fix your stance, don't slouch. It bothers me."),
+        new Exchange(16, 15, "OMG Remy, I can't believe it's you! Tell me, do you work like a hive mind, I've always been curious."),
+        new Exchange(12, 13, "Well if I had a bottle of gin for each time I faced off against an Elephant...well I'd have one bottle. Eh, the point is that it's weird."),
+        new Exchange(12, 14, "Well you're a character."),
+        new Exchange(11, 12, "I absolutely detest Alcoholics, go clean yourself up."),
+        new Exchange(15, 12, "Looks like I'm up against you again. Drats.",
+            "Well I'd almost be offended if it weren't for the fact that I'm gonna win this showdown of ours."),
+        new Exchange(12, 15, "Well Well Well, did someone call an exterminator"),
+        new Exchange(11, 14, "I see we have an iron maiden fighting... an iron maiden", "I will admit, this is most interesting"),
+        new Exchange(14, 11, "I sense you and I could be kindred spirits"),
+        new Exchange(14, 15, "You poor souls, I shall obsolve you of your pain and suffering"),
+        new Exchange(11, 15, "I'm a doll brought to life, but still I think that you take the cake for being weirder")
+    };
+
+    static bool Matches(Exchange entry, int a, int b)
+    {
+        return (entry.firstId == a && entry.secondId == b) || (entry.firstId == b && entry.secondId == a);
+    }
+    public static Exchange Select(int a, int b, int variant)
+    {
+        int count = 0;
+        foreach (Exchange entry in exchanges) if (Matches(entry, a, b)) count++;
+        if (count == 0) return new Exchange(a, b, "To be implemented.", "To be implemented.");
+        int chosen = ((variant % count) + count) % count;
+        foreach (Exchange entry in exchanges)
+            if (Matches(entry, a, b) && chosen-- == 0) return entry;
+        throw new InvalidOperationException("Unreachable dialogue variant");
+    }
+}

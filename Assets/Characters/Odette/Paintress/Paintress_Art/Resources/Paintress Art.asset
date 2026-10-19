@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa5a024dae297604f829b64925f74f0e, type: 3}
+  m_Name: Paintress Art
+  m_EditorClassIdentifier: LD.CharacterData::CodeCharacterArt
+  viewPrefab: {fileID: 6348161837467261392, guid: b9b37fe693e3f4e1fae519f4e376e303, type: 3}
+  sprite: {fileID: 0}
+  spriteOffsetX: 0
+  spriteOffsetY: 0
+  spriteScale: 1
+  flipSprite: 0
+  placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
+  tintByState: 1
+  idleLoopTicks: 60
+  walkLoopTicks: 30
+  projectileSprites: []
+  sfx:
+    moves: []
+    attackStart: []
+    hit: []
+    heavyHit: []
+    grab: []
+    block: []
+    dash: []
+    superFlash: {fileID: 0}
+    ko: {fileID: 0}
+    reflect: []
+    destroy: []
+    summon: []
+    hold: []
+    heal: []
+    powerUp: []
+    outOfAmmo: []
+    theme: {fileID: 8300000, guid: 7aeed64b587af8e459022031de3e1e3c, type: 3}
+  characterId: 11

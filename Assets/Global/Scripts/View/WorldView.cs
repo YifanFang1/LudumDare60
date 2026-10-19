@@ -333,11 +333,21 @@ public class WorldView : MonoBehaviour
             stateName = "Idle";
             t = Loop(tick, v.data.idleLoopTicks);
         }
+        // Powered up (K3N's Install, Noir's Rapid Fire): use the "Install_<State>" Animator state
+        // when the character has one (Install_Idle, Install_Light...), else the normal state.
+        if (f.IsPoweredUp)
+        {
+            string powered = PoweredPrefix + stateName;
+            if (v.animator.HasState(0, Animator.StringToHash(powered))) stateName = powered;
+        }
         if (v.animator.HasState(0, Animator.StringToHash(stateName)))
         {
             v.animator.Play(stateName, 0, Mathf.Clamp01(t));
         }
     }
+
+    // Name prefix of the Animator states used while a fighter IsPoweredUp.
+    const string PoweredPrefix = "Install_";
 
     static float Loop(int tick, int length)
     {
@@ -379,7 +389,8 @@ public class WorldView : MonoBehaviour
             HitboxInstance h = sim.hitboxes[i];
             if (string.IsNullOrEmpty(h.def.visual)) continue;
             FighterView owner = views[h.owner];
-            Sprite sprite = owner != null && owner.data != null ? owner.data.FindProjectileSprite(h.def.visual) : null;
+            ProjectileSprite entry = owner != null && owner.data != null ? owner.data.FindProjectileEntry(h.def.visual) : null;
+            Sprite sprite = entry != null ? entry.sprite : null;
             bool placeholder = sprite == null;
             if (placeholder) sprite = PlaceholderArt.ShapeSprite(h.def.visual);
 
@@ -406,7 +417,9 @@ public class WorldView : MonoBehaviour
             }
             else
             {
-                sr.transform.localScale = new Vector3(h.facing, 1f, 1f);   // art faces right
+                float size = entry != null && entry.scale > 0f ? entry.scale : 1f;
+                float dir = entry != null && entry.flip ? -h.facing : h.facing;   // art faces right unless `flip`
+                sr.transform.localScale = new Vector3(dir * size, size, 1f);
                 sr.color = Color.white;
             }
         }
