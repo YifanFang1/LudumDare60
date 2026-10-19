@@ -145,6 +145,19 @@ public class RosterTests
         Assert.AreEqual(70, sim.fighters[1].hp);
     }
 
+    [Test]
+    public void RuyShoryukenLaunchesTheVictim()
+    {
+        GameSim sim = AfterSuperflash(Samurai.Id, Sandbag.Id, 1200);
+        int highest = 0;
+        for (int i = 0; i < 60; i++)
+        {
+            sim.Step(None, None);
+            highest = System.Math.Max(highest, sim.fighters[1].y);
+        }
+        Assert.Greater(highest, 3000, "launched well above the ground");
+    }
+
     // ================= K3N =================
 
     [Test]

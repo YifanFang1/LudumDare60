@@ -7,7 +7,8 @@
 //   Special (I)    Hadoken: hold I to charge, let go to throw. 10 damage tapped, up to 20 after
 //                  60 ticks of holding (it throws by itself at full charge). One on screen.
 //   Ultimate (O)   Shoryuken: a rising uppercut, invincible on its first 8 ticks, 30 damage.
-//                  It keeps playing after it lands, so it's very punishable if blocked.
+//                  On hit it launches the victim high into the air. It keeps playing after it
+//                  lands, so it's very punishable if blocked.
 //   Perk 1         Rage: all his hits do +missingHp%/2 damage (up to about +50%).
 //   Perk 2         The Hadoken's charge (above).
 public class Samurai : BaseFighter
@@ -17,6 +18,10 @@ public class Samurai : BaseFighter
     public const int HadokenFullCharge = 60;   // ticks of holding for the full +10 damage
     public const int HadokenBonusDamage = 10;
     public const int ShoryukenInvincibleTicks = 8;   // ticks 0-7 of the move
+    // The launch: a Shoryuken that connects (not blocked) throws the victim high into the air.
+    // Peak height is about up * up / (2 * Gravity): 280 -> about 3.6 units, above Ruy's own 2.4.
+    public const int ShoryukenLaunchUp = 280;        // milli-units per tick, upward
+    public const int ShoryukenLaunchSideways = 40;   // milli-units per tick, away from Ruy (the normal knockback is 120)
 
     public static readonly MoveDef Hadoken = MakeHadoken();
     public static readonly MoveDef Shoryuken = MakeShoryuken();
@@ -70,6 +75,16 @@ public class Samurai : BaseFighter
             vy = 230;              // peaks about 2.4 units up
             vx = facing * 20;      // a little forward drift
         }
+    }
+
+    // The launch. Runs after TakeHit, so it replaces the normal knockback. The victim stays in
+    // hitstun (or KO) until they land, so a launched fighter can't act until they're back down.
+    public override void OnHitDealt(GameSim sim, Fighter victim, HitboxInstance hit)
+    {
+        if (hit.blocked || hit.def != Shoryuken.hitboxes[0]) return;
+        int away = x <= victim.x ? 1 : -1;
+        victim.vy = ShoryukenLaunchUp;
+        victim.vx = away * ShoryukenLaunchSideways;
     }
 
     public override bool IsIntangible

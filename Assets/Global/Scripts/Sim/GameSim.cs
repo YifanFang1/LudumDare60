@@ -51,6 +51,12 @@ public class GameSim
     }
     public const int CountdownTicks = 180;
     public const int FightBannerTicks = 60;
+    // ROUND CALL: "ROUND 1" / "FINAL ROUND" on its own, after the intros and before the 3-2-1, so the
+    // announcer never talks over the dialogue. Sessions switch it on; tests that only want the
+    // countdown leave it off. Nobody can act during it, like the countdown.
+    public bool roundCallOn;
+    public const int RoundCallTicks = 126;   // 2.1 seconds (Announcer_Round1 is 3.1 s, so it runs a little into the 3-2-1)
+    public int roundCallTicks;
     public int countdownTicks;
     public int fightBannerTicks;
     public string CountdownText
@@ -146,6 +152,7 @@ public class GameSim
         roundTimeTicks = RoundTimeTicks;
         timeUp = false;
         roundWinner = -1;
+        roundCallTicks = roundCallOn ? RoundCallTicks : 0;
         countdownTicks = countdownOn ? CountdownTicks : 0;
         fightBannerTicks = 0;
         freezeTicks = 0;
@@ -202,7 +209,13 @@ public class GameSim
             return;
         }
 
-        // Consume synchronized input ticks without applying them during the countdown.
+        // Then the round call, then the countdown: input ticks are consumed without being applied.
+        if (roundCallTicks > 0)
+        {
+            roundCallTicks--;
+            tick++;
+            return;
+        }
         if (countdownTicks > 0)
         {
             countdownTicks--;
@@ -833,6 +846,7 @@ public class GameSim
             h = h * 31 + introFirstTicks;
             h = h * 31 + introSecondTicks;
             h = h * 31 + introVariant;
+            h = h * 31 + roundCallTicks;
             h = h * 31 + countdownTicks;
             h = h * 31 + fightBannerTicks;
             for (int i = 0; i < 2; i++)
