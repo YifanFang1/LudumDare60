@@ -471,6 +471,7 @@ public class WorldView : MonoBehaviour
             Sprite sprite = entry != null ? entry.sprite : null;
 
             // A placed hitbox whose art lingers (or animates): remember it once, draw it from the ghost list below.
+            if (entry != null && entry.playOnTelegraph) continue;   // drawn from the Telegraph event instead
             if (entry != null && entry.lingerSeconds > 0f && !h.FollowsOwner)
             {
                 long key = ((long)h.owner * 73856093L) ^ ((long)h.def.GetHashCode() * 19349663L) ^ ((long)h.originX * 83492791L) ^ ((long)h.originY * 2654435761L);
@@ -525,13 +526,13 @@ public class WorldView : MonoBehaviour
         for (int g = ghosts.Count - 1; g >= 0; g--)
         {
             ProjectileGhost gh = ghosts[g];
-            float elapsed = Time.time - gh.startTime;
+            float elapsed = Time.time - gh.startTime;   // negative while it waits to start (first frame shows)
             if (elapsed > gh.entry.lingerSeconds) { ghosts.RemoveAt(g); continue; }
             Sprite frame = gh.entry.sprite;
             if (gh.entry.frames != null && gh.entry.frames.Length > 0)
             {
                 int n = gh.entry.frames.Length;
-                int idx = Mathf.FloorToInt(elapsed * Mathf.Max(0.01f, gh.entry.framesPerSecond));
+                int idx = Mathf.Max(0, Mathf.FloorToInt(elapsed * Mathf.Max(0.01f, gh.entry.framesPerSecond)));
                 idx = gh.entry.loop ? idx % n : Mathf.Min(idx, n - 1);
                 frame = gh.entry.frames[idx];
             }
@@ -910,7 +911,20 @@ public class WorldView : MonoBehaviour
                 w.x = e.x;
                 w.width = e.amount;
                 w.untilTick = sim.tick + e.b;
-                warnings.Add(w);
+                FighterView tOwner = e.a >= 0 && e.a < views.Length ? views[e.a] : null;
+                ProjectileSprite tArt = tOwner != null && tOwner.data != null ? tOwner.data.FindTelegraphEntry() : null;
+                if (tArt == null) warnings.Add(w);   // art that plays on the telegraph (Patience's guillotine) replaces the red outline
+                if (tArt != null)
+                {
+                    // Start late enough that the last frame lands when the attack does.
+                    float animLen = tArt.frames != null && tArt.frames.Length > 0 ? tArt.frames.Length / Mathf.Max(0.01f, tArt.framesPerSecond) : 0f;
+                    float lead = Mathf.Max(0f, e.b / 60f - animLen);
+                    ghosts.Add(new ProjectileGhost
+                    {
+                        entry = tArt, facing = sim.fighters[e.a].facing, startTime = Time.time + lead,
+                        position = new Vector3(e.x * Scale, 1200f * Scale, 0f),
+                    });
+                }
                 line = P(e.a) + "'s attack lands here in " + e.b + " ticks";
                 break;
             case SimEventType.Reflect:
