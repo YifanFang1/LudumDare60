@@ -145,86 +145,86 @@ public class RosterTests
         Assert.AreEqual(70, sim.fighters[1].hp);
     }
 
-    // ================= Nek =================
+    // ================= K3N =================
 
     [Test]
-    public void NekInstallStartsWithAnyMeterAndDrainsIt()
+    public void K3NInstallStartsWithAnyMeterAndDrainsIt()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id, 8000);
-        Nek nek = (Nek)sim.fighters[0];
-        nek.meter = 300;
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 8000);
+        K3N k3n = (K3N)sim.fighters[0];
+        k3n.meter = 300;
 
         sim.Step(Buttons.Ultimate, None);
-        Assert.IsTrue(nek.installOn);
+        Assert.IsTrue(k3n.installOn);
         Assert.AreEqual(0, sim.freezeTicks, "no superflash");
-        Assert.AreEqual(300 - Nek.InstallDrainPerTick, nek.meter);
+        Assert.AreEqual(300 - K3N.InstallDrainPerTick, k3n.meter);
 
         Run(sim, None, None, 200);
-        Assert.AreEqual(0, nek.meter);
-        Assert.IsFalse(nek.installOn, "it switches off when the meter is empty");
+        Assert.AreEqual(0, k3n.meter);
+        Assert.IsFalse(k3n.installOn, "it switches off when the meter is empty");
     }
 
     [Test]
-    public void NekInstallNeedsSomeMeter()
+    public void K3NInstallNeedsSomeMeter()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id, 8000);
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 8000);
         sim.Step(Buttons.Ultimate, None);
-        Assert.IsFalse(((Nek)sim.fighters[0]).installOn);
+        Assert.IsFalse(((K3N)sim.fighters[0]).installOn);
     }
 
     [Test]
-    public void NekInstallToggleOffKeepsTheRest()
+    public void K3NInstallToggleOffKeepsTheRest()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id, 8000);
-        Nek nek = (Nek)sim.fighters[0];
-        nek.meter = 500;
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 8000);
+        K3N k3n = (K3N)sim.fighters[0];
+        k3n.meter = 500;
 
         sim.Step(Buttons.Ultimate, None);
         Run(sim, None, None, 9);
         sim.Step(Buttons.Ultimate, None);   // a fresh press
-        int left = nek.meter;
+        int left = k3n.meter;
         Run(sim, None, None, 30);
 
-        Assert.IsFalse(nek.installOn);
-        Assert.AreEqual(left, nek.meter, "no more drain once it's off");
-        Assert.AreEqual(500 - 10 * Nek.InstallDrainPerTick, left);
+        Assert.IsFalse(k3n.installOn);
+        Assert.AreEqual(left, k3n.meter, "no more drain once it's off");
+        Assert.AreEqual(500 - 10 * K3N.InstallDrainPerTick, left);
     }
 
     [Test]
-    public void NekInstallAddsDamageAndBlocksMeterGain()
+    public void K3NInstallAddsDamageAndBlocksMeterGain()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id, 1200);
-        Nek nek = (Nek)sim.fighters[0];
-        nek.meter = Fighter.MeterMax;
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 1200);
+        K3N k3n = (K3N)sim.fighters[0];
+        k3n.meter = Fighter.MeterMax;
         sim.Step(Buttons.Ultimate, None);
 
-        int before = nek.meter;
+        int before = k3n.meter;
         Press(sim, Buttons.Light, 0, 20);
 
         Assert.AreEqual(100 - 5 * 130 / 100, sim.fighters[1].hp);
-        Assert.AreEqual(before - 21 * Nek.InstallDrainPerTick, nek.meter, "only the drain: no meter from the hit");
+        Assert.AreEqual(before - 21 * K3N.InstallDrainPerTick, k3n.meter, "only the drain: no meter from the hit");
     }
 
     [Test]
-    public void NekInstallRemovesCooldowns()
+    public void K3NInstallRemovesCooldowns()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id, 8000);
-        Nek nek = (Nek)sim.fighters[0];
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 8000);
+        K3N k3n = (K3N)sim.fighters[0];
         Press(sim, Buttons.Light, 0, 20);
-        Assert.IsTrue(nek.IsOnCooldown(Nek.CapeWhip));
+        Assert.IsTrue(k3n.IsOnCooldown(K3N.CapeWhip));
 
-        nek.meter = Fighter.MeterMax;
+        k3n.meter = Fighter.MeterMax;
         sim.Step(Buttons.Ultimate, None);
-        Assert.IsFalse(nek.IsOnCooldown(Nek.CapeWhip), "Install clears running cooldowns");
+        Assert.IsFalse(k3n.IsOnCooldown(K3N.CapeWhip), "Install clears running cooldowns");
 
         Press(sim, Buttons.Light, 0, 20);
-        Assert.IsFalse(nek.IsOnCooldown(Nek.CapeWhip), "and starts none");
+        Assert.IsFalse(k3n.IsOnCooldown(K3N.CapeWhip), "and starts none");
     }
 
     [Test]
-    public void NekRapidPunchesKeepTheVictimInHitstun()
+    public void K3NRapidPunchesKeepTheVictimInHitstun()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id, 1200);
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 1200);
         int hits = 0;
         for (int i = 0; i < 120; i++)
         {
@@ -237,19 +237,19 @@ public class RosterTests
     }
 
     [Test]
-    public void NekRapidPunchesTappedThrowThree()
+    public void K3NRapidPunchesTappedThrowThree()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id, 1200);
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 1200);
         Press(sim, Buttons.Special, 0, 60);
         Assert.AreEqual(100 - 3 * 2, sim.fighters[1].hp);
     }
 
     [Test]
-    public void NekChargedPunchScalesWithCharge()
+    public void K3NChargedPunchScalesWithCharge()
     {
-        GameSim tapped = NewMatch(Nek.Id, Sandbag.Id, 1200);
+        GameSim tapped = NewMatch(K3N.Id, Sandbag.Id, 1200);
         Press(tapped, Buttons.Heavy, 0, 40);
-        GameSim full = NewMatch(Nek.Id, Sandbag.Id, 1200);
+        GameSim full = NewMatch(K3N.Id, Sandbag.Id, 1200);
         Press(full, Buttons.Heavy, 60, 40);
 
         Assert.AreEqual(88, tapped.fighters[1].hp);
@@ -257,17 +257,17 @@ public class RosterTests
     }
 
     [Test]
-    public void NekCooldownsShrinkWhenHurt()
+    public void K3NCooldownsShrinkWhenHurt()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id, 8000);
-        Nek nek = (Nek)sim.fighters[0];
-        nek.hp = 50;
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 8000);
+        K3N k3n = (K3N)sim.fighters[0];
+        k3n.hp = 50;
 
         Press(sim, Buttons.Special, 0, 0);
-        UntilFree(sim, nek);
+        UntilFree(sim, k3n);
 
         // Special cooldown 30, -25% at half health = 22 (+1: "ticks until usable").
-        Assert.AreEqual(30 * 75 / 100 + 1, nek.CooldownLeft(Nek.RapidPunches));
+        Assert.AreEqual(30 * 75 / 100 + 1, k3n.CooldownLeft(K3N.RapidPunches));
     }
 
     // ================= Noir =================

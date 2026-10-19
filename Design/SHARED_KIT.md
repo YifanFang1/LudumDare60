@@ -210,7 +210,7 @@ Not scheduled (D-30). When a real character design needs one of these, build it 
 | Intangibility | `IsIntangible`: skipped by hits and pushboxes | The view hides the fighter or shows it see-through |
 | Placed hitboxes | `sim.SpawnHitboxAt(owner, def, worldX)`, `sim.CountHitboxes(owner, def)` | For traps and hitboxes at a chosen spot |
 | Telegraphs | A `Telegraph` event (x, width, duration) that the view draws as a warning outline | For attacks that need to warn before they hit |
-| Charge input | A hold phase on a move (`chargeTicks` on `Fighter`): charge then release, repeat while held, or tap vs hold (D-42) | Ruy, Nek, Executioner, Dr. Remy |
+| Charge input | A hold phase on a move (`chargeTicks` on `Fighter`): charge then release, repeat while held, or tap vs hold (D-42) | Ruy, K3N, Executioner, Dr. Remy |
 | Grab pull | A grab that moves the victim next to the grabber before the throw (like the back throw) | Noir's lasso, Executioner's whip grab |
 | Held grab | `FighterStateId.Held` (appended): the victim is pinned for N ticks while the grabber may only use certain moves | Room's Trunk Grab |
 | Hitbox vs projectile | Hitbox flags `destroysProjectiles` / `reflectsProjectiles`, checked before hits resolve | Room's Vine Boom, Paintress's canvas |

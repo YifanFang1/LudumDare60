@@ -43,7 +43,7 @@ public static class PlaceholderArt
         { 13, new Style(0.45f, 0.52f, 0.62f, Pattern.Frame,    'E') },   // Room (the Elephant)
         { 14, new Style(0.65f, 0.12f, 0.15f, Pattern.Chevron,  'X') },   // The Executioner
         { 15, new Style(0.25f, 0.60f, 0.30f, Pattern.Dots,     'D') },   // Dr. Remy
-        { 16, new Style(0.55f, 0.30f, 0.90f, Pattern.Bands,    'K') },   // Nek
+        { 16, new Style(0.55f, 0.30f, 0.90f, Pattern.Bands,    'K') },   // K3N
     };
 
     public static Style StyleFor(int characterId)

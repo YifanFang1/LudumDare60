@@ -34,6 +34,7 @@ public class GlitchTransition : MonoBehaviour
     IEnumerator Play(Action onPeak)
     {
         Busy = true;
+        AudioManager.Glitch();
         if (blocker != null) blocker.gameObject.SetActive(true);
 
         for (float t = 0f; t < rampUpTime; t += Time.unscaledDeltaTime)
@@ -44,6 +45,7 @@ public class GlitchTransition : MonoBehaviour
         SetGlitch(1f);
         yield return new WaitForSecondsRealtime(peakHold);
 
+        AudioManager.PageSwitch();
         if (onPeak != null) onPeak();
         yield return null;
 

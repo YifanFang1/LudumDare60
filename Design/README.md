@@ -25,7 +25,7 @@ It sits outside `Assets/` on purpose, so Unity doesn't make `.meta` files for it
 | 13 | Room | Grappler | `Elephant` | [Room.md](Characters/Room.md) | Built; placeholder art |
 | 14 | The Executioner | Trapper | `Executioner` | [Executioner.md](Characters/Executioner.md) | Built; placeholder art |
 | 15 | Dr. Remy | Mixup | `PlagueDoctor` | [DrRemy.md](Characters/DrRemy.md) | Built; placeholder art (was Plague Doctor) |
-| 16 | Nek (temp name) | Powerup | `Nek` | [Nek.md](Characters/Nek.md) | Built; placeholder art |
+| 16 | K3N | Powerup | `K3N` | [K3N.md](Characters/K3N.md) | Built; placeholder art |
 
 **Old Tech(niques) and eras are still TBD for everyone** (D-45). The sheet didn't include them.
 

@@ -103,6 +103,7 @@ public class TvOffEffect : MonoBehaviour
     IEnumerator Run()
     {
         if (waitBefore > 0f) yield return new WaitForSecondsRealtime(waitBefore);
+        AudioManager.TvOff();
 
         float w = root.rect.width > 1f ? root.rect.width : 1920f;
         float h = root.rect.height > 1f ? root.rect.height : 1080f;

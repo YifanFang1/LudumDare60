@@ -5,7 +5,7 @@ public static class CharacterDialogue
 {
     public static string Speaker(int id)
     {
-        if (id == 14) return "Penance"; // existing Executioner
+        if (id == 14) return "Patience"; // existing Executioner
         return CharacterList.NameOf(id);
     }
 
@@ -27,7 +27,7 @@ public static class CharacterDialogue
                         "It seems I have been throoughly pun-nished";
             }
         }
-        if (id == 14) // Penance
+        if (id == 14) // Patience
         {
             switch (moment)
             {

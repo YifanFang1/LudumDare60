@@ -22,10 +22,10 @@ public class CharacterTests
     public void RosterCharactersAreRegisteredWithTheirSheetNames()
     {
         // D-40: the in-game names come from the Moveset Tracker; the class names stay.
-        int[] ids = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id, Nek.Id };
-        string[] names = { "Ruy", "Paintress", "Noir", "Ŕ̶̝͇̤͛̎Ȍ̴̢̪̗͇͂̈́̆̀̿̿̈́̀͐͗̓͠ͅO̵̯̲͕̗͐̐̌͂͗̓̆̍͊͗M̷̧̤̲̲̖͑̿", "The Executioner", "Dr. Remy", "Nek" };
+        int[] ids = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id, K3N.Id };
+        string[] names = { "Ruy", "Paintress", "Noir", "Ŕ̶̝͇̤͛̎Ȍ̴̢̪̗͇͂̈́̆̀̿̿̈́̀͐͗̓͠ͅO̵̯̲͕̗͐̐̌͂͗̓̆̍͊͗M̷̧̤̲̲̖͑̿", "The Executioner", "Dr. Remy", "K3N" };
         System.Type[] types = { typeof(Samurai), typeof(Painter), typeof(Cowboy), typeof(Elephant),
-                                typeof(Executioner), typeof(PlagueDoctor), typeof(Nek) };
+                                typeof(Executioner), typeof(PlagueDoctor), typeof(K3N) };
         string[] slots = { "Light", "Heavy", "Grab", "Special", "Ultimate", "JumpLight", "JumpHeavy" };
 
         for (int i = 0; i < ids.Length; i++)
@@ -44,7 +44,7 @@ public class CharacterTests
                 Assert.Contains(moves[m].name, slots, names[i] + "'s move names must be slot names");
             }
         }
-        Assert.AreEqual(16, Nek.Id, "Nek takes the first free roster id (D-40)");
+        Assert.AreEqual(16, K3N.Id, "K3N takes the first free roster id (D-40)");
     }
 
     [Test]

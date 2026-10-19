@@ -26,7 +26,8 @@ public class RelayLockstepSession : MatchSessionBase
     // 12: rematch ("r" message) and keepalive ("p").
     // 13: synchronized pre-round countdown.
     // 15: synchronized two-character introduction before the countdown.
-    const string Version = "15";
+    // 16: round timer is 80 seconds.
+    const string Version = "16";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 

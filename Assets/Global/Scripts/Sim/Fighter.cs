@@ -195,7 +195,7 @@ public abstract class Fighter
 
     // true = ignore this kind of status effect (Room's perk).
     public virtual bool IgnoresStatus(StatusKind kind) { return false; }
-    // false = hits don't give this fighter meter right now (Nek's Install).
+    // false = hits don't give this fighter meter right now (K3N's Install).
     public virtual bool CanGainMeter { get { return true; } }
     // true = hits pass through this fighter right now (invincible frames). Bodies still push.
     public virtual bool IsIntangible { get { return false; } }
@@ -209,7 +209,7 @@ public abstract class Fighter
 
     // HINTS FOR THE AI (AIInputSource). They only READ the sim and never affect the fight, so they
     // aren't hashed. The AI stays generic: it asks these instead of knowing characters by name.
-    //   UltimateIsToggle      the Ultimate button switches a mode on and off (Nek's Install)
+    //   UltimateIsToggle      the Ultimate button switches a mode on and off (K3N's Install)
     //   WantsSpecialSwitch    a TAP of Special changes what Special does, and a tap is wanted now
     //   SpecialHoldTicks      hold Special at least this long to use it (0 = any press works)
     public virtual bool UltimateIsToggle { get { return false; } }

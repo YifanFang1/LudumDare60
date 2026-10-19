@@ -21,6 +21,7 @@ public enum SimEventType
     SummonDestroyed, // a: the owner, b: who destroyed it (-1 = it ran out), x: where
     Hold,         // a held grab caught someone: a: grabber, b: victim, amount: hold ticks
     OutOfAmmo,    // a fresh Special press with no ammo left (Noir's empty click): a: who, x/y: where
+    PowerUp,      // a power-up switched on or off (K3N's Install): a: who, amount: 1 on, 0 off. Sound only.
 }
 
 public struct SimEvent

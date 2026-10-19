@@ -47,8 +47,8 @@ public class AITests
         }
 
         // Every launch-roster character, as each side, against a plain opponent: the AI has to be
-        // able to finish a match with all of them (Room can't block, Nek has no normal Ultimate...).
-        int[] roster = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id, Nek.Id };
+        // able to finish a match with all of them (Room can't block, K3N has no normal Ultimate...).
+        int[] roster = { Samurai.Id, Painter.Id, Cowboy.Id, Elephant.Id, Executioner.Id, PlagueDoctor.Id, K3N.Id };
         for (int i = 0; i < roster.Length; i++)
         {
             GameSim asP1 = PlayAIMatch(roster[i], Brawler.Id, seen);
@@ -102,22 +102,22 @@ public class AITests
     [Test]
     public void AITogglesInstallOnUpCloseAndOffWhenFar()
     {
-        GameSim sim = NewMatch(Nek.Id, Sandbag.Id);
-        Nek nek = (Nek)sim.fighters[0];
-        nek.meter = 800;
+        GameSim sim = NewMatch(K3N.Id, Sandbag.Id);
+        K3N k3n = (K3N)sim.fighters[0];
+        k3n.meter = 800;
         bool turnedOn = false;
-        RunAI(sim, 1200, delegate { if (nek.installOn) turnedOn = true; });
+        RunAI(sim, 1200, delegate { if (k3n.installOn) turnedOn = true; });
         Assert.IsTrue(turnedOn, "the AI should switch Install on up close with meter");
 
         // Far away with Install on: it switches it off to save meter.
-        GameSim far = NewMatch(Nek.Id, Sandbag.Id);
-        Nek farNek = (Nek)far.fighters[0];
-        farNek.meter = Fighter.MeterMax;
-        farNek.installOn = true;
+        GameSim far = NewMatch(K3N.Id, Sandbag.Id);
+        K3N farK3N = (K3N)far.fighters[0];
+        farK3N.meter = Fighter.MeterMax;
+        farK3N.installOn = true;
         far.fighters[0].x = -7000;
         far.fighters[1].x = 7000;
         bool turnedOff = false;
-        RunAI(far, 120, delegate { if (!farNek.installOn && farNek.meter > 0) turnedOff = true; });
+        RunAI(far, 120, delegate { if (!farK3N.installOn && farK3N.meter > 0) turnedOff = true; });
         Assert.IsTrue(turnedOff, "the AI should switch Install off when far away");
     }
 

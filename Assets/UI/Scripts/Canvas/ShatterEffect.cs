@@ -70,6 +70,7 @@ public class ShatterEffect : MonoBehaviour
     IEnumerator Run(Vector2 screenPoint, Action onCovered, Action onDone)
     {
         IsPlaying = true;
+        AudioManager.GlassBreak();
         yield return new WaitForEndOfFrame();   // the screen can only be read once the frame is drawn
 
         Texture2D shot = Capture();

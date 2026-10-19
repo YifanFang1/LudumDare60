@@ -14,7 +14,7 @@ using System.Collections.Generic;
 //                13  Elephant         "Room"             in-game names (D-40) and are kept
 //                14  Executioner      "The Executioner"  to avoid churn.
 //                15  PlagueDoctor     "Dr. Remy"
-//                16  Nek              "Nek" (temp name)
+//                16  K3N              "K3N"
 //                17+          free, for new roster characters
 //   other ids   characters made in the Unity inspector (CharacterData assets). They get a big
 //               random id and register themselves at startup, so nobody edits this file for them.
@@ -45,7 +45,7 @@ public static class CharacterList
         Add(Elephant.Id, "Ŕ̶̝͇̤͛̎Ȍ̴̢̪̗͇͂̈́̆̀̿̿̈́̀͐͗̓͠ͅO̵̯̲͕̗͐̐̌͂͗̓̆̍͊͗M̷̧̤̲̲̖͑̿", delegate { return new Elephant(); }, null);
         Add(Executioner.Id, "The Executioner", delegate { return new Executioner(); }, null);
         Add(PlagueDoctor.Id, "Dr. Remy", delegate { return new PlagueDoctor(); }, null);
-        Add(Nek.Id, "Nek", delegate { return new Nek(); }, null);
+        Add(K3N.Id, "K3N", delegate { return new K3N(); }, null);
     }
 
     // For characters written in code. Pick an id that is not used yet.

@@ -17,7 +17,7 @@ public class ControlRowUI : MonoBehaviour
         if (bindButton != null)
         {
             bindButton.onClick.RemoveAllListeners();
-            bindButton.onClick.AddListener(() => onClick(index));
+            bindButton.onClick.AddListener(() => { AudioManager.Click(); onClick(index); });
         }
     }
 

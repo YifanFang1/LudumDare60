@@ -88,6 +88,8 @@ public class CharacterSfx
     public AudioClip[] summon;
     public AudioClip[] hold;
     public AudioClip[] heal;
+    [Tooltip("A power-up switching on (K3N's Install).")]
+    public AudioClip[] powerUp;
     [Tooltip("A fresh Special press with no ammo left (Noir's empty click).")]
     public AudioClip[] outOfAmmo;
     [Tooltip("This character's music. Plays in round 2 or 3 after they win a round. Empty = the AudioManager's Fight Music.")]

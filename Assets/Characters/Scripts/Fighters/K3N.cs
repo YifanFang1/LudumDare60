@@ -1,4 +1,4 @@
-// NEK (temp name): roster character, id 16. Powerup. Design: Design/Characters/Nek.md
+// K3N: roster character, id 16. Powerup. Design: Design/Characters/K3N.md
 // An arcade-style brawler with a pet, Zeep Zorp (only seen in his block animation for now).
 //
 //   Light (J)      Cape whip: a jab with a little more reach.
@@ -10,7 +10,7 @@
 //                  with ANY meter (no superflash), it drains 2 meter a tick, and O again turns it
 //                  off. While it's on: +30% damage, no move cooldowns, no meter gain.
 //   Perk 2         Second Wind: his cooldowns shrink as he loses health (up to -50%).
-public class Nek : BaseFighter
+public class K3N : BaseFighter
 {
     public const int Id = 16;
 
@@ -68,7 +68,7 @@ public class Nek : BaseFighter
 
     public override void OnTick(GameSim sim)
     {
-        // A knocked-out Nek switches Install off, so the bar stops draining once he is dead.
+        // A knocked-out K3N switches Install off, so the bar stops draining once he is dead.
         if (hp <= 0)
         {
             installOn = false;
@@ -77,11 +77,16 @@ public class Nek : BaseFighter
 
         if ((pressedInput & Buttons.Ultimate) != 0 && CanToggleInstall)
         {
-            if (installOn) installOn = false;
+            if (installOn)
+            {
+                installOn = false;
+                sim.AddEvent(SimEventType.PowerUp, index, -1, x, y, 0);
+            }
             else if (meter > 0)
             {
                 installOn = true;
                 ClearCooldowns();   // "no move cooldowns" includes the ones already running
+                sim.AddEvent(SimEventType.PowerUp, index, -1, x, y, 1);
             }
         }
 

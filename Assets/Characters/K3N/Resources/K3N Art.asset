@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa5a024dae297604f829b64925f74f0e, type: 3}
-  m_Name: Nek Art
+  m_Name: K3N Art
   m_EditorClassIdentifier: LD.CharacterData::CodeCharacterArt
   viewPrefab: {fileID: 8050349493309617423, guid: 0f4a944e99abb47fc85335b29697ef67, type: 3}
   sprite: {fileID: 0}
@@ -24,13 +24,26 @@ MonoBehaviour:
   walkLoopTicks: 30
   projectileSprites: []
   sfx:
-    moves: []
+    moves:
+    - move: Light
+      clips:
+      - {fileID: 8300000, guid: 6144dfc33c10f42298e25273aaf04c6e, type: 3}
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: ea15cef22b2fa4462983ab74ff9a677f, type: 3}
     attackStart: []
-    hit: []
-    heavyHit: []
+    hit:
+    - {fileID: 8300000, guid: ea15cef22b2fa4462983ab74ff9a677f, type: 3}
+    heavyHit:
+    - {fileID: 8300000, guid: be29cf966dcbd4094a391bf158fb5b22, type: 3}
     grab: []
-    block: []
-    dash: []
+    block:
+    - {fileID: 8300000, guid: ce7f81d7279de4c73868f21ae6a2cf4a, type: 3}
+    - {fileID: 8300000, guid: d6637cb9a499a4a93a165c34a035851d, type: 3}
+    - {fileID: 8300000, guid: 28a1043b352144c418c6d72110b46bf8, type: 3}
+    - {fileID: 8300000, guid: c9da7706fe635424b81ba35dc4f12feb, type: 3}
+    dash:
+    - {fileID: 8300000, guid: b22755d5c39e041119d57f75e99f3577, type: 3}
     superFlash: {fileID: 0}
     ko: {fileID: 0}
     reflect: []
@@ -38,5 +51,7 @@ MonoBehaviour:
     summon: []
     hold: []
     heal: []
+    powerUp:
+    - {fileID: 8300000, guid: 9e7a7c019202c4cf28df1b72c85a0988, type: 3}
     outOfAmmo: []
   characterId: 16

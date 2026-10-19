@@ -75,11 +75,11 @@ public class GameSim
     public const int RoundEndDelay = 120;   // ticks between the KO and the next round
     public const int StartX = 3000;         // fighters start at -StartX and +StartX
 
-    // ROUND TIMER: a round lasts at most 45 seconds of live fighting (the countdown, hit stop, superflash
+    // ROUND TIMER: a round lasts at most 80 seconds of live fighting (the countdown, hit stop, superflash
     // and the pause after a KO do not count). When it runs out, whoever has more health wins the round;
     // equal health is a draw for the round, scored like a double KO. Sessions switch it on like the
     // countdown; isolated combat tests leave it off.
-    public const int RoundTimeTicks = 45 * 60;
+    public const int RoundTimeTicks = 80 * 60;
     public bool roundTimerOn;
     public int roundTimeTicks;              // counts down from RoundTimeTicks
     public bool timeUp;                     // the round just ended on the clock, not a KO

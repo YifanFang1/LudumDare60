@@ -26,6 +26,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] summonSounds;     // Ultimate copies appeared
     public AudioClip[] holdSounds;       // a held grab caught someone (empty = use grabSounds)
     public AudioClip[] healSounds;       // someone healed
+    public AudioClip[] powerUpSounds;    // a power-up switched on (K3N's Install)
     public AudioClip[] outOfAmmoSounds;  // a Special press with no ammo (Noir's empty click)
     public int heavyHitDamage = 10;      // Brawler: Light does 5, Heavy does 12
 
@@ -39,6 +40,10 @@ public class AudioManager : MonoBehaviour
     [Header("Menu")]
     public AudioClip buttonClick;
     public AudioClip confirm;            // Ready / Fight! on character select
+    public AudioClip pageSwitch;         // the menu page changes (the middle of the glitch transition)
+    public AudioClip glitchSound;        // the glitch transition starts
+    public AudioClip glassBreak;         // the screen shatters (title press, match start)
+    public AudioClip tvOff;              // the TV switches off on Quit
 
     [Header("Music")]
     public AudioClip menuMusic;          // lobby and waiting for an opponent
@@ -129,6 +134,11 @@ public class AudioManager : MonoBehaviour
         if (instance != null) instance.PlayUI(instance.confirm);
     }
 
+    public static void PageSwitch() { if (instance != null) instance.PlayUI(instance.pageSwitch); }
+    public static void Glitch() { if (instance != null) instance.PlayUI(instance.glitchSound); }
+    public static void GlassBreak() { if (instance != null) instance.PlayUI(instance.glassBreak); }
+    public static void TvOff() { if (instance != null) instance.PlayUI(instance.tvOff); }
+
     // ---------- fight ----------
 
     void OnMatchStarted(GameSim sim)
@@ -218,6 +228,9 @@ public class AudioManager : MonoBehaviour
                 PlaySfx(Pick(own, Has(holdSounds) ? holdSounds : grabSounds));
                 break;
             }
+            case SimEventType.PowerUp:
+                if (e.amount == 1) PlaySfx(Pick(c != null ? c.powerUp : null, powerUpSounds));
+                break;
             case SimEventType.OutOfAmmo:
                 PlaySfx(Pick(c != null ? c.outOfAmmo : null, outOfAmmoSounds));
                 break;

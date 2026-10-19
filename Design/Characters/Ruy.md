@@ -91,4 +91,4 @@ After the 30-tick superflash, a rising uppercut that's **invincible on startup**
 Still open:
 - **Old Tech, era, art style:** TBD by the team (D-45).
 - Two comeback systems stack here: taking damage already fills the meter (D-08), and rage adds damage on top. Playtest it.
-- Nek's perk 2 and Room's perk 1 are also "more damage taken = ..." perks. Three of seven characters get stronger when hurt.
+- K3N's perk 2 and Room's perk 1 are also "more damage taken = ..." perks. Three of seven characters get stronger when hurt.

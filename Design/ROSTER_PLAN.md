@@ -1,6 +1,6 @@
 # Roster build plan (from the Moveset Tracker)
 
-> **Status (2026-10-17): every step below is built, nothing was cut.** Step 0, Step 1 (K8-K11), Passes 1-3 for all seven characters, and Pass 4's code (AI, HUD status line, code-drawn placeholder art, zones, copies, telegraphs, ink overlay, sound slots). Network `Version` is "11" (after merging main's air dash, D-62). Decisions made while building are D-50 to D-62 in [DECISIONS.md](DECISIONS.md). Tests: `KitExtensionTests` (one per new rule), `RosterTests` (one per character rule), plus `AITests` and the soak test with all ten code characters: 181 EditMode tests after the merge with main's air dash, all passing. The AI also toggles Nek's Install and picks Dr. Remy's potions on purpose (D-60). **Still to do:** the **online match between two builds** (the team runs it, D-61: start the relay with `npm run dev` in `relay/`, point both clients' relay address at `ws://localhost:8787`, play a full best-of-3 and watch for desync warnings), real art (Unity Editor, see Pass 4), and a playtest pass on the numbers. The plan below is kept as written.
+> **Status (2026-10-17): every step below is built, nothing was cut.** Step 0, Step 1 (K8-K11), Passes 1-3 for all seven characters, and Pass 4's code (AI, HUD status line, code-drawn placeholder art, zones, copies, telegraphs, ink overlay, sound slots). Network `Version` is "11" (after merging main's air dash, D-62). Decisions made while building are D-50 to D-62 in [DECISIONS.md](DECISIONS.md). Tests: `KitExtensionTests` (one per new rule), `RosterTests` (one per character rule), plus `AITests` and the soak test with all ten code characters: 181 EditMode tests after the merge with main's air dash, all passing. The AI also toggles K3N's Install and picks Dr. Remy's potions on purpose (D-60). **Still to do:** the **online match between two builds** (the team runs it, D-61: start the relay with `npm run dev` in `relay/`, point both clients' relay address at `ws://localhost:8787`, play a full best-of-3 and watch for desync warnings), real art (Unity Editor, see Pass 4), and a playtest pass on the numbers. The plan below is kept as written.
 
 How to turn the seven designs in [Characters/](Characters/) into the game. The decisions behind it are D-40 to D-49 in [DECISIONS.md](DECISIONS.md). The earlier [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) (the shared kit and the placeholders) is done, and this plan starts from there.
 
@@ -9,7 +9,7 @@ How to turn the seven designs in [Characters/](Characters/) into the game. The d
 ## Overview
 
 ```
-Step 0   Housekeeping       names, Nek placeholder (id 16)
+Step 0   Housekeeping       names, K3N placeholder (id 16)
 Step 1   Kit-wide changes   K8 cooldowns + CanBlock · K9 hit modifiers · K10 charge input · K11 move hooks
 Pass 1   Playable + distinct  each character: stats, normals, dashes, Special   (+ the extensions they need)
 Pass 2   Ultimates            each character's Ultimate                         (+ extensions)
@@ -26,9 +26,9 @@ After each pass, every character is **complete at that layer** and the game is s
 | What | Where |
 |---|---|
 | Display names: Samurai → "Ruy", Painter → "Paintress", Cowboy → "Noir", Elephant → "Room", Executioner → "The Executioner", PlagueDoctor → "Dr. Remy" (D-40). Class names stay | `CharacterList.cs` (only the strings) |
-| New placeholder `Nek : BaseFighter`, `Id = 16`, header comment like the others. Register it in `CharacterList` and the soak test's pool | `Assets/Characters/Scripts/Fighters/Nek.cs`, `CharacterList.cs`, the soak test |
+| New placeholder `K3N : BaseFighter`, `Id = 16`, header comment like the others. Register it in `CharacterList` and the soak test's pool | `Assets/Characters/Scripts/Fighters/K3N.cs`, `CharacterList.cs`, the soak test |
 | Fix the comment in `Samurai.cs` (it says "SAMURAI"; it's Ruy now) | `Samurai.cs` |
-| **Unity Editor:** a Code Character Art asset for Nek with its own Placeholder Color (as in R2 of the old plan) | `Assets/Characters/CharacterDataBase/Resources/` |
+| **Unity Editor:** a Code Character Art asset for K3N with its own Placeholder Color (as in R2 of the old plan) | `Assets/Characters/CharacterDataBase/Resources/` |
 
 No `Version` bump: names and a new id don't change sim rules.
 
@@ -50,7 +50,7 @@ Each character gets its stats, Light, Heavy, Grab, dashes, block rule and Specia
 | # | Character | Moves to build | New extensions first needed here | Est. |
 |---|---|---|---|---|
 | 1 | **Ruy** ([doc](Characters/Ruy.md)) | Standard normals; Hadoken with charge (10 → 20) | uses K9 + K10 | 0.5h |
-| 2 | **Nek** ([doc](Characters/Nek.md)) | Cape whip, Charged Punch, quick dashes, Rapid Punches (hold to repeat) | uses K10's repeat variant | 1h |
+| 2 | **K3N** ([doc](Characters/K3N.md)) | Cape whip, Charged Punch, quick dashes, Rapid Punches (hold to repeat) | uses K10's repeat variant | 1h |
 | 3 | **Noir** ([doc](Characters/Noir.md)) | 4-unit Fire box, thrown gun, horse dashes, bullet Special (no ammo limit yet) | **Grab pull**: a grab hitbox that moves the victim next to the grabber before the throw (like the back throw). 1h | 2h |
 | 4 | **Executioner** ([doc](Characters/Executioner.md)) | Whip, charged whip (reach), whip grab (reuses Grab pull), slow dashes (60 CD), traps (slow only; bleed comes in Pass 3) | **Placed hitboxes** (`SpawnHitboxAt`, `CountHitboxes`, lifetime 0 = until it triggers, a `groundOnly` flag). **Status effects** core (on the victim, D-24): `ApplySlow`, `TakeDamage(canKO)`, `Heal`, `IgnoresStatus`, plus a speed hook `SpeedPercent` read by walk and dashes. 3h | 3.5h |
 | 5 | **Dr. Remy** ([doc](Characters/DrRemy.md)) | Cane jab, rat projectile, short dashes, leech grab (damage only for now), potions (tap to cycle, hold to use) | **Ground zones** (a list in `GameSim`: owner, x, width, ticksLeft, kind; queried in `OnTick`; hashed; no per-tick allocations). 1.5h | 2.5h |
@@ -65,7 +65,7 @@ Each character gets its stats, Light, Heavy, Grab, dashes, block rule and Specia
 |---|---|---|---|---|
 | 1 | Noir | Rapid Fire: 5 s of unlimited ammo + a ~0 Special cooldown | none (a buff timer in `HashExtra` + `ModifyCooldown`) | 0.5h |
 | 2 | Dr. Remy | Unleash the Rats: 3 unblockable low waves | none (projectiles spawned on ticks 6/36/66) | 0.5h |
-| 3 | Nek | Install toggle (D-48): any meter, no superflash, drains, +30% damage, no cooldowns | none (uses K8, K9). It's technically perk 1, but it's his O button, so it's built here | 1.5h |
+| 3 | K3N | Install toggle (D-48): any meter, no superflash, drains, +30% damage, no cooldowns | none (uses K8, K9). It's technically perk 1, but it's his O button, so it's built here | 1.5h |
 | 4 | Ruy | Shoryuken: invincible startup, rises, keeps its recovery on landing | **Intangibility** (`IsIntangible`: skipped by hits; **not** by pushboxes, see Paintress's open question). 1h | 1.5h |
 | 5 | Executioner | Guillotine: a telegraph on the opponent's spot, an unblockable drop 30 ticks later, 40 damage | **Telegraphs** (a `Telegraph` event + a generic view outline). 1h | 1.5h |
 | 6 | Paintress | Paint Splat: an unblockable, jumpable projectile, then 3 s of seeded scramble (plus a view-only blind) | **Seeded roll** (an int hash of seed, tick and index; no state). **Scramble** status (the victim's input is remapped in `FilterInput`). 1.5h | 2h |
@@ -79,7 +79,7 @@ Each character gets its stats, Light, Heavy, Grab, dashes, block rule and Specia
 |---|---|---|---|
 | Ruy | Rage (+missingHp%/2 damage); the Hadoken charge is already done | none (K9) | 0.5h |
 | Noir | 6 bullets per round; Point Blank knockback (×1 → ×2 inside 4 units) | none | 1h |
-| Nek | Second Wind (`ModifyCooldown` shrinks as he's hurt); Install is already done | none | 0.5h |
+| K3N | Second Wind (`ModifyCooldown` shrinks as he's hurt); Install is already done | none | 0.5h |
 | Executioner | Bleed (stacks to 5, DoT, -25% damage at 5, fades); Dismember every 3rd hit (slow). Traps now add bleed too | **Bleed** status on top of the Pass 1 status core | 2h |
 | Dr. Remy | Potions are already done; Leeches (1 HP/s for 300 ticks, heals Remy) | **Leech** status (DoT that heals its owner) | 1h |
 | Paintress | Invincible forward dash + 8 HP back dash cost; paint puddles (max 3, 240 ticks, +15% / -15% speed) | uses Intangibility (Pass 2) and Zones (Pass 1); a dash-start hook | 2h |
@@ -89,7 +89,7 @@ Each character gets its stats, Light, Heavy, Grab, dashes, block rule and Specia
 
 ## Pass 4: readability, AI and art (about 6h, can overlap with art work)
 
-- **HUD** (`HudScreen` and the `FightView` fallback): Noir's ammo pips, Dr. Remy's selected potion (needed: without it a tap is invisible), Nek's Install state, bleed stacks, and small status icons (slow, scramble, leech).
+- **HUD** (`HudScreen` and the `FightView` fallback): Noir's ammo pips, Dr. Remy's selected potion (needed: without it a tap is invisible), K3N's Install state, bleed stacks, and small status icons (slow, scramble, leech).
 - **View:** the telegraph outline, the zone renderer (paint, poison cloud), copies drawn see-through, the ink-blot overlay **only on the victim's local screen**, and the charge glow.
 - **Audio:** Vine Boom (it's the joke), the gun click, the guillotine.
 - **AI** (`AIInputSource`): per-character hints from each doc. At least: respect cooldowns (K8), never block as Room, cycle potions as Remy, count Noir's ammo, toggle Install.
@@ -116,7 +116,7 @@ These are collected from the docs' open questions. The ones that can change the 
 1. ~~Online play is still Brawler vs Brawler.~~ Out of date when written: online character select was already built (ARCHITECTURE.md, "Online"), so all seven are playable online.
 2. **Old Tech is missing for all seven** (D-45). It's the jam theme, so get answers before the art is locked.
 3. **No round timer** (D-26) plus Dr. Remy's healing and leeches means a stalling risk. Decide on a timer or a heal limit before Pass 3.
-4. **Comeback overload:** Ruy (rage), Nek (cooldowns) and Room (dash) all get stronger when hurt, on top of the meter already favouring the player taking damage (D-08).
+4. **Comeback overload:** Ruy (rage), K3N (cooldowns) and Room (dash) all get stronger when hurt, on top of the meter already favouring the player taking damage (D-08).
 5. **Balance extremes:** Room has 200 HP and no block. Vine Boom stacking can reach ×16 without a cap. Executioner bleed can reach 30 damage. Ruy's Shoryuken does 45 with full rage.
 6. **Cooldowns change the feel of every character**, including the AI and test characters. Playtest K8 alone before building on it.
 7. **Shared mechanics:** Noir's lasso and the Executioner's whip grab are the same thing. Fine for the code, but maybe not for the design.
@@ -124,6 +124,6 @@ These are collected from the docs' open questions. The ones that can change the 
 ## Testing
 
 - Every extension gets a unit test in the same commit (the "Test it with" column and each doc's Tests list).
-- The **determinism soak test** must include Nek and run green after every step. Per-tick status, zone and summon lists are exactly the kind of state it catches.
+- The **determinism soak test** must include K3N and run green after every step. Per-tick status, zone and summon lists are exactly the kind of state it catches.
 - After each pass: one online match between two builds (rounds, statuses and summons must stay in sync), and a full best-of-3 for every character vs the AI.
 - Before every push: the [review checklist](IMPLEMENTATION_PLAN.md#review-checklist-read-it-before-every-push).

@@ -149,7 +149,7 @@ Need more than one hitbox (a two-hit combo, a sweep that grows)? Build the `Move
 | A fighter that can't be KO'd | Override `CanBeKnockedOut` to return false; a lethal hit refills health instead. |
 | A new button | Add a bit in `Sim/Buttons.cs` (keep the old values), then a `Make(...)` line in `FightControls`. For inspector characters, also add it at the end of `AttackButton` in `CharacterDef.cs`. |
 | A move you charge by holding its button | Set `holdButton`, `chargeTick` and `chargeMax` on the `MoveDef`. `chargeTicks` says how long it was held; use it in `OnHitboxSpawned` (Ruy's Hadoken in `Samurai.cs`). |
-| A move that repeats while held (rapid punches) | `holdButton`, `loopStart`, `loopEnd`, `loopMin`, `loopMax` on the `MoveDef` (`Nek.cs`). |
+| A move that repeats while held (rapid punches) | `holdButton`, `loopStart`, `loopEnd`, `loopMin`, `loopMax` on the `MoveDef` (`K3N.cs`). |
 | "Tap to switch, hold to use" | `holdButton` and `tapWindow`; a tap calls `OnTap` instead of playing the move (`PlagueDoctor.cs`). |
 | A damage / knockback bonus, a charged hit, a longer whip | `OnHitboxSpawned(sim, hit)` (when it's created) or `ModifyOutgoingHit(sim, victim, hit)` (when it lands). Change `hit.damage`, `hit.hitstun`, `hit.knockback`, `hit.box`; **never** `hit.def`, which both players share (D-25). |
 | Something on a given tick of a move (a jump, a teleport, placing a trap) | `OnMoveStart`, `OnMoveTick` (check `move` and `stateTick`), `OnMoveEnd`. A ground move that leaves the ground needs `keepOnLanding` (`Samurai.cs`'s Shoryuken). |
@@ -167,7 +167,7 @@ Need more than one hitbox (a two-hit combo, a sweep that grows)? Build the `Move
 | No meter for a while (a powered-up mode) | Override `CanGainMeter`. |
 | Something that must look random | `sim.Roll(salt)`: the same on both machines (D-47). Never `System.Random` in the sim. |
 | A line on the HUD (ammo, the selected potion) or a glow | `HudInfo` and `IsPoweredUp`. Cosmetic only, never hashed. |
-| The AI to use your mechanic properly | AI hints (read only, never hashed): `UltimateIsToggle`, `WantsSpecialSwitch(sim)`, `SpecialHoldTicks` (`Nek.cs`, `PlagueDoctor.cs`). The AI already respects cooldowns and `CanUseMove` by asking your `ChooseMove`. |
+| The AI to use your mechanic properly | AI hints (read only, never hashed): `UltimateIsToggle`, `WantsSpecialSwitch(sim)`, `SpecialHoldTicks` (`K3N.cs`, `PlagueDoctor.cs`). The AI already respects cooldowns and `CanUseMove` by asking your `ChooseMove`. |
 | An engine rule the kit doesn't have yet (cancels, armor, teleports...) | Check the extensions list in [Design/SHARED_KIT.md](../../Design/SHARED_KIT.md#extensions-build-when-a-design-needs-them): build it as a generic hook with a do-nothing default, plus a test in `KitExtensionTests.cs`. Never write `if (this is MyCharacter)` in `Fighter` or `GameSim`. |
 
 
@@ -198,7 +198,7 @@ The `Characters` folder is part of the deterministic simulation:
 
 ## The launch roster
 
-Seven characters, each designed in `Design/Characters/<Name>.md` and built in its own class: Ruy (`Samurai.cs`, id 10), Paintress (`Painter.cs`, 11), Noir (`Cowboy.cs`, 12), Room (`Elephant.cs`, 13), The Executioner (`Executioner.cs`, 14), Dr. Remy (`PlagueDoctor.cs`, 15) and Nek (`Nek.cs`, 16). The class names are older than the in-game names (D-40). Each one's special rules have a test in `RosterTests.cs`. They're the best examples of the hooks above.
+Seven characters, each designed in `Design/Characters/<Name>.md` and built in its own class: Ruy (`Samurai.cs`, id 10), Paintress (`Painter.cs`, 11), Noir (`Cowboy.cs`, 12), Room (`Elephant.cs`, 13), The Executioner (`Executioner.cs`, 14), Dr. Remy (`PlagueDoctor.cs`, 15) and K3N (`K3N.cs`, 16). The class names are older than the in-game names (D-40). Each one's special rules have a test in `RosterTests.cs`. They're the best examples of the hooks above.
 
 ## The test characters
 
@@ -237,7 +237,7 @@ Both start on. The defaults are `Show Hurtboxes` / `Show Hitboxes` on the `World
 
 
 ### Placeholder boxes
-A character with no art is a **placeholder box** the size of its hurtbox, drawn in code by `Global/Scripts/View/PlaceholderArt.cs`: each character has its own colour, pattern and letter (R = Ruy, P = Paintress, N = Noir, E = Room, X = The Executioner, D = Dr. Remy, K = Nek, B/S/Z = the test characters), and a dark tab shows which way it faces. It turns lighter when attacking (brighter the longer a move is charged), darker in hitstun or when held, cyan in blockstun, gold-pulsing when powered up (Install, Rapid Fire), see-through while invincible, and grey when KO'd. If the character has an art asset, its `Placeholder Color` is used instead of the table's colour.
+A character with no art is a **placeholder box** the size of its hurtbox, drawn in code by `Global/Scripts/View/PlaceholderArt.cs`: each character has its own colour, pattern and letter (R = Ruy, P = Paintress, N = Noir, E = Room, X = The Executioner, D = Dr. Remy, K = K3N, B/S/Z = the test characters), and a dark tab shows which way it faces. It turns lighter when attacking (brighter the longer a move is charged), darker in hitstun or when held, cyan in blockstun, gold-pulsing when powered up (Install, Rapid Fire), see-through while invincible, and grey when KO'd. If the character has an art asset, its `Placeholder Color` is used instead of the table's colour.
 
 Projectiles, traps, the canvas and the Guillotine with no sprite get a placeholder **shape** for their visual key (circle, bar, triangle, spikes...) in the owner's colour. Paint puddles and poison clouds are drawn as floor strips and clouds, Room's copies see-through, and the Guillotine's warning as a red outline.
 
@@ -360,3 +360,8 @@ Each character can have its own sounds. Open the character's art asset (CodeChar
 Anything left empty falls back to the shared lists on the AudioManager, so characters without custom sounds still work. Sounds only listen to sim events, so they can't affect the fight.
 
 Noir's empty click: a fresh Special press with no bullets left raises the `OutOfAmmo` sim event. Put `gunemptyclick` in the character's Sfx > Out Of Ammo (or the AudioManager's Out Of Ammo Sounds for everyone).
+
+K3N (id 16) is set up in `Assets/Characters/K3N/Resources/K3N Art.asset` (clips in `Assets/Characters/K3N/k3n sfx`): Light = cape, Special = smallpunch, hit = smallpunch, heavy hit (12+ damage, the Charged Punch) = bigpunch, dash = dash, block = zeepzorp-01..04 (his pet), Install on = powerup. Install raises the `PowerUp` sim event (amount 1 on, 0 off); only "on" plays a sound. Any character can use the **Power Up** slot.
+
+### Menu sounds
+The AudioManager's Menu section holds the shared UI sounds: Button Click (every button) and Confirm, Page Switch (middle of the glitch transition), Glitch Sound (start of the glitch transition), Glass Break (title press and match start shatter), TV Off (Quit). They live in `Assets/UI/SFX`.

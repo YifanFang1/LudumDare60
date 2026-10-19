@@ -1,8 +1,8 @@
-# Nek (temp name) (Powerup)
+# K3N (Powerup)
 
-**Id:** 16 (new, the first free roster id) · **Class:** `Nek : BaseFighter` in `Assets/Characters/Scripts/Fighters/Nek.cs` (not created yet) · **Era:** TBD (arcade-style character, confirmed) · **Art style:** TBD (the tracker shows a pixel-art sprite with purple hair and a cape)
+**Id:** 16 (new, the first free roster id) · **Class:** `K3N : BaseFighter` in `Assets/Characters/Scripts/Fighters/K3N.cs` (not created yet) · **Era:** TBD (arcade-style character, confirmed) · **Art style:** TBD (the tracker shows a pixel-art sprite with purple hair and a cape)
 
-> **Status: BUILT (2026-10-17)** in `Nek.cs`, with its tests in `Assets/Tests/EditMode/RosterTests.cs`. The numbers here match the code on that date; from now on **the code is the source of truth**. He is the new 7th roster character (id 16).
+> **Status: BUILT (2026-10-17)** in `K3N.cs`, with its tests in `Assets/Tests/EditMode/RosterTests.cs`. The numbers here match the code on that date; from now on **the code is the source of truth**. He is the new 7th roster character (id 16).
 >
 > **How to read this doc:** the **Sheet says** column is copied word for word from the tracker. Rules marked **(confirmed)** were answered by the team on 2026-10-17. **Frame numbers started as planner proposals** (the sheet gave none): tune in playtest; once in code, the code wins. "(std X)" = standard value. **CD** = per-move cooldown (D-43).
 
@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Powerup | 100 | 100 | Cape whip around | Charged Punch | Grab with hand | Quick leap back | Quick hop forward | Block - (flavored as throwing Zeep Zorp in front of the enemy to absorb the damage) | Rapid fire short range punches | Install | Install - will enhance all of his moves and spend his super meter | More damage taken = less attack recharge time |
 
-**Zeep Zorp** is Nek's "pet" entity (confirmed). It's only seen in his block for now.
+**Zeep Zorp** is K3N's "pet" entity (confirmed). It's only seen in his block for now.
 
 ## Game plan
 A brawler who saves up meter and then spends it for a burst of power. Outside Install he's an average close-range fighter with a charged punch and a hold-to-mash rapid punch. With Install on he hits 30% harder with no cooldowns, for as long as his meter lasts. He's weak while his meter is empty, and to opponents who run away and wait out his Install.
@@ -44,7 +44,7 @@ A brawler who saves up meter and then spends it for a burst of power. Outside In
 - Standard Special cooldown (30) after the move. No projectile, so the default one-projectile limit doesn't matter.
 
 ## Ultimate (O): Install (via perk 1). Old Tech: TBD
-Nek has **no normal Ultimate**. His perk 1, Install, turns the O button into a **meter-drain toggle** (confirmed):
+K3N has **no normal Ultimate**. His perk 1, Install, turns the O button into a **meter-drain toggle** (confirmed):
 - **Starts with any meter above 0** (no full bar needed) and **no superflash** (confirmed).
 - While it's on, his meter **drains until it's empty, or until he presses O again** to turn it off and keep what's left (confirmed). Drain: 2 meter per tick (120 per second), so a full bar lasts about 8.3 s (confirmed).
 - **While on (confirmed):** **+30% damage** on all his hits, and **no move cooldowns**.
@@ -56,7 +56,7 @@ Nek has **no normal Ultimate**. His perk 1, Install, turns the O button into a *
 2. **Second Wind** (confirmed): "more damage taken = less attack recharge time". Recharge means the new per-move cooldowns (D-43). His cooldowns shrink by `missingHp% / 2` (up to about -50% near 0 HP). Hook: a `ModifyCooldown(move, ticks)` virtual on the cooldown system. It has no effect while Install is on, because cooldowns are 0 then.
 
 ## Implementation notes
-- **New class + registration:** `Nek.cs`, `Id = 16`, added to `CharacterList` and to the soak test pool.
+- **New class + registration:** `K3N.cs`, `Id = 16`, added to `CharacterList` and to the soak test pool.
 - **Extra state (in `HashExtra()`):** `installOn` (bool). The charge and hold state for the punch and Rapid Punches live in the generic charge fields (hashed by `GameSim`).
 - **Kit changes and extensions used:** per-move cooldowns + `ModifyCooldown` (D-43), *Charge input* (Heavy charge, Special hold-to-repeat), *Hit modifiers* (+30% and the charge damage).
 - **The Install button is not a `MoveDef`:** pressing O shouldn't play a move or start a superflash. `Fighter.ThinkGrounded` only starts a superflash for moves with the `ultimate` flag, so returning no move is enough. Should turning it on play a short pose (like a 10-tick move)? See open questions.
@@ -72,16 +72,16 @@ Nek has **no normal Ultimate**. His perk 1, Install, turns the O button into a *
 - Hold I for the full string only when the first punch hits.
 
 ## Tests
-- `NekInstallStartsWithPartialMeterAndDrains`: at 300 meter, Install turns on and the meter falls by 2 a tick until it's 0, then turns off.
-- `NekInstallToggleOffKeepsMeter`: pressing O again stops the drain.
-- `NekInstallAddsDamageAndRemovesCooldowns`.
-- `NekRapidPunchesKeepVictimInHitstun`: a held string of 10 hits lands every hit on Sandbag.
-- `NekCooldownsShrinkWhenHurt`.
+- `K3NInstallStartsWithPartialMeterAndDrains`: at 300 meter, Install turns on and the meter falls by 2 a tick until it's 0, then turns off.
+- `K3NInstallToggleOffKeepsMeter`: pressing O again stops the drain.
+- `K3NInstallAddsDamageAndRemovesCooldowns`.
+- `K3NRapidPunchesKeepVictimInHitstun`: a held string of 10 hits lands every hit on Sandbag.
+- `K3NCooldownsShrinkWhenHurt`.
 
 ## Open questions
 **Answered (2026-10-17):** no meter gain during Install; 2 meter per tick drain; instant, no pose; Charged Punch 12 -> 20 damage, hitstun 20 -> 26, knockback 80 -> 120 over 60 ticks (all confirmed).
 
 Still open:
 - **Old Tech, era, art style:** TBD (D-45). "Install" is a fighting-game term (Guilty Gear), not an Old Tech.
-- **Name:** "Nek" is a temp name.
+- **Name:** "K3N" is a temp name.
 - He's an arcade character like Ruy, and both have a "more damage taken" perk. How will they look and play differently?

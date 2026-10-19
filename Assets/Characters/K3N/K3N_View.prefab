@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: 4540439795994616914}
   - component: {fileID: 1835293702734789000}
   m_Layer: 0
-  m_Name: Nek_View
+  m_Name: K3N_View
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
