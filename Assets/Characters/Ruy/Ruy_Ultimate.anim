@@ -17,15 +17,50 @@ AnimationClip:
   m_PositionCurves: []
   m_ScaleCurves: []
   m_FloatCurves: []
-  m_PPtrCurves: []
+  m_PPtrCurves:
+  - serializedVersion: 2
+    curve:
+    - time: 0.000000
+      value: {fileID: 21300000, guid: 6a27dc98c5f744138909d22502bb7dc0, type: 3}
+    - time: 0.038462
+      value: {fileID: 21300000, guid: fa60554b8848044a9bb630da4e4d3e0f, type: 3}
+    - time: 0.096154
+      value: {fileID: 21300000, guid: 218784e5a69e14c6ab30d8f7f4d46802, type: 3}
+    - time: 0.192308
+      value: {fileID: 21300000, guid: fcc60b517647245469bc18778e48fa55, type: 3}
+    - time: 0.307692
+      value: {fileID: 21300000, guid: 2a0e97fdb029d403c84ac532359a45c5, type: 3}
+    - time: 0.576923
+      value: {fileID: 21300000, guid: 19ebd83ed8636408ebcad4924c3ced0b, type: 3}
+    attribute: m_Sprite
+    path: Art
+    classID: 212
+    script: {fileID: 0}
+    flags: 2
   m_SampleRate: 60
   m_WrapMode: 0
   m_Bounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 0, y: 0, z: 0}
   m_ClipBindingConstant:
-    genericBindings: []
-    pptrCurveMapping: []
+    genericBindings:
+    - serializedVersion: 2
+      path: 3296235700
+      attribute: 0
+      script: {fileID: 0}
+      typeID: 212
+      customType: 23
+      isPPtrCurve: 1
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+      metaData: 0
+    pptrCurveMapping:
+    - {fileID: 21300000, guid: 6a27dc98c5f744138909d22502bb7dc0, type: 3}
+    - {fileID: 21300000, guid: fa60554b8848044a9bb630da4e4d3e0f, type: 3}
+    - {fileID: 21300000, guid: 218784e5a69e14c6ab30d8f7f4d46802, type: 3}
+    - {fileID: 21300000, guid: fcc60b517647245469bc18778e48fa55, type: 3}
+    - {fileID: 21300000, guid: 2a0e97fdb029d403c84ac532359a45c5, type: 3}
+    - {fileID: 21300000, guid: 19ebd83ed8636408ebcad4924c3ced0b, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}
