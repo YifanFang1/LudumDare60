@@ -15624,7 +15624,7 @@ MonoBehaviour:
   dashSounds: []
   jumpSounds: []
   superFlashSound: {fileID: 0}
-  koSound: {fileID: 0}
+  koSound: {fileID: 8300000, guid: 02e101df925bd1943a196bed4977179b, type: 3}
   reflectSounds: []
   destroySounds: []
   telegraphSound: {fileID: 0}

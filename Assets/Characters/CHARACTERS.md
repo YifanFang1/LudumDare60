@@ -369,6 +369,8 @@ Fill **Voice** on the same art asset (the class is in `Characters/Scripts/Data/C
 - **Moves:** a shout per move name (Light, Heavy, Special, Ultimate...).
 - **Hurt** (played on a hit with **Hurt Chance**), **KO**, **Round Win** (not the last round, since the win line plays then).
 
+**Volume** on Voice turns one character's voice up or down. For a lo-fi sound, select clips in the Project window and run **Fight > Audio > Bitcrush Selected Clips**: it saves a crushed copy next to each clip and swaps it in on the art assets (WebGL can't run audio filters live, so the effect is baked into the file).
+
 Voices play on their own source per fighter at normal pitch, so a new line cuts off that fighter's previous one. The on-screen intro time comes from the text length, not the recording, so a recording longer than its line is cut off when the next line starts.
 
 ### Menu sounds

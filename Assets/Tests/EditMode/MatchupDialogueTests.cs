@@ -11,7 +11,7 @@ public class MatchupDialogueTests
         Assert.AreEqual(a.secondText, b.secondText);
         Assert.AreEqual(10, a.firstId);
         Assert.AreEqual(12, a.secondId);
-        Assert.AreEqual("Wet Urn? What are you on about Buckaroo?", a.secondText);
+        Assert.AreEqual("Wet Urn? What are ya' on about, Buckaroo?", a.secondText);
         GameSim sim = new GameSim();
         a.Configure(sim, 10, 0);
         Assert.AreEqual(0, sim.introFirstSlot);
@@ -24,7 +24,7 @@ public class MatchupDialogueTests
     [Test]
     public void SingleSuppliedLineKeepsItsSpeakerAndDoesNotInventAReply()
     {
-        var entry = MatchupDialogue.Select(15, 10, 0);
+        var entry = new MatchupDialogue.Exchange(10, 15, "Uh, what's with the rat?");
         Assert.AreEqual("Uh, what's with the rat?", entry.firstText);
         Assert.IsNull(entry.secondText);
         GameSim sim = new GameSim { introductionsOn = true, countdownOn = true };
@@ -64,6 +64,27 @@ public class MatchupDialogueTests
         Assert.AreEqual(GameSim.CountdownTicks - 1, a.countdownTicks);
     }
 
+    [Test]
+    public void MirrorMatchesSpeakFromDifferentFighterSlotsBeforeCountdown()
+    {
+        for (int id = 10; id <= 16; id++)
+        {
+            var entry = MatchupDialogue.Select(id, id, 0);
+            Assert.IsTrue(entry.firstText != "To be implemented.");
+            Assert.IsTrue(!string.IsNullOrEmpty(entry.secondText));
+            var sim = new GameSim { introductionsOn = true, countdownOn = true };
+            entry.Configure(sim, id, 0);
+            sim.Reset(1, CharacterList.Factory(id), CharacterList.Factory(id));
+            Assert.AreEqual(0, sim.IntroSlot);
+            for (int i = 0; i < sim.introFirstTicks; i++) sim.Step(0, 0);
+            Assert.AreEqual(1, sim.IntroSlot);
+            Assert.AreEqual(0, sim.IntroLineElapsedTicks);
+            for (int i = 0; i < sim.introSecondTicks; i++) sim.Step(0, 0);
+            Assert.AreEqual(-1, sim.IntroSlot);
+            Assert.AreEqual(GameSim.CountdownTicks, sim.countdownTicks);
+        }
+    }
+
     static GameSim NewExchange(MatchupDialogue.Exchange entry)
     {
         var sim = new GameSim { introductionsOn = true, countdownOn = true, roundTimerOn = true };
@@ -76,7 +97,7 @@ public class MatchupDialogueTests
     public void EmptyMatchupsKeepExplicitPlaceholderAndNegativeVariantsAreSafe()
     {
         Assert.AreEqual("To be implemented.", MatchupDialogue.Select(13, 15, 0).firstText);
-        Assert.AreEqual("To be implemented.", MatchupDialogue.Select(10, 10, 0).firstText);
+        Assert.AreEqual("Are you from Tennesse? Cause you're the only 10 I see.", MatchupDialogue.Select(10, 10, 0).firstText);
         Assert.IsTrue(MatchupDialogue.Select(10, 16, int.MinValue).firstText != null);
     }
 }

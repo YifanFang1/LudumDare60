@@ -14,29 +14,28 @@ public static class CharacterDialogue
 
     public static string Line(int id, CharacterDialogueMoment moment, int variant)
     {
-        bool alternate = (variant & 1) != 0;
         if (id == 10) // Ruy
         {
             switch (moment)
             {
                 case CharacterDialogueMoment.Starting:
-                    return alternate ? "Sure-you-can beat me?" :
-                        "You know, they call me a genie. It's cause I grant death wishes.";
+                    return Pick(variant, "You know, they call me a genie. It's 'cause I grant death wishes.",
+                        "Sure-you-can beat me?");
                 case CharacterDialogueMoment.Winning:
-                    return alternate ? "Get dest-Ruy-ed" :
-                        "Man, I'm bored, can you at least try to fight back?";
+                    return Pick(variant, "Man, I'm bored. Can you at least try to fight back?",
+                        "Get dest-Ruy-ed!", "That was a Ruy-ly good punch.");
                 case CharacterDialogueMoment.Losing:
-                    return alternate ? "You're being such a Kill-Ruy" :
-                        "It seems I have been throoughly pun-nished";
+                    return Pick(variant, "It seems I have been thoroughly pun-nished.",
+                        "You're being such a Kill-Ruy.", "Hey! That's a Ruy-crime!");
             }
         }
         if (id == 14) // Penance
         {
             switch (moment)
             {
-                case CharacterDialogueMoment.Starting: return "Draw your weapon. Your judgment awaits";
-                case CharacterDialogueMoment.Winning: return "May you find forgiveness beyond this life";
-                case CharacterDialogueMoment.Losing: return alternate ? "You wear my patience." : "My penance... is not yet complete...";
+                case CharacterDialogueMoment.Starting: return "Draw your weapon. Your judgment awaits.";
+                case CharacterDialogueMoment.Winning: return "May you find forgiveness beyond this life.";
+                case CharacterDialogueMoment.Losing: return Pick(variant, "My penance... is not yet complete...", "You wear my patience thin.");
             }
         }
         switch (id)
@@ -53,6 +52,13 @@ public static class CharacterDialogue
                 return Ending(moment, "High score! Who's got the next coin?", "Not game over... just out of credits.");
         }
         return "To be implemented.";
+    }
+
+    // One of several lines for the same moment, chosen by the variant (the same on both machines).
+    static string Pick(int variant, params string[] lines)
+    {
+        int n = lines.Length;
+        return lines[((variant % n) + n) % n];
     }
 
     static string Ending(CharacterDialogueMoment moment, string winning, string losing)
