@@ -206,6 +206,9 @@ public abstract class Fighter
     // and whether to draw this fighter powered up (a glow). Not hashed.
     public virtual string HudInfo { get { return null; } }
     public virtual bool IsPoweredUp { get { return false; } }
+    // COSMETIC: a limited-ammo fighter (Noir) reports its magazine for the HUD's bullet row. AmmoMax 0 = no row.
+    public virtual int AmmoMax { get { return 0; } }
+    public virtual int AmmoLit { get { return 0; } }
     // Hyper armor: a hit that doesn't kill still does its damage, but there is no hitstun, no
     // knockback and the fighter's move isn't interrupted (Room while grown).
     public virtual bool IgnoresHitstun { get { return false; } }

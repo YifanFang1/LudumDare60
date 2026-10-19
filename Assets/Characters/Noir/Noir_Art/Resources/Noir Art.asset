@@ -22,6 +22,8 @@ MonoBehaviour:
   tintByState: 1
   idleLoopTicks: 60
   walkLoopTicks: 30
+  ammoLitSprite: {fileID: -8189792276811800741, guid: 584e9808258e34f9986fe0160bcbe75f, type: 3}
+  ammoEmptySprite: {fileID: -8311563565995484431, guid: 584e9808258e34f9986fe0160bcbe75f, type: 3}
   projectileSprites: []
   moveFlashes: []
   sfx:

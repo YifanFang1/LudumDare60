@@ -23,6 +23,14 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites:
+  - visual: trap
+    sprite: {fileID: 520256503147680049, guid: a3c88ff0e4fb144e1a7e066d90f267ed, type: 3}
+    scale: 0.1
+    flip: 0
+    frames: []
+    framesPerSecond: 12
+    loop: 0
+    lingerSeconds: 0
   - visual: guillotine
     sprite: {fileID: 0}
     scale: 0.5
@@ -34,7 +42,8 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 40418ce4b866c4af2b6cd64062180fb5, type: 3}
     framesPerSecond: 12
     loop: 0
-    lingerSeconds: 0.34
+    lingerSeconds: 0.6
+    playOnTelegraph: 1
   moveFlashes: []
   sfx:
     moves:

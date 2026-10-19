@@ -126,6 +126,8 @@ public class Cowboy : BaseFighter
     }
 
     public override bool IsPoweredUp { get { return rapidFireTicks > 0; } }
+    public override int AmmoMax { get { return BulletsPerRound; } }
+    public override int AmmoLit { get { return rapidFireTicks > 0 ? BulletsPerRound : System.Math.Max(0, System.Math.Min(BulletsPerRound, ammo)); } }   // Rapid Fire = unlimited, so every bullet lights
 
     public override int HashExtra() { return ammo * 1000 + rapidFireTicks; }
 }
