@@ -837,7 +837,10 @@ public static class BuildFightCanvas
         Stretch((RectTransform)list.transform);
 
         PlacedImage(list.transform, "Frame", LoadSprite("UIPanel.png"), 38f, 28f, 732f, 865f);
-        PlacedImage(list.transform, "Title", SelectSprite("General/choose_a_renegade.png"), 101f, 90f, 618f, 71f);
+        // Step 1 and online: "Choose a renegade". Vs AI step 2: "Choose an opponent", centred on the same spot.
+        Image youTitle = PlacedImage(list.transform, "Title", SelectSprite("General/choose_a_renegade.png"), 101f, 90f, 618f, 71f);
+        Image opponentTitle = PlacedImage(list.transform, "OpponentTitle", SelectSprite("General/choose_an_opponent.png"), 92.5f, 97f, 635f, 57f);
+        opponentTitle.gameObject.SetActive(false);
 
         GameObject gridGo = new GameObject("Grid", typeof(RectTransform), typeof(GridLayoutGroup));
         gridGo.transform.SetParent(list.transform, false);
@@ -851,7 +854,10 @@ public static class BuildFightCanvas
         grid.constraintCount = 3;
 
         Button backBtn = PlacedArtButton(list.transform, "BackButton", LoadSprite("BACK.png"), LoadSprite("BACKHOVER.png"), 85f, 872f);
-        Button confirm = PlacedArtButton(list.transform, "ConfirmButton", SelectSprite("General/fight.png"), SelectSprite("General/fight_hover.png"), 424f, 872f);
+        // Ready (step 1 and online) and Fight! (vs AI step 2) share one spot; the screen shows one at a time
+        Button confirm = PlacedArtButton(list.transform, "ReadyButton", SelectSprite("General/ready.png"), SelectSprite("General/ready_hover.png"), 424f, 872f);
+        Button fight = PlacedArtButton(list.transform, "FightButton", SelectSprite("General/fight.png"), SelectSprite("General/fight_hover.png"), 424f, 872f);
+        fight.gameObject.SetActive(false);
 
         // ----- the gear timer (shown on both pages) -----
         GameObject gearGo = new GameObject("TimerGear", typeof(RectTransform), typeof(Image));
@@ -959,9 +965,12 @@ public static class BuildFightCanvas
         cs.gridParent = (RectTransform)gridGo.transform;
         cs.buttonPrefab = buttonPrefab;
         cs.confirmButton = confirm;
+        cs.fightButton = fight;
         cs.confirmLabel = null;
         cs.backButton = backBtn;
         cs.backLabel = null;
+        cs.youTitle = youTitle.gameObject;
+        cs.opponentTitle = opponentTitle.gameObject;
         cs.listPage = list;
         cs.detailsPage = details;
         cs.profile = profile;
@@ -1094,8 +1103,22 @@ public static class BuildFightCanvas
         return fa;
     }
 
+    // One character on the select screen: its picture folder in Assets/UI/CharacterSelect and its hand-tuned layout.
+    class SelectArtDef
+    {
+        public string folder;
+        public int id;
+        public string label;
+        public int traits;                                       // how many trait_N.png banners
+        public Vector2 nameCorner = new Vector2(1868f, 830f);    // where the name picture's bottom-right goes
+        public Vector2[] traitPositions;                         // top-left of each banner; null = the automatic stagger
+        public Vector2 spriteOffset;                             // moves the big character picture (+x right, +y down)
+        public Rect tilePortraitRect;                            // grid tile portrait by hand; width 0 = automatic
+    }
+
     // Fills Assets/UI/Resources/CharacterSelectArt.asset from the pictures in Assets/UI/CharacterSelect/<FOLDER>/.
-    // Pictures are refreshed every time; the Background / Skills texts you edit in the asset are kept.
+    // Pictures and the layout (SelectArtDef) are refreshed every time, so tune positions in the table, not in the
+    // asset; the Background / Skills texts you edit in the asset are kept.
     static CharacterSelectArt BuildSelectArt()
     {
         AssetDatabase.Refresh();
@@ -1106,31 +1129,48 @@ public static class BuildFightCanvas
             AssetDatabase.CreateAsset(asset, SelectArtAssetPath);
         }
 
-        // folder, character id, label, number of banners, name picture's bottom-right corner
-        object[][] defs =
+        // Positions are top-left pixels in the 1920x1080 layout. Rule of thumb: the banners and the name must
+        // not cover the character's face (preview each one with the More page closed after a rebuild).
+        SelectArtDef[] defs =
         {
-            new object[] { "RUY", Samurai.Id, "Ruy", 3, new Vector2(1868f, 830f) },
+            new SelectArtDef { folder = "RUY", id = Samurai.Id, label = "Ruy", traits = 3 },
             // Odette: arrow-shaped banners hug the right edge (x is clamped to fit)
-            new object[] { "ODETTE", Painter.Id, "Odette", 3, new Vector2(1868f, 800f),
-                new[] { new Vector2(1915f, 40f), new Vector2(1915f, 270f), new Vector2(1915f, 375f) } },
-            new object[] { "ROOM", Elephant.Id, "Room", 3, new Vector2(1800f, 815f), new[] { new Vector2(1500f, 40f), new Vector2(1450f, 125f), new Vector2(1380f, 220f) }, new Rect(-13.3f, -20.5f, 204.1582f, 183.9017f) },
-            new object[] { "PATIENCE", Executioner.Id, "Patience", 1, new Vector2(1868f, 830f) },
-            new object[] { "DR_REMY", PlagueDoctor.Id, "Dr. Remy", 3, new Vector2(1868f, 815f) },
-            new object[] { "K3N", K3N.Id, "K3N", 3, new Vector2(1868f, 830f) },
-            new object[] { "NOIR", Cowboy.Id, "Noir", 3, new Vector2(1868f, 830f) },
+            new SelectArtDef { folder = "ODETTE", id = Painter.Id, label = "Odette", traits = 3, nameCorner = new Vector2(1868f, 800f),
+                traitPositions = new[] { new Vector2(1915f, 40f), new Vector2(1915f, 270f), new Vector2(1915f, 375f) } },
+            // Room: the elephant stands left of the backing so its face shows; the banners step down to the left above it
+            new SelectArtDef { folder = "ROOM", id = Elephant.Id, label = "Room", traits = 3, nameCorner = new Vector2(1835f, 815f),
+                spriteOffset = new Vector2(-90f, 0f),
+                traitPositions = new[] { new Vector2(1508f, 144f), new Vector2(1196f, 245f), new Vector2(1045f, 395f) },
+                tilePortraitRect = new Rect(-13.3f, -20.5f, 204.1582f, 183.9017f) },
+            // Patience: her one banner sits above her crown, not across her face
+            new SelectArtDef { folder = "PATIENCE", id = Executioner.Id, label = "Patience", traits = 1,
+                traitPositions = new[] { new Vector2(1915f, 8f) } },
+            new SelectArtDef { folder = "DR_REMY", id = PlagueDoctor.Id, label = "Dr. Remy", traits = 3, nameCorner = new Vector2(1868f, 815f) },
+            // K3N: the banners line the right edge, clear of his head and his ice weapon
+            new SelectArtDef { folder = "K3N", id = K3N.Id, label = "K3N", traits = 3,
+                traitPositions = new[] { new Vector2(1645f, 150f), new Vector2(1645f, 330f), new Vector2(1645f, 520f) } },
+            // Noir: the banners hug the right edge, clear of his face and his gun hand
+            new SelectArtDef { folder = "NOIR", id = Cowboy.Id, label = "Noir", traits = 3,
+                traitPositions = new[] { new Vector2(1600f, 100f), new Vector2(1915f, 260f), new Vector2(1620f, 540f) } },
+            // Sandbag (vs AI only) has just its grid tiles (select.png, picked.png) so far; its big panel uses the
+            // no-art fallback until backing.png and sprite.png are added to the folder
+            new SelectArtDef { folder = "SANDBAG", id = Sandbag.Id, label = "Sandbag", traits = 0 },
         };
         System.Collections.Generic.List<CharacterSelectArt.Entry> entries = new System.Collections.Generic.List<CharacterSelectArt.Entry>();
         for (int d = 0; d < defs.Length; d++)
         {
-            string folder = (string)defs[d][0];
-            int id = (int)defs[d][1];
+            SelectArtDef def = defs[d];
+            string folder = def.folder;
+            int id = def.id;
             CharacterSelectArt.Entry e = asset.Find(id);
             bool isNew = e == null;
             if (isNew) e = new CharacterSelectArt.Entry();
             e.characterId = id;
-            e.label = (string)defs[d][2];
+            e.label = def.label;
             e.backing = SelectSprite(folder + "/backing.png");
             e.sprite = SelectSprite(folder + "/sprite.png");
+            e.select = SelectSprite(folder + "/select.png");
+            e.picked = SelectSprite(folder + "/picked.png");
             if (id == K3N.Id) e.spriteScale = 15f;   // ArcadeIdle1 is tiny pixel art (39x54 px of character), blown up crisp
             e.spriteBounds = OpaqueBounds(e.sprite);
             e.nameArt = SelectSprite(folder + "/name.png");
@@ -1139,12 +1179,13 @@ public static class BuildFightCanvas
             e.backArt = SelectSprite(folder + "/back.png");
             e.miniSkill = SelectSprite(folder + "/mini_skill.png");
             e.skillBlock = SelectSprite(folder + "/skill_block.png");
-            int n = (int)defs[d][3];
-            e.traits = new Sprite[n];
-            for (int t = 0; t < n; t++) e.traits[t] = SelectSprite(folder + "/trait_" + (t + 1) + ".png");
-            if (isNew || id == PlagueDoctor.Id || id == Elephant.Id) e.nameCorner = (Vector2)defs[d][4];   // these two are laid out by hand here
-            if ((isNew || id == Elephant.Id) && defs[d].Length > 5 && defs[d][5] != null) e.traitPositions = (Vector2[])defs[d][5];
-            if (defs[d].Length > 6) e.tilePortraitRect = (Rect)defs[d][6];   // a hand-set Inspector layout, always reapplied
+            e.traits = new Sprite[def.traits];
+            for (int t = 0; t < def.traits; t++) e.traits[t] = SelectSprite(folder + "/trait_" + (t + 1) + ".png");
+            // the layout comes from the table above on every rebuild
+            e.nameCorner = def.nameCorner;
+            e.traitPositions = def.traitPositions != null ? def.traitPositions : new Vector2[0];
+            e.spriteOffset = def.spriteOffset;
+            e.tilePortraitRect = def.tilePortraitRect;
             if (isNew || string.IsNullOrEmpty(e.background)) e.background = "Coming soon.";
             if (id == PlagueDoctor.Id && (isNew || e.background == "Coming soon.")) FillRemyText(e);
             entries.Add(e);
@@ -1157,11 +1198,13 @@ public static class BuildFightCanvas
                 CharacterSelectArt.Entry old = asset.entries[i];
                 if (old == null) continue;
                 bool known = false;
-                for (int d = 0; d < defs.Length; d++) if ((int)defs[d][1] == old.characterId) known = true;
+                for (int d = 0; d < defs.Length; d++) if (defs[d].id == old.characterId) known = true;
                 if (!known) entries.Add(old);
             }
         }
         asset.entries = entries.ToArray();
+        asset.randomSelect = SelectSprite("General/random_select.png");
+        asset.randomPicked = SelectSprite("General/random_picked.png");
         EditorUtility.SetDirty(asset);
         AssetDatabase.SaveAssets();
         return asset;
@@ -1329,12 +1372,21 @@ public static class BuildFightCanvas
         Stretch(nameText.rectTransform);
         nameText.gameObject.SetActive(false);
 
+        // the black silhouette: last child, so it covers the whole tile while it is NOT the current pick
+        GameObject pickedGo = new GameObject("Picked", typeof(RectTransform), typeof(Image));
+        pickedGo.transform.SetParent(go.transform, false);
+        Stretch((RectTransform)pickedGo.transform);
+        Image picked = pickedGo.GetComponent<Image>();
+        picked.raycastTarget = false;
+        picked.enabled = false;
+
         CharacterButtonUI ui = go.GetComponent<CharacterButtonUI>();
         ui.button = button;
         ui.backing = backing;
         ui.portrait = portrait;
         ui.nameText = nameText;
         ui.selectedMark = selected;
+        ui.pickedIcon = picked;
 
         GameObject saved = PrefabUtility.SaveAsPrefabAsset(go, ButtonPrefabPath);
         Object.DestroyImmediate(go);

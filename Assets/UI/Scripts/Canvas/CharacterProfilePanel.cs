@@ -54,8 +54,11 @@ public class CharacterProfilePanel : MonoBehaviour
         float h = e.sprite.rect.height;
         float s = e.spriteScale > 0f ? e.spriteScale : (h > 1000f ? 1000f / h : 1f);
         Rect b = e.spriteBounds.width > 0f ? e.spriteBounds : new Rect(0f, 0f, e.sprite.rect.width, h);
-        // the opaque part's bottom edge sits on the bottom of the screen (pictures with empty space under the feet too)
-        Put(sprite, e.sprite, SpriteCenterX - (b.x + b.width * 0.5f) * s, 1080f - (b.y + b.height) * s, e.sprite.rect.width * s, h * s);
+        // the opaque part's bottom edge sits on the bottom of the screen (pictures with empty space under the feet too),
+        // then spriteOffset nudges characters whose face would be hidden by the name or banners
+        float spriteX = SpriteCenterX + e.spriteOffset.x - (b.x + b.width * 0.5f) * s;
+        float spriteY = 1080f + e.spriteOffset.y - (b.y + b.height) * s;
+        Put(sprite, e.sprite, spriteX, spriteY, e.sprite.rect.width * s, h * s);
         sprite.preserveAspect = false;
 
         if (e.nameArt != null)

@@ -70,24 +70,24 @@ MonoBehaviour:
     theme: {fileID: 8300000, guid: 7aeed64b587af8e459022031de3e1e3c, type: 3}
   voice:
     select:
-    - {fileID: 8300000, guid: 83cae788c1611bb4d89310f481e33704, type: 3}
-    - {fileID: 8300000, guid: 8b49521168cccc94e960fb42ba1a3e31, type: 3}
-    - {fileID: 8300000, guid: df2cd7fd09c8ee4409130f5ba9be5d9c, type: 3}
+    - {fileID: 8300000, guid: c404f682d90bfd4458612ae13ab0c0fb, type: 3}
+    - {fileID: 8300000, guid: f8c4472e51e0fb549b611e450fd51bf6, type: 3}
+    - {fileID: 8300000, guid: 1d5b5974b2bbf8c489192964cf73d043, type: 3}
     roundWin:
-    - {fileID: 8300000, guid: 3a050c9fc796d2043aa0efe087ed767a, type: 3}
-    - {fileID: 8300000, guid: 58a74bb49fb1c2442a92a905c7de088c, type: 3}
+    - {fileID: 8300000, guid: bf41f632060f2154ea4c3135c965f2b9, type: 3}
+    - {fileID: 8300000, guid: 988b120067b65ea40b777051db8f441e, type: 3}
     roundLose:
-    - {fileID: 8300000, guid: 962339147f9dc344da3429a5e3171766, type: 3}
-    - {fileID: 8300000, guid: 3f14b3cd4e96b2945b6d33009c80492e, type: 3}
+    - {fileID: 8300000, guid: 3c6464f94cbc31a4499729c5d7cf94d2, type: 3}
+    - {fileID: 8300000, guid: 4c6ec31ae35d3e04a9ded4091201f616, type: 3}
     dialogue: []
     volume: 0.5
     moves:
     - move: Special
       clips:
-      - {fileID: 8300000, guid: 00e321a1cf44e094ea0c351362a81359, type: 3}
+      - {fileID: 8300000, guid: 6ff99260165965e40bb16b2c07d745bc, type: 3}
     hurt:
-    - {fileID: 8300000, guid: 28e51e10840e24740a961a1764610fcb, type: 3}
-    - {fileID: 8300000, guid: 625facf2bd329034eac5b8a403269351, type: 3}
+    - {fileID: 8300000, guid: f7968949befcc7a4ebd44b3254691986, type: 3}
+    - {fileID: 8300000, guid: c351d9318c3a6274fb43affe374d3a5e, type: 3}
     hurtChance: 0.4
     ko: []
   characterId: 11

@@ -3,10 +3,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Character select. Vs AI there are two tabs (you / the AI); online you only pick your own and press Ready.
+// Character select. Online you pick your own fighter and press Ready. Vs AI it takes two steps on the same
+// screen: pick yourself and press Ready, then the grid starts fresh under "Choose an opponent" and you pick the
+// AI's fighter and press Fight! (Back on step 2 returns to step 1 with your pick kept). The steps swap through
+// the same CRT glitch as every other screen change. Every tile is a dark silhouette except the current pick,
+// which shows in colour.
 // The 3x3 grid fills itself from CharacterList using the CharacterButton prefab. Hovering or clicking a tile shows
 // that character on the big panel (art from CharacterSelectArt); More opens their Background / Skills page.
-// A 30 second gear counts down and confirms the current pick when it runs out.
+// Online, a 30 second gear counts down and confirms the current pick when it runs out.
 public class CharacterSelectScreen : MonoBehaviour
 {
     [Header("Grid")]
@@ -14,10 +18,13 @@ public class CharacterSelectScreen : MonoBehaviour
     public CharacterButtonUI buttonPrefab;
 
     [Header("Buttons and text")]
-    public Button confirmButton;                // "Fight!" vs AI, "Ready" online
+    public Button confirmButton;                // "Ready": locks in your own pick (online, and step 1 vs AI)
+    public Button fightButton;                  // "Fight!": vs AI step 2, locks in the AI's pick and starts the match
     public TMP_Text confirmLabel;
     public Button backButton;                   // "Back" vs AI, "Leave room" online
     public TMP_Text backLabel;
+    public GameObject youTitle;                 // "Choose a renegade" picture
+    public GameObject opponentTitle;            // "Choose an opponent" picture (vs AI step 2)
     public TMP_Text titleText;
     public TMP_Text statusText;
 
@@ -42,16 +49,30 @@ public class CharacterSelectScreen : MonoBehaviour
     const int RandomId = -1;   // the "Random" tile: the real pick is made when you confirm
     const int LockedId = -2;   // the greyed "coming soon" tile
     const int NoHover = int.MinValue;
+    const int NoTile = int.MinValue;
     const int GridTiles = 9;
 
-    // Grid order (3 per row): Patience, Ruy, Odette / Remy, K3N, Noir / Room, then Random and a locked slot.
+    // Grid order (3 per row): Patience, Ruy, Odette / Remy, K3N, Noir / Room, then Random and the last slot
+    // (Sandbag vs AI, a locked "coming soon" tile online).
     static readonly int[] DisplayOrder = { Executioner.Id, Samurai.Id, Painter.Id, PlagueDoctor.Id, K3N.Id, Cowboy.Id, Elephant.Id };
 
     IMatchSession match;
+    MatchScreens screens;   // for its glitch transition between the two vs-AI steps
     bool wired;
-    bool randomYou;   // the opponent (vs AI) is always Random; you only pick your own fighter
     readonly List<CharacterButtonUI> buttons = new List<CharacterButtonUI>();
     readonly List<int> builtIds = new List<int>();
+    bool builtVsAI;         // the grid was built with the Sandbag tile (vs AI) or the "coming soon" tile (online)
+
+    // The two steps. Online there is only the first.
+    bool pickingOpponent;   // vs AI step 2: the grid picks the AI's fighter
+    bool randomYou;         // the "?" tile is your current pick
+    bool randomOpponent;    // the "?" tile is the AI's current pick
+    bool youLocked;         // vs AI: Ready was pressed on step 1 (online, match.CharacterConfirmed says this)
+    int youTile = RandomId; // the tile you locked in on step 1, so Back can restore it (Random stays Random)
+    int lockedTile = NoTile;// the tile that stays picked once locked in: the "?" stays the "?" even after Random has rolled a fighter
+    bool switching;         // a step change is waiting for the glitch or playing it: no clicks meanwhile
+    bool switchToOpponent;
+    bool glitchStarted;
 
     int previewId = int.MinValue;   // the character on the big panel when nothing is hovered
     int hoverId = NoHover;
@@ -65,8 +86,15 @@ public class CharacterSelectScreen : MonoBehaviour
     {
         match = SessionFinder.Find();
         if (match == null) return;
-        // every time character select opens, both sides start on Random
+        // every time character select opens, it starts on step 1 with both sides on Random
+        pickingOpponent = false;
         randomYou = true;
+        randomOpponent = true;
+        youLocked = false;
+        youTile = RandomId;
+        lockedTile = NoTile;
+        switching = false;
+        glitchStarted = false;
         if (!wired) { Wire(); wired = true; }
         Rebuild();
         timeLeft = pickSeconds;
@@ -87,17 +115,114 @@ public class CharacterSelectScreen : MonoBehaviour
 
     void Wire()
     {
-        if (confirmButton != null) confirmButton.onClick.AddListener(() => { AudioManager.Confirm(); ResolveRandom(); match.ConfirmCharacter(); });
-        if (backButton != null) backButton.onClick.AddListener(() => { AudioManager.Click(); match.Leave(); });
+        screens = GetComponentInParent<MatchScreens>(true);
+        if (confirmButton != null) confirmButton.onClick.AddListener(LockIn);
+        if (fightButton != null) fightButton.onClick.AddListener(LockIn);
+        if (backButton != null) backButton.onClick.AddListener(Back);
         if (profile != null && profile.moreButton != null)
             profile.moreButton.onClick.AddListener(() =>
             {
+                if (switching) return;
                 if (!detailsOpen && !CharacterProfilePanel.HasArt(previewId)) return;
                 AudioManager.Click();
                 SetDetails(!detailsOpen);
             });
         if (backgroundTab != null) backgroundTab.onClick.AddListener(() => { AudioManager.Click(); showSkills = false; });
         if (skillsTab != null) skillsTab.onClick.AddListener(() => { AudioManager.Click(); showSkills = true; });
+    }
+
+    // Ready / Fight!: locks in the pick of the current step. Step 1 vs AI then moves on to the AI's pick;
+    // otherwise the pick goes to the session (online it is sent to the opponent; vs AI the match starts).
+    void LockIn()
+    {
+        if (LockedIn() || switching) return;
+        AudioManager.Confirm();
+        if (detailsOpen) SetDetails(false);
+        lockedTile = SelectedTile();
+        if (pickingOpponent)
+        {
+            if (randomOpponent) match.OpponentCharacter = RandomCharacter();
+            randomOpponent = false;
+            match.ConfirmCharacter();
+            return;
+        }
+        if (randomYou)
+        {
+            match.LocalCharacter = RandomCharacter();
+            AudioManager.CharacterPicked(match.LocalCharacter);   // the rolled fighter still says their Select line
+        }
+        randomYou = false;
+        if (match.ChoosesOpponent)
+        {
+            youLocked = true;      // your tile goes black, then the glitch swaps to step 2
+            youTile = lockedTile;
+            SwitchStep(true);
+        }
+        else match.ConfirmCharacter();
+    }
+
+    void Back()
+    {
+        if (switching) return;
+        AudioManager.Click();
+        if (pickingOpponent && !match.CharacterConfirmed) SwitchStep(false);
+        else match.Leave();
+    }
+
+    // The step only changes at the peak of the glitch, like a screen change. RunPendingSwitch starts it.
+    void SwitchStep(bool toOpponent)
+    {
+        switching = true;
+        switchToOpponent = toOpponent;
+        glitchStarted = false;
+        RunPendingSwitch();
+    }
+
+    void RunPendingSwitch()
+    {
+        if (!switching || glitchStarted) return;
+        GlitchTransition glitch = screens != null ? screens.transition : null;
+        if (glitch == null || !glitch.isActiveAndEnabled) { ApplyStep(switchToOpponent); return; }
+        if (glitch.Busy) return;   // the glitch that opened this screen is still fading: start ours next frame
+        glitchStarted = true;
+        glitch.Run(() => ApplyStep(switchToOpponent));
+    }
+
+    void ApplyStep(bool opponent)
+    {
+        switching = false;
+        glitchStarted = false;
+        if (!isActiveAndEnabled) return;   // the screen closed during the glitch: OnEnable starts over anyway
+        pickingOpponent = opponent;
+        hoverId = NoHover;
+        lockedTile = NoTile;
+        SetDetails(false);
+        if (opponent)
+        {
+            randomOpponent = true;          // a fresh grid for the AI's pick
+            previewId = FirstCharacter();
+        }
+        else
+        {
+            youLocked = false;              // back on step 1: your pick is open again, as you left it
+            randomYou = youTile == RandomId;
+            if (!randomYou) previewId = match.LocalCharacter;
+        }
+        timeLeft = pickSeconds;
+    }
+
+    // Whether the current step's pick is locked in (its tile shows black and the grid stops taking clicks).
+    bool LockedIn()
+    {
+        if (match.CharacterConfirmed) return true;
+        return !pickingOpponent && youLocked;
+    }
+
+    // The tile of the current step's pick: the "?" while it is Random.
+    int SelectedTile()
+    {
+        if (pickingOpponent) return randomOpponent ? RandomId : match.OpponentCharacter;
+        return randomYou ? RandomId : match.LocalCharacter;
     }
 
     // Opens or closes the More page: the character slides left and the text page replaces the grid.
@@ -120,47 +245,40 @@ public class CharacterSelectScreen : MonoBehaviour
         if (match == null) return;
 
         if (GridOutOfDate()) Rebuild();
+        RunPendingSwitch();
 
-        bool choosesOpponent = match.ChoosesOpponent;
-        int current = match.LocalCharacter;
-        bool randomNow = randomYou;
+        bool vsAI = match.ChoosesOpponent;
+        bool lockedIn = LockedIn();
+        int shownTile = lockedIn ? lockedTile : SelectedTile();
 
         for (int i = 0; i < buttons.Count; i++)
         {
             if (buttons[i].CharacterId == LockedId) { buttons[i].SetInteractable(false); continue; }
-            bool isRandomTile = buttons[i].CharacterId == RandomId;
-            if (isRandomTile)
-            {
-                buttons[i].SetSelected(randomNow);
-                buttons[i].SetDimmed(false);
-            }
-            else if (randomNow)
-            {
-                buttons[i].SetSelected(false);
-                buttons[i].SetDimmed(false);
-            }
-            else
-            {
-                buttons[i].SetSelected(buttons[i].CharacterId == current);
-                buttons[i].SetDimmed(false);
-            }
-            buttons[i].SetInteractable(!match.CharacterConfirmed);
+            buttons[i].SetSelected(buttons[i].CharacterId == shownTile);
+            buttons[i].SetDimmed(false);
+            buttons[i].SetInteractable(!lockedIn && !switching);
         }
 
+        if (youTitle != null) youTitle.SetActive(!pickingOpponent);
+        if (opponentTitle != null) opponentTitle.SetActive(pickingOpponent);
         if (titleText != null)
         {
-            string title = "Choose your character";
-            if (!choosesOpponent && match.OpponentName.Length > 0) title += "\nvs " + match.OpponentName;
+            string title = pickingOpponent ? "Choose an opponent" : "Choose your character";
+            if (!vsAI && match.OpponentName.Length > 0) title += "\nvs " + match.OpponentName;
             titleText.text = title;
         }
-        if (confirmButton != null) confirmButton.gameObject.SetActive(!match.CharacterConfirmed);
-        if (confirmLabel != null) confirmLabel.text = choosesOpponent ? "Fight!" : "Ready";
-        if (backLabel != null) backLabel.text = choosesOpponent ? "Back" : "Leave room";
+        // Ready on step 1 (and online), Fight! on step 2. A canvas built before Fight! existed uses Ready for both.
+        bool canConfirm = !lockedIn && !switching;
+        bool fightShown = pickingOpponent && fightButton != null;
+        if (confirmButton != null) confirmButton.gameObject.SetActive(canConfirm && !fightShown);
+        if (fightButton != null) fightButton.gameObject.SetActive(canConfirm && fightShown);
+        if (confirmLabel != null) confirmLabel.text = pickingOpponent ? "Fight!" : "Ready";
+        if (backLabel != null) backLabel.text = vsAI ? "Back" : "Leave room";
         if (statusText != null) statusText.text = match.Status;
 
         // The pick countdown only runs online; vs AI there is no timer and no gear.
-        if (gear != null) gear.gameObject.SetActive(!choosesOpponent);
-        if (!choosesOpponent) UpdateTimer();
+        if (gear != null) gear.gameObject.SetActive(!vsAI);
+        if (!vsAI) UpdateTimer();
         UpdateProfile();
     }
 
@@ -176,10 +294,7 @@ public class CharacterSelectScreen : MonoBehaviour
         if (timeLeft <= 0f)
         {
             timeLeft = 0f;
-            if (detailsOpen) SetDetails(false);
-            AudioManager.Confirm();
-            ResolveRandom();
-            match.ConfirmCharacter();
+            LockIn();
         }
         if (timerText != null) timerText.text = Mathf.CeilToInt(timeLeft) + "s";
     }
@@ -268,6 +383,7 @@ public class CharacterSelectScreen : MonoBehaviour
 
     bool GridOutOfDate()
     {
+        if (builtVsAI != match.ChoosesOpponent) return true;
         System.Collections.Generic.IList<int> ids = CharacterList.Ids;
         if (ids.Count != builtIds.Count) return true;
         for (int i = 0; i < ids.Count; i++)
@@ -282,6 +398,7 @@ public class CharacterSelectScreen : MonoBehaviour
     {
         buttons.Clear();
         builtIds.Clear();
+        builtVsAI = match.ChoosesOpponent;
         if (gridParent == null || buttonPrefab == null) return;
         // Clear EVERY tile under the grid, not just the ones this list knows about (a second Rebuild in the same
         // frame, or tiles left from an earlier open, used to pile up as duplicates). Deactivate first: Destroy
@@ -306,17 +423,15 @@ public class CharacterSelectScreen : MonoBehaviour
         {
             if (builtIds[i] != Sandbag.Id && !order.Contains(builtIds[i])) order.Add(builtIds[i]);
         }
-        for (int i = 0; i < order.Count; i++)
-        {
-            CharacterButtonUI b = Instantiate(buttonPrefab, gridParent);
-            b.Setup(order[i], Pick, Hover);
-            buttons.Add(b);
-        }
+        for (int i = 0; i < order.Count; i++) AddCharacterTile(order[i]);
 
-        // Random next ("?"), then locked "coming soon" slots up to a full 3x3
+        // Random next ("?"), then Sandbag vs AI (bottom-right), then locked "coming soon" slots up to a full 3x3
+        CharacterSelectArt art = CharacterSelectArt.Load();
         CharacterButtonUI random = Instantiate(buttonPrefab, gridParent);
-        random.SetupSpecial(RandomId, "?", new Color(0.55f, 0.55f, 0.55f), Color.black, Pick, false);
+        random.SetupSpecial(RandomId, "?", new Color(0.55f, 0.55f, 0.55f), Color.black, Pick, false,
+            tile: art != null ? art.randomSelect : null, picked: art != null ? art.randomPicked : null);
         buttons.Add(random);
+        if (builtVsAI && builtIds.Contains(Sandbag.Id)) AddCharacterTile(Sandbag.Id);
         while (buttons.Count < GridTiles)
         {
             CharacterButtonUI locked = Instantiate(buttonPrefab, gridParent);
@@ -325,26 +440,20 @@ public class CharacterSelectScreen : MonoBehaviour
         }
     }
 
+    void AddCharacterTile(int id)
+    {
+        CharacterButtonUI b = Instantiate(buttonPrefab, gridParent);
+        b.Setup(id, Pick, Hover);
+        buttons.Add(b);
+    }
+
     void Hover(int id, bool on)
     {
         if (on) hoverId = id;
         else if (hoverId == id) hoverId = NoHover;
     }
 
-    // Turns a Random tile into a real pick (Sandbag, the training dummy, is not in the draw).
-    // Online the result is what gets sent to the opponent, so both sides agree.
-    void ResolveRandom()
-    {
-        if (randomYou)
-        {
-            match.LocalCharacter = RandomCharacter();
-            AudioManager.CharacterPicked(match.LocalCharacter);   // the rolled fighter still says their Select line
-        }
-        if (match.ChoosesOpponent) match.OpponentCharacter = RandomCharacter();   // vs AI: the opponent is always Random
-        randomYou = false;
-    }
-
-    // Everyone except Sandbag.
+    // Everyone except Sandbag (the training dummy is only ever a deliberate pick).
     static int RandomCharacter()
     {
         System.Collections.Generic.IList<int> ids = CharacterList.Ids;
@@ -357,18 +466,28 @@ public class CharacterSelectScreen : MonoBehaviour
         return pool[Random.Range(0, pool.Count)];
     }
 
+    // A click on a tile: it becomes the current step's pick (yours, or the AI's on step 2).
     void Pick(int id)
     {
-        if (match.CharacterConfirmed) return;
+        if (LockedIn() || switching) return;
         AudioManager.Click();
         if (id == RandomId)
         {
-            randomYou = true;
+            if (pickingOpponent) randomOpponent = true;
+            else randomYou = true;
             return;
         }
         previewId = id;
-        randomYou = false;
-        match.LocalCharacter = id;
-        AudioManager.CharacterPicked(id);   // your character's Select voice line
+        if (pickingOpponent)
+        {
+            randomOpponent = false;
+            match.OpponentCharacter = id;
+        }
+        else
+        {
+            randomYou = false;
+            match.LocalCharacter = id;
+        }
+        AudioManager.CharacterPicked(id);   // the character's Select voice line
     }
 }

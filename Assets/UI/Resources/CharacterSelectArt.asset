@@ -17,6 +17,8 @@ MonoBehaviour:
     characterId: 10
     backing: {fileID: 21300000, guid: cd0bdf8b4b9d2433bb236297ca3101ec, type: 3}
     sprite: {fileID: 21300000, guid: 72edd6610f5da4f53b9a74c3334a1ab9, type: 3}
+    select: {fileID: 21300000, guid: a2c466bf38195e54883245f47a47bbfa, type: 3}
+    picked: {fileID: 21300000, guid: fe320943f9b6d7d4daee1fdc6040caab, type: 3}
     spriteBounds:
       serializedVersion: 2
       x: 185
@@ -24,6 +26,7 @@ MonoBehaviour:
       width: 661
       height: 898
     spriteScale: 0
+    spriteOffset: {x: 0, y: 0}
     tilePortraitRect:
       serializedVersion: 2
       x: 0
@@ -53,6 +56,8 @@ MonoBehaviour:
     characterId: 11
     backing: {fileID: 21300000, guid: 66e7cf6d7a6b844218e42b84cac85392, type: 3}
     sprite: {fileID: 21300000, guid: 59e521beb1f8849d393839251471f21d, type: 3}
+    select: {fileID: 21300000, guid: 97cc4114f7917ca459ca59dd082b64cd, type: 3}
+    picked: {fileID: 21300000, guid: 9474585c338592c4ea3ea61c4f093f7d, type: 3}
     spriteBounds:
       serializedVersion: 2
       x: 126
@@ -60,6 +65,7 @@ MonoBehaviour:
       width: 685
       height: 912
     spriteScale: 0
+    spriteOffset: {x: 0, y: 0}
     tilePortraitRect:
       serializedVersion: 2
       x: 0
@@ -92,6 +98,8 @@ MonoBehaviour:
     characterId: 13
     backing: {fileID: 21300000, guid: 85356beaa41914e01b3a37aa2af9adda, type: 3}
     sprite: {fileID: 21300000, guid: ec267ed96308c4d729c80c70f0642d86, type: 3}
+    select: {fileID: 21300000, guid: 5009bd55eedae1c42982bfe6762a1af7, type: 3}
+    picked: {fileID: 21300000, guid: 5916b458bbc9df447b54d4c0b93a5c74, type: 3}
     spriteBounds:
       serializedVersion: 2
       x: 84
@@ -99,6 +107,7 @@ MonoBehaviour:
       width: 692
       height: 595
     spriteScale: 0
+    spriteOffset: {x: -90, y: 0}
     tilePortraitRect:
       serializedVersion: 2
       x: -13.3
@@ -121,16 +130,18 @@ MonoBehaviour:
     - {fileID: 21300000, guid: f49717fa3c2f046b69d32d0a2072affe, type: 3}
     - {fileID: 21300000, guid: f5f1fa6213898417eb4ecfcba6521fa6, type: 3}
     traitPositions:
-    - {x: 1500, y: 40}
-    - {x: 1450, y: 125}
-    - {x: 1380, y: 220}
-    nameCorner: {x: 1800, y: 815}
+    - {x: 1508, y: 144}
+    - {x: 1196, y: 245}
+    - {x: 1045, y: 395}
+    nameCorner: {x: 1835, y: 815}
     background: Coming soon.
     skills: []
   - label: Patience
     characterId: 14
     backing: {fileID: 21300000, guid: eb6d9c69865f84df7bf9bdda8fddb2a5, type: 3}
     sprite: {fileID: 21300000, guid: 526691a3738904957aa7dde14578b0f4, type: 3}
+    select: {fileID: 21300000, guid: d996e824c2baa3745a0f22e355c0241f, type: 3}
+    picked: {fileID: 21300000, guid: 9e2a07f9f4d35ef41af5e3f0cd681220, type: 3}
     spriteBounds:
       serializedVersion: 2
       x: 297
@@ -138,6 +149,7 @@ MonoBehaviour:
       width: 617
       height: 956
     spriteScale: 0
+    spriteOffset: {x: 0, y: 0}
     tilePortraitRect:
       serializedVersion: 2
       x: 0
@@ -157,7 +169,8 @@ MonoBehaviour:
     skillBlock: {fileID: 21300000, guid: 5877075bb94d7432585c648d648e579a, type: 3}
     traits:
     - {fileID: 21300000, guid: fd10b3f7298dd44adb7bb9315b1370e6, type: 3}
-    traitPositions: []
+    traitPositions:
+    - {x: 1915, y: 8}
     nameCorner: {x: 1868, y: 830}
     background: Coming soon.
     skills: []
@@ -165,6 +178,8 @@ MonoBehaviour:
     characterId: 15
     backing: {fileID: 21300000, guid: 0f4b8a8bf315e4a3583dc3f8e748d04b, type: 3}
     sprite: {fileID: 21300000, guid: 2c9b7b82b1eaa4a0ea815ad9c2c4e806, type: 3}
+    select: {fileID: 21300000, guid: 067a9adaf97b66943b7c45bb0b6ca365, type: 3}
+    picked: {fileID: 21300000, guid: 116257fb3c9209b41ace13fe8819beec, type: 3}
     spriteBounds:
       serializedVersion: 2
       x: 14
@@ -172,6 +187,7 @@ MonoBehaviour:
       width: 783
       height: 929
     spriteScale: 0
+    spriteOffset: {x: 0, y: 0}
     tilePortraitRect:
       serializedVersion: 2
       x: 0
@@ -211,6 +227,8 @@ MonoBehaviour:
     characterId: 16
     backing: {fileID: 21300000, guid: 195f29febbab14b9891779ad4867c876, type: 3}
     sprite: {fileID: 21300000, guid: d70be9d3042dc4b21a83cc7ee05ec79a, type: 3}
+    select: {fileID: 21300000, guid: f63b3df53e5fd5e43be73b6cf1488b54, type: 3}
+    picked: {fileID: 21300000, guid: 84ea8b7792f476a43922ed33c5b90133, type: 3}
     spriteBounds:
       serializedVersion: 2
       x: 43
@@ -218,6 +236,7 @@ MonoBehaviour:
       width: 39
       height: 54
     spriteScale: 15
+    spriteOffset: {x: 0, y: 0}
     tilePortraitRect:
       serializedVersion: 2
       x: 0
@@ -239,7 +258,10 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 4d7ab8bfaae5f482d99e54a27d67c41e, type: 3}
     - {fileID: 21300000, guid: 1cfa5326390bc4556925a8b74b79ab32, type: 3}
     - {fileID: 21300000, guid: bcb4af82e2e554fe29aac205207c831a, type: 3}
-    traitPositions: []
+    traitPositions:
+    - {x: 1645, y: 150}
+    - {x: 1645, y: 330}
+    - {x: 1645, y: 520}
     nameCorner: {x: 1868, y: 830}
     background: Coming soon.
     skills: []
@@ -247,6 +269,8 @@ MonoBehaviour:
     characterId: 12
     backing: {fileID: 21300000, guid: ba8be0e67dfc84b72aa7f955673ce1f8, type: 3}
     sprite: {fileID: 21300000, guid: 2d0e5357e4a2f449693669f19b435e55, type: 3}
+    select: {fileID: 21300000, guid: e80435d35f4e3d549bb67325da50e73a, type: 3}
+    picked: {fileID: 21300000, guid: ebd78079a4eece147ba06bbc403bdd34, type: 3}
     spriteBounds:
       serializedVersion: 2
       x: 206
@@ -254,6 +278,7 @@ MonoBehaviour:
       width: 658
       height: 837
     spriteScale: 0
+    spriteOffset: {x: 0, y: 0}
     tilePortraitRect:
       serializedVersion: 2
       x: 0
@@ -275,7 +300,48 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 9b7dd7e1254ec423dbd2dcc2ad1aca1c, type: 3}
     - {fileID: 21300000, guid: a6670797c634f4f62864097791d4a70f, type: 3}
     - {fileID: 21300000, guid: 50d6f938c4bbd400ea0121152dea5a19, type: 3}
+    traitPositions:
+    - {x: 1600, y: 100}
+    - {x: 1915, y: 260}
+    - {x: 1620, y: 540}
+    nameCorner: {x: 1868, y: 830}
+    background: Coming soon.
+    skills: []
+  - label: Sandbag
+    characterId: 2
+    backing: {fileID: 0}
+    sprite: {fileID: 0}
+    select: {fileID: 21300000, guid: 32085d766626a2c4db81fe7647cf1287, type: 3}
+    picked: {fileID: 21300000, guid: 0291bff886c3b494093f6a41b3c9f144, type: 3}
+    spriteBounds:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    spriteScale: 0
+    spriteOffset: {x: 0, y: 0}
+    tilePortraitRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    nameArt: {fileID: 0}
+    nameBounds:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    moreArt: {fileID: 0}
+    backArt: {fileID: 0}
+    miniSkill: {fileID: 0}
+    skillBlock: {fileID: 0}
+    traits: []
     traitPositions: []
     nameCorner: {x: 1868, y: 830}
     background: Coming soon.
     skills: []
+  randomSelect: {fileID: 21300000, guid: 58b3e02a8e3e9ea41b154c822285ef3b, type: 3}
+  randomPicked: {fileID: 21300000, guid: eeb6c470485be964482f24e0b777215a, type: 3}
