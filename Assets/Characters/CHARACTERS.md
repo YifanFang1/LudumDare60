@@ -375,6 +375,8 @@ The end-of-match dialogue box (`CharacterDialogue.cs`) is never voiced, and no v
 
 **Volume** on Voice turns one character's voice up or down. For a lo-fi sound, select clips in the Project window and run **Fight > Audio > Bitcrush Selected Clips**: it saves a crushed copy next to each clip and swaps it in on the art assets (WebGL can't run audio filters live, so the effect is baked into the file).
 
+**Volume** on Voice turns one character's voice up or down. For a lo-fi sound, select clips in the Project window and run **Fight > Audio > Bitcrush Selected Clips**: it saves a crushed copy next to each clip and swaps it in on the art assets (WebGL can't run audio filters live, so the effect is baked into the file).
+
 Voices play on their own source per fighter at normal pitch, so a new line cuts off that fighter's previous one. The on-screen intro time comes from the text length, not the recording, so a recording longer than its line is cut off when the next line starts.
 
 ### Menu sounds
