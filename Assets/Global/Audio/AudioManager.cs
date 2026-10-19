@@ -33,9 +33,9 @@ public class AudioManager : MonoBehaviour
     public int heavyHitDamage = 10;      // Brawler: Light does 5, Heavy does 12
 
     [Header("Match")]
-    // The round call ("Round 1", "Round 2", "Final Round") plays just before each round's countdown,
-    // timed so it finishes as the countdown starts (during the intros in round 1, during the pause
-    // after the KO in later rounds). The countdown sound plays when the 3-2-1 starts.
+    // The round call ("Round 1", "Round 2", "Final Round") plays during the sim's round call phase,
+    // after the intro dialogue (round 1) or the pause after the KO (later rounds). The countdown
+    // sound plays when the 3-2-1 starts after it.
     [FormerlySerializedAs("roundStart")] public AudioClip round1Sound;
     public AudioClip round2Sound;        // any round that isn't the first or the final one
     public AudioClip finalRoundSound;    // a round that decides the match (empty = round2Sound)
@@ -61,6 +61,15 @@ public class AudioManager : MonoBehaviour
     [Range(0f, 1f)] public float sfxVolume = 1f;
     [Range(0f, 1f)] public float uiVolume = 0.8f;
     [Range(0f, 1f)] public float musicVolume = 0.5f;
+    [Range(0f, 1f)] public float voiceVolume = 1f;   // character voice lines (CharacterLook.voice)
+    [Tooltip("Seconds for a song to fade out when the music changes or stops.")]
+    public float musicFadeOutSeconds = 0.6f;
+    [Tooltip("Seconds for a song to fade in when it starts.")]
+    public float musicFadeInSeconds = 1f;
+    [Tooltip("The round music starts this many seconds before FIGHT! (during the 3-2-1). 0 = on FIGHT!")]
+    public float musicEarlySeconds = 2.5f;
+    [Tooltip("Editor only: log each on-screen line that has no voice clip yet, to see which recordings are missing.")]
+    public bool logMissingVoiceLines;
 
     // So menus can play click sounds without needing a reference (or this component at all).
     static AudioManager instance;
@@ -69,13 +78,18 @@ public class AudioManager : MonoBehaviour
     AudioSource sfx;      // fight sounds, slightly random pitch
     AudioSource ui;       // clicks and jingles, normal pitch
     AudioSource music;
-    bool resultPlayed;    // the win/lose jingle for this match has played; the fight music stops
+    float musicFade;      // 0-1, multiplies musicVolume while a song fades in or out
+    bool resultPlayed;    // the win/lose jingle for this match has played
     // Character themes: round 1 plays fightMusic, then each new round plays the theme of whoever
     // won the round before (a drawn round keeps the current music).
     int themeSlot = -1;          // fighter slot whose theme is playing, -1 = fightMusic
     int lastRoundWinner = -1;    // remembered during the pause after a KO, used when the next round starts
     int calledRound;             // the last round whose round call has played
     int countedRound;            // the last round whose countdown sound has played
+    // Character voices: one source per fighter, so a new line cuts off that fighter's last one.
+    readonly AudioSource[] voices = new AudioSource[2];
+    MatchCinematics cinematic;   // the intro and win/lose dialogue (added by WorldView at run time)
+    string spokenLine = "";      // the dialogue line already voiced, so each is spoken once
 
     void Awake()
     {
@@ -90,6 +104,8 @@ public class AudioManager : MonoBehaviour
         sfx = AddSource(false);
         ui = AddSource(false);
         music = AddSource(true);
+        voices[0] = AddSource(false);
+        voices[1] = AddSource(false);
 
         // Clips with "Preload Audio Data" off load on first use, which can make that first play
         // late or silent. The announcer is timed, so load these up front.
@@ -130,7 +146,8 @@ public class AudioManager : MonoBehaviour
 
     void Update()
     {
-        if (match.Phase == MatchPhase.Playing && match.Sim.IsOver && !resultPlayed)
+        // The win/lose jingle waits until the win/lose dialogue is over (and its voice has finished).
+        if (match.Phase == MatchPhase.Playing && match.Sim.IsOver && !resultPlayed && !DialogueRunning())
         {
             resultPlayed = true;
             PlayResult(match.Sim.Winner);
@@ -139,9 +156,10 @@ public class AudioManager : MonoBehaviour
         if (match.Phase == MatchPhase.Playing && match.Sim.roundWinner >= 0)
             lastRoundWinner = match.Sim.roundWinner;
         if (match.Phase == MatchPhase.Playing) Announce(match.Sim);
+        if (match.Phase == MatchPhase.Playing) SpeakDialogue();
+        else if (spokenLine != "") { spokenLine = ""; StopVoices(); }   // left the match mid-line
 
-        music.volume = musicVolume;
-        SetMusic(MusicFor(match.Phase));
+        SetMusic(MusicFor(match.Phase));   // also sets the music volume (with the fade)
     }
 
     // ---------- for menus ----------
@@ -170,6 +188,106 @@ public class AudioManager : MonoBehaviour
         lastRoundWinner = -1;
         calledRound = 0;
         countedRound = 0;
+        spokenLine = "";
+        StopVoices();
+    }
+
+    // ---------- character voices ----------
+
+    // The voice set of the character a fighter slot is playing, or null.
+    CharacterVoice VoiceOf(int slot)
+    {
+        GameSim sim = match.Sim;
+        if (sim == null || slot < 0 || slot >= sim.fighters.Length || sim.fighters[slot] == null) return null;
+        CharacterLook look = CharacterRegistry.GetLook(sim.fighters[slot].characterId);
+        return look != null ? look.voice : null;
+    }
+
+    // Speaks the intro / win / lose line on screen, once, when it first appears.
+    void SpeakDialogue()
+    {
+        if (cinematic == null) cinematic = GetComponent<MatchCinematics>();
+        if (cinematic == null || !cinematic.Active) return;
+
+        int slot = cinematic.FocusSlot;
+        string text = cinematic.Text;
+        string key = slot + ":" + text;
+        if (slot < 0 || string.IsNullOrEmpty(text) || key == spokenLine) return;
+        spokenLine = key;
+
+        CharacterVoice v = VoiceOf(slot);
+        AudioClip clip = v != null ? v.FindLine(text) : null;
+        if (clip == null)
+        {
+            if (logMissingVoiceLines && Application.isEditor)
+                Debug.Log("[Voice] No clip for " + cinematic.Speaker + ": \"" + text + "\"");
+            return;
+        }
+        StopVoices();   // the other fighter's line ends when this one starts
+        PlayVoice(slot, clip);
+    }
+
+    // True while the end-of-match dialogue is on screen or a character is still speaking.
+    bool DialogueRunning()
+    {
+        if (cinematic == null) cinematic = GetComponent<MatchCinematics>();
+        if (cinematic != null && cinematic.OutroActive) return true;
+        return voices[0].isPlaying || voices[1].isPlaying;
+    }
+
+    // Combat shouts from the sim's events. Runs alongside the sound effects in OnSimEvent.
+    void Shout(SimEvent e)
+    {
+        GameSim sim = match.Sim;
+        switch (e.type)
+        {
+            case SimEventType.AttackStart:
+            {
+                CharacterVoice v = VoiceOf(e.a);
+                if (v != null && sim.fighters[e.a].move != null) PlayVoice(e.a, v.FindMove(sim.fighters[e.a].move.name));
+                break;
+            }
+            case SimEventType.Hit:
+            {
+                CharacterVoice v = VoiceOf(e.b);
+                if (v != null && Random.value < v.hurtChance) PlayVoice(e.b, v.hurt);
+                break;
+            }
+            case SimEventType.KO:
+            {
+                CharacterVoice v = VoiceOf(e.a);
+                if (v != null) PlayVoice(e.a, v.ko);
+                break;
+            }
+            case SimEventType.RoundEnd:
+            {
+                // Not after the last round: the winner's win line plays then.
+                CharacterVoice v = VoiceOf(e.a);
+                if (v != null && !sim.IsOver) PlayVoice(e.a, v.roundWin);
+                break;
+            }
+        }
+    }
+
+    void PlayVoice(int slot, AudioClip[] clips)
+    {
+        if (!Has(clips)) return;
+        PlayVoice(slot, clips[Random.Range(0, clips.Length)]);
+    }
+
+    void PlayVoice(int slot, AudioClip clip)
+    {
+        if (clip == null || slot < 0 || slot > 1) return;
+        AudioSource s = voices[slot];
+        s.Stop();
+        s.clip = clip;
+        s.volume = voiceVolume;
+        s.Play();
+    }
+
+    void StopVoices()
+    {
+        for (int i = 0; i < voices.Length; i++) if (voices[i] != null) voices[i].Stop();
     }
 
     // The round call and the countdown, read from the sim's timers each frame (they are not sim
@@ -178,24 +296,17 @@ public class AudioManager : MonoBehaviour
     {
         if (sim.IsOver) return;
 
-        // Ticks until the next countdown starts, and which round it is for.
-        int next = sim.round;
-        int ticksLeft = 0;
-        if (sim.introTicks > 0) ticksLeft = sim.introTicks;
-        else if (sim.roundOverTicks > 0) { next = sim.round + 1; ticksLeft = sim.roundOverTicks; }
+        // Order: intros (dialogue) -> round call ("ROUND 1", the sim's round call phase) -> 3-2-1.
+        bool waiting = sim.introTicks > 0 || sim.roundOverTicks > 0;
+        if (waiting) return;
 
-        if (calledRound < next)
+        if (calledRound < sim.round && (sim.roundCallTicks > 0 || sim.countdownTicks > 0))
         {
-            AudioClip call = RoundCall(sim, next);
-            int lead = call != null ? Mathf.CeilToInt(call.length * 60f) : 0;
-            if (ticksLeft <= lead)
-            {
-                calledRound = next;
-                PlayUI(call);
-            }
+            calledRound = sim.round;
+            PlayUI(RoundCall(sim, sim.round));
         }
 
-        if (countedRound < sim.round && sim.introTicks == 0 && sim.roundOverTicks == 0 && sim.countdownTicks > 0)
+        if (countedRound < sim.round && sim.roundCallTicks == 0 && sim.countdownTicks > 0)
         {
             countedRound = sim.round;
             PlayUI(countdownSound);
@@ -228,6 +339,7 @@ public class AudioManager : MonoBehaviour
 
     void OnSimEvent(SimEvent e)
     {
+        Shout(e);
         CharacterSfx c = SfxOf(e.a);
         switch (e.type)
         {
@@ -337,7 +449,16 @@ public class AudioManager : MonoBehaviour
             case MatchPhase.CharacterSelect:
                 return characterSelectMusic != null ? characterSelectMusic : menuMusic;
             case MatchPhase.Playing:
-                return resultPlayed ? null : FightMusic();   // silence so the jingle stands out
+                // Silent during the intros and once the match is won, so the dialogue and then the
+                // jingle stand out. A character theme (rounds 2-3) starts with the round call; the
+                // default battle theme waits for most of the 3-2-1 (Music Early Seconds before FIGHT!).
+                GameSim sim = match.Sim;
+                if (sim.IsOver || sim.introTicks > 0) return null;
+                AudioClip song = FightMusic();
+                if (song != fightMusic) return song;
+                int earlyTicks = Mathf.RoundToInt(musicEarlySeconds * 60f);
+                if (sim.roundCallTicks > 0 || sim.countdownTicks > earlyTicks) return null;
+                return song;
             default:
                 return menuMusic;
         }
@@ -350,11 +471,29 @@ public class AudioManager : MonoBehaviour
         return c != null && c.theme != null ? c.theme : fightMusic;
     }
 
+    // Switches songs with a fade: the old song fades out, then the new one starts and fades in.
+    // If the wanted song changes back mid-fade, the current one just fades back up.
     void SetMusic(AudioClip clip)
     {
-        if (music.clip == clip) return;
-        music.clip = clip;
-        if (clip != null) music.Play();
-        else music.Stop();
+        float dt = Time.unscaledDeltaTime;
+        if (music.clip != clip)
+        {
+            if (music.clip != null && music.isPlaying && musicFade > 0f)
+            {
+                musicFade = Mathf.MoveTowards(musicFade, 0f, musicFadeOutSeconds > 0f ? dt / musicFadeOutSeconds : 1f);
+            }
+            else
+            {
+                music.clip = clip;
+                musicFade = 0f;
+                if (clip != null) music.Play();
+                else music.Stop();
+            }
+        }
+        else if (clip != null)
+        {
+            musicFade = Mathf.MoveTowards(musicFade, 1f, musicFadeInSeconds > 0f ? dt / musicFadeInSeconds : 1f);
+        }
+        music.volume = musicVolume * musicFade;
     }
 }
