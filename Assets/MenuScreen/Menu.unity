@@ -8201,8 +8201,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterPreview
   characterId: 16
   character: {fileID: 0}
-  moveIndex: 5
-  tick: 0
+  moveIndex: 3
+  tick: 24
   playing: 0
   playSpeed: 1
   faceRight: 1

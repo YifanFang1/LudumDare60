@@ -833,23 +833,51 @@ public class RosterTests
     }
 
     [Test]
-    public void RemyRatWavesCannotBeBlocked()
+    public void RemyRatShowerWaitsOneSecondAndCannotBeBlocked()
     {
+        MoveDef m = PlagueDoctor.UnleashTheRats;
+        for (int i = 0; i < m.hitboxes.Length; i++)
+        {
+            Assert.GreaterOrEqual(m.hitboxes[i].spawnTick, PlagueDoctor.UltDelay, "no rat before the 1 s delay");
+            Assert.IsTrue(m.hitboxes[i].unblockable);
+            StringAssert.StartsWith("rat_shower_", m.hitboxes[i].visual);
+        }
+
         GameSim sim = NewMatch(PlagueDoctor.Id, Brawler.Id, 3000);
         sim.fighters[0].meter = Fighter.MeterMax;
         sim.Step(Buttons.Ultimate, BackP1);
-        Run(sim, None, BackP1, GameSim.SuperFlashTicks + 120);
-        Assert.AreEqual(110 - 30, sim.fighters[1].hp);
+        Run(sim, None, BackP1, GameSim.SuperFlashTicks + PlagueDoctor.UltDelay);
+        Assert.AreEqual(110, sim.fighters[1].hp, "nothing hits during the delay");
+        Run(sim, None, BackP1, 250);
+        Assert.Less(sim.fighters[1].hp, 110, "the shower lands even through a block");
     }
 
     [Test]
-    public void RemyRatWavesAreLowEnoughToJump()
+    public void RemyUltimateCannotBeInterrupted()
     {
-        for (int i = 0; i < PlagueDoctor.UnleashTheRats.hitboxes.Length; i++)
+        GameSim sim = NewMatch(PlagueDoctor.Id, Brawler.Id, 800);
+        sim.fighters[0].meter = Fighter.MeterMax;
+        sim.Step(Buttons.Ultimate, None);
+        Run(sim, None, None, GameSim.SuperFlashTicks + 5);
+        Assert.AreEqual(FighterStateId.Attack, sim.fighters[0].state);
+        int before = sim.fighters[0].hp;
+        Run(sim, None, Buttons.Light, 30);
+        Assert.Less(sim.fighters[0].hp, before, "the hit still does damage");
+        Assert.AreEqual(FighterStateId.Attack, sim.fighters[0].state, "hyper armor: still in the move");
+    }
+
+    [Test]
+    public void RemyRatShowerIsScatteredNotIdentical()
+    {
+        MoveDef m = PlagueDoctor.UnleashTheRats;
+        bool speedVaries = false, artVaries = false;
+        for (int i = 1; i < m.hitboxes.Length; i++)
         {
-            Box b = PlagueDoctor.UnleashTheRats.hitboxes[i].box;
-            Assert.Less(b.y + b.h, 1000);
+            if (m.hitboxes[i].vx != m.hitboxes[0].vx) speedVaries = true;
+            if (m.hitboxes[i].visual != m.hitboxes[0].visual) artVaries = true;
         }
+        Assert.IsTrue(speedVaries);
+        Assert.IsTrue(artVaries);
     }
 
     [Test]
