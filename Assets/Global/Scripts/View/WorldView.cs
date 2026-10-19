@@ -55,6 +55,17 @@ public class WorldView : MonoBehaviour
     List<SpriteRenderer> summonQuads = new List<SpriteRenderer>();
     List<SpriteRenderer> telegraphQuads = new List<SpriteRenderer>();
 
+    // Move flashes (CharacterLook.moveFlashes): an image over a fighter's hurtbox that fades out. View only.
+    class ActiveFlash
+    {
+        public int owner;
+        public MoveFlash flash;
+        public MoveDef move;
+        public float startTime;
+        public SpriteRenderer sr;
+    }
+    List<ActiveFlash> flashes = new List<ActiveFlash>();
+
     // A Telegraph event, remembered until its attack lands.
     struct Warning
     {
@@ -186,6 +197,7 @@ public class WorldView : MonoBehaviour
         zoneQuads.Clear();
         summonQuads.Clear();
         telegraphQuads.Clear();
+        flashes.Clear();
         warnings.Clear();
         eventLog.Clear();
     }
@@ -222,6 +234,7 @@ public class WorldView : MonoBehaviour
         }
         UpdateHitboxes(sim);
         UpdateProjectileArt(sim);
+        UpdateMoveFlashes(sim);
         UpdateZones(sim);
         UpdateSummons(sim);
         UpdateWarnings(sim);
@@ -249,7 +262,8 @@ public class WorldView : MonoBehaviour
         // the hurtbox the same way in either mode.
         CharacterLook d = v.data;
         v.root.transform.position = new Vector3(f.x * Scale + f.facing * d.spriteOffsetX, f.y * Scale + d.spriteOffsetY, 0f);
-        v.root.transform.localScale = new Vector3(f.facing * d.SpriteFlip * d.spriteScale, d.spriteScale, 1f);   // art faces right (or is flipped to)
+        float grow = f.ScalePercent / 100f;   // a grown fighter (Room's Ultimate) draws bigger, from the feet
+        v.root.transform.localScale = new Vector3(f.facing * d.SpriteFlip * d.spriteScale * grow, d.spriteScale * grow, 1f);   // art faces right (or is flipped to)
         if (v.art == null) Pose(v, f);
         else v.art.color = d.tintByState ? StateTint(Color.white, f) : Color.white;
 
@@ -424,6 +438,70 @@ public class WorldView : MonoBehaviour
             }
         }
         for (int i = used; i < projectileArt.Count; i++) projectileArt[i].enabled = false;
+    }
+
+    void StartMoveFlash(int fighter)
+    {
+        if (worldRoot == null || fighter < 0 || fighter > 1) return;
+        FighterView v = views[fighter];
+        Fighter f = match.Sim.fighters[fighter];
+        if (v == null || v.data == null || f.move == null) return;
+        MoveFlash mf = v.data.FindMoveFlash(f.move.name);
+        if (mf == null) return;
+        ActiveFlash a = new ActiveFlash();
+        a.owner = fighter;
+        a.flash = mf;
+        a.move = f.move;
+        a.startTime = Time.time;
+        GameObject go = new GameObject("MoveFlash");
+        go.transform.SetParent(worldRoot.transform, false);
+        a.sr = go.AddComponent<SpriteRenderer>();
+        a.sr.sprite = mf.sprite;
+        a.sr.sortingOrder = 9;
+        flashes.Add(a);
+    }
+
+    // Each flash is stretched to the move's attack area (the box that hurts enemies; all of the move's
+    // hitboxes combined, scaled up if the fighter is grown), follows the fighter, and fades to nothing.
+    void UpdateMoveFlashes(GameSim sim)
+    {
+        for (int i = flashes.Count - 1; i >= 0; i--)
+        {
+            ActiveFlash a = flashes[i];
+            float fade = Mathf.Max(0.01f, a.flash.fadeSeconds);
+            float t = (Time.time - a.startTime) / fade;
+            if (t >= 1f || a.sr == null)
+            {
+                if (a.sr != null) Destroy(a.sr.gameObject);
+                flashes.RemoveAt(i);
+                continue;
+            }
+            Fighter fo = sim.fighters[a.owner];
+            Box b = MoveAttackArea(a.move, fo);
+            Vector3 size = a.sr.sprite.bounds.size;
+            a.sr.transform.position = new Vector3((b.x + b.w / 2f) * Scale, (b.y + b.h / 2f) * Scale, 0f);
+            a.sr.transform.localScale = new Vector3(b.w * Scale / size.x, b.h * Scale / size.y, 1f);
+            a.sr.color = new Color(1f, 1f, 1f, 1f - t);
+        }
+    }
+
+    // The world box covering all of `m`'s hitboxes (milli-units), grown with the fighter's ScalePercent.
+    // Falls back to the body hurtbox for a move with no hitboxes.
+    static Box MoveAttackArea(MoveDef m, Fighter f)
+    {
+        if (m == null || m.hitboxes == null || m.hitboxes.Length == 0) return f.HurtboxWorld();
+        int grow = f.ScalePercent;
+        int x0 = int.MaxValue, y0 = int.MaxValue, x1 = int.MinValue, y1 = int.MinValue;
+        for (int i = 0; i < m.hitboxes.Length; i++)
+        {
+            Box b = m.hitboxes[i].box;
+            Box w = new Box(b.x * grow / 100, b.y * grow / 100, b.w * grow / 100, b.h * grow / 100).ToWorld(f.x, f.y, f.facing);
+            if (w.x < x0) x0 = w.x;
+            if (w.y < y0) y0 = w.y;
+            if (w.x + w.w > x1) x1 = w.x + w.w;
+            if (w.y + w.h > y1) y1 = w.y + w.h;
+        }
+        return new Box(x0, y0, x1 - x0, y1 - y0);
     }
 
     // ================= zones, Ultimate copies, warnings =================
@@ -689,6 +767,7 @@ public class WorldView : MonoBehaviour
     void LogEvent(SimEvent e)
     {
         GameSim sim = match.Sim;
+        if (e.type == SimEventType.AttackStart) StartMoveFlash(e.a);
         string line;
         switch (e.type)
         {

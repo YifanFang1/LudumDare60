@@ -23,6 +23,10 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
+  moveFlashes:
+  - move: Special
+    sprite: {fileID: 6284786619204268103, guid: e8f0ab513b1104de5888cf4fb43c8ce2, type: 3}
+    fadeSeconds: 0.35
   sfx:
     moves: []
     attackStart: []

@@ -206,6 +206,11 @@ public abstract class Fighter
     // and whether to draw this fighter powered up (a glow). Not hashed.
     public virtual string HudInfo { get { return null; } }
     public virtual bool IsPoweredUp { get { return false; } }
+    // Hyper armor: a hit that doesn't kill still does its damage, but there is no hitstun, no
+    // knockback and the fighter's move isn't interrupted (Room while grown).
+    public virtual bool IgnoresHitstun { get { return false; } }
+    // How big the art is drawn, in percent (150 = 1.5x). View only: the sim uses Hurtbox.
+    public virtual int ScalePercent { get { return 100; } }
 
     // HINTS FOR THE AI (AIInputSource). They only READ the sim and never affect the fight, so they
     // aren't hashed. The AI stays generic: it asks these instead of knowing characters by name.
@@ -780,6 +785,7 @@ public abstract class Fighter
 
         hp -= hit.damage;
         if (hp <= 0 && !CanBeKnockedOut) hp = MaxHp;
+        if (hp > 0 && IgnoresHitstun) return;   // hyper armor: damage only
         if (state == FighterStateId.Attack) EndMove(sim, false);
         move = null;
         holdTicks = 0;                     // being hit drops anyone you were holding

@@ -439,24 +439,18 @@ public class RosterTests
     }
 
     [Test]
-    public void RoomAddressMeSummonsFourCopiesThatLastEightSeconds()
+    public void RoomAddressMeGrowsHimForEightSecondsWithHyperArmor()
     {
         GameSim sim = AfterSuperflash(Elephant.Id, Sandbag.Id, 1200);
         sim.Step(None, None);
-        Assert.AreEqual(4, sim.CountSummons(0));
+        Elephant room = (Elephant)sim.fighters[0];
+        Assert.IsTrue(room.Grown);
+        Assert.AreEqual(0, sim.CountSummons(0), "no more copies");
+        Assert.AreEqual(1050, -room.Hurtbox.x, "body is x1.5");
 
-        Run(sim, None, None, Elephant.CopyTicks);
-        Assert.AreEqual(0, sim.CountSummons(0));
-    }
-
-    [Test]
-    public void RoomCopiesSkipSpotsNextToAFighter()
-    {
-        GameSim sim = NewMatch(Elephant.Id, Sandbag.Id, 4000);   // Room -2000, Sandbag 2000: both on a spot
-        sim.fighters[0].meter = Fighter.MeterMax;
-        sim.Step(Buttons.Ultimate, None);
-        Run(sim, None, None, GameSim.SuperFlashTicks + 1);
-        Assert.AreEqual(2, sim.CountSummons(0));
+        Run(sim, None, None, Elephant.GrowTicks);
+        Assert.IsFalse(room.Grown);
+        Assert.AreEqual(700, -room.Hurtbox.x);
     }
 
     [Test]

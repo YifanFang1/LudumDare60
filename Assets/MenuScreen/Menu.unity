@@ -13106,6 +13106,7 @@ MonoBehaviour:
   pipWonColor: {r: 0.62, g: 0.95, b: 0.35, a: 1}
   pipEmptyColor: {r: 0.07, g: 0.09, b: 0.08, a: 1}
   timerText: {fileID: 0}
+  timerBackdropColor: {r: 0, g: 0, b: 0, a: 0.85}
   timerColor: {r: 1, g: 1, b: 1, a: 1}
   timerLowColor: {r: 1, g: 0.35, b: 0.3, a: 1}
   bannerText: {fileID: 0}
@@ -15645,7 +15646,7 @@ MonoBehaviour:
   confirm: {fileID: 8300000, guid: 211a4d6cab23d4f65a3ffc73a42b0140, type: 3}
   pageSwitch: {fileID: 8300000, guid: cd1d88815db944007a656ccbce40dda4, type: 3}
   glitchSound: {fileID: 8300000, guid: db51424db52a74773912055c97d1b2c0, type: 3}
-  glassBreak: {fileID: 8300000, guid: dfb9d6ed109d1424aa25f5151c317cdc, type: 3}
+  glassBreak: {fileID: 8300000, guid: 071394c3aceed4675ada5194e7399044, type: 3}
   tvOff: {fileID: 8300000, guid: abc45c7d861a449879abb4b90ef90298, type: 3}
   menuMusic: {fileID: 8300000, guid: a56bae3fbbd637e4ba060afb8cc5528b, type: 3}
   characterSelectMusic: {fileID: 8300000, guid: a56bae3fbbd637e4ba060afb8cc5528b, type: 3}
