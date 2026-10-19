@@ -7413,9 +7413,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ec6945e4cb8a436f915e3006600aa98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterPreview
-  characterId: 13
+  characterId: 16
   character: {fileID: 0}
-  moveIndex: 0
+  moveIndex: 6
   tick: 0
   playing: 0
   playSpeed: 1
@@ -8673,8 +8673,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 90
-  m_fontSizeBase: 90
+  m_fontSize: 82
+  m_fontSizeBase: 82
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

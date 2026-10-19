@@ -373,7 +373,7 @@ public class CharacterSelectScreen : MonoBehaviour
         for (int i = 0; i < e.skills.Length; i++)
         {
             CharacterSelectArt.Skill k = e.skills[i];
-            AddSkillRow(e.skillBlock, "<color=#F5891F><size=125%>" + k.name + "</size></color>\n" + k.description);
+            AddSkillRow(k.icon != null ? k.icon : e.skillBlock, "<color=#F5891F><size=125%>" + k.name + "</size></color>\n" + k.description);
         }
     }
 

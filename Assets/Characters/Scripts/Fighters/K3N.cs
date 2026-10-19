@@ -17,6 +17,7 @@ public class K3N : BaseFighter
 
     public const int InstallDrainPerTick = 2;      // a full bar lasts about 8 seconds
     public const int InstallDamagePercent = 130;
+    public const int InstallAttackDrain = 150;     // every Install attack (Light, Heavy or Special) also costs this much bar (1000 = full)
     public const int PunchFullCharge = 60;
     // Charged Punch steps him forward: LungeSpeed milli-units a tick for the LungeTicks ticks just
     // before the punch comes out (8 x 50 = 0.4 units). Only after he lets go of the charge.
@@ -42,13 +43,14 @@ public class K3N : BaseFighter
 
     public static readonly MoveDef ChargedPunch = MakeChargedPunch();
 
-    // The two attacks he uses while Install is on. They start as copies of the normal Light and Heavy
-    // (same numbers) so you can tune them on their own in the Character Preview: they are the LAST TWO
-    // moves in its list. Both keep the move names "Light" and "Heavy", so the Install_Light /
-    // Install_Heavy animation states, the sounds and the flashes all still match.
+    // The three attacks he uses while Install is on. They start as copies of the normal Light, Heavy and
+    // Special (same numbers) so you can tune them on their own in the Character Preview: they are the LAST
+    // THREE moves in its list. They keep the move names "Light", "Heavy" and "Special", so the Install_Light /
+    // Install_Heavy / Install_Special animation states (when you make them), the sounds and the flashes all match.
     public static readonly MoveDef InstallWhip = MakeCapeWhip();
     public static readonly MoveDef InstallPunch = MakeChargedPunch();
     public static readonly MoveDef RapidPunches = MakeRapidPunches();
+    public static readonly MoveDef InstallSpecial = MakeRapidPunches(true);
 
     static MoveDef MakeChargedPunch()
     {
@@ -70,7 +72,10 @@ public class K3N : BaseFighter
     // Each pass spawns THREE hitboxes (ticks 7, 10 and 21 of the move, different boxes), 1 damage
     // each, so a pass is 3 damage. NOTE: the loop only repeats ticks 6-10, so the tick-21 box
     // fires once, after the loop ends.
-    static MoveDef MakeRapidPunches()
+    static MoveDef MakeRapidPunches() { return MakeRapidPunches(false); }
+
+    // The Install version has FIVE hitboxes (tune them in the Character Preview: "Special (INSTALL)").
+    static MoveDef MakeRapidPunches(bool install)
     {
         MoveDef m = Melee("Special",
             totalTicks: 25, spawnTick: 6, activeTicks: 2,
@@ -81,8 +86,15 @@ public class K3N : BaseFighter
         int[] spawn = { 7, 10, 21 };
         int[] life = { 2, 6, 2 };
         Box[] boxes = { new Box(500, 1000, 1600, 600), new Box(300, 0, 2000, 2000), new Box(300, 1000, 2600, 700) };
-        m.hitboxes = new HitboxDef[3];
-        for (int i = 0; i < 3; i++)
+        if (install)
+        {
+            // the same three plus a high jab (tick 9) and a long low finisher (tick 23)
+            spawn = new[] { 7, 9, 10, 21, 23 };
+            life = new[] { 2, 2, 6, 2, 2 };
+            boxes = new[] { new Box(500, 1000, 1600, 600), new Box(400, 1300, 1500, 500), new Box(300, 0, 2000, 2000), new Box(300, 1000, 2600, 700), new Box(300, 800, 3400, 900) };
+        }
+        m.hitboxes = new HitboxDef[spawn.Length];
+        for (int i = 0; i < spawn.Length; i++)
         {
             m.hitboxes[i] = new HitboxDef
             {
@@ -104,22 +116,34 @@ public class K3N : BaseFighter
     protected override MoveDef LightAttack { get { return installOn ? InstallWhip : CapeWhip; } }
     protected override MoveDef HeavyAttack { get { return installOn ? InstallPunch : ChargedPunch; } }
     protected override MoveDef GrabMove { get { return HandGrab; } }
-    protected override MoveDef SpecialMove { get { return RapidPunches; } }
+    protected override MoveDef SpecialMove { get { return installOn ? InstallSpecial : RapidPunches; } }
     protected override MoveDef UltimateMove { get { return null; } }   // O is the Install toggle
 
-    // Editor tools list the Install attacks too (last two).
+    public override bool IsPoweredMove(MoveDef m) { return m == InstallWhip || m == InstallPunch || m == InstallSpecial; }
+
+    // Editor tools list the Install attacks too (last three).
     public override MoveDef[] ListMoves()
     {
         MoveDef[] normal = base.ListMoves();
-        MoveDef[] all = new MoveDef[normal.Length + 2];
+        MoveDef[] all = new MoveDef[normal.Length + 3];
         normal.CopyTo(all, 0);
         all[normal.Length] = InstallWhip;
         all[normal.Length + 1] = InstallPunch;
+        all[normal.Length + 2] = InstallSpecial;
         return all;
     }
 
     public override DashDef ForwardDash { get { return new DashDef(10, 150); } }
     public override DashDef BackDash { get { return new DashDef(12, 130); } }
+
+    // Every Install attack costs a big chunk of the bar on top of the steady drain. Running dry ends Install.
+    public override void OnMoveStart(GameSim sim)
+    {
+        if (!installOn) return;
+        if (move != InstallWhip && move != InstallPunch && move != InstallSpecial) return;
+        AddMeter(-InstallAttackDrain);
+        if (meter == 0) installOn = false;
+    }
 
     public override void OnTick(GameSim sim)
     {

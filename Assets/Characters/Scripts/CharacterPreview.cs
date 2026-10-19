@@ -78,6 +78,14 @@ public class CharacterPreview : MonoBehaviour
         return Resolve() ? fighter.ListMoves() : new MoveDef[0];
     }
 
+    // The move's name for the inspector, marking the ones only used while powered up.
+    public string LabelOf(MoveDef move)
+    {
+        string label = !string.IsNullOrEmpty(move.name) ? move.name : "(unnamed)";
+        if (Resolve() && fighter.IsPoweredMove(move)) label += " (INSTALL)";
+        return label;
+    }
+
     public Box Hurtbox { get { return Resolve() ? fighter.Hurtbox : new Box(0, 0, 0, 0); } }
 
     public MoveDef CurrentMove()
@@ -191,7 +199,9 @@ public class CharacterPreview : MonoBehaviour
         viewInstance.transform.localScale = new Vector3(facing * look.SpriteFlip * look.spriteScale, look.spriteScale, 1f);
 
         MoveDef move = CurrentMove();
-        AnimationClip clip = move != null ? FindClip(viewInstance, move.name) : null;
+        AnimationClip clip = null;
+        if (move != null && fighter != null && fighter.IsPoweredMove(move)) clip = FindClip(viewInstance, "Install_" + move.name);   // the Install version of the animation
+        if (clip == null && move != null) clip = FindClip(viewInstance, move.name);
         if (clip == null) clip = FindClip(viewInstance, "Idle");
         if (clip != null)
         {

@@ -22,6 +22,7 @@ MonoBehaviour:
   tintByState: 1
   idleLoopTicks: 60
   walkLoopTicks: 30
+  clipMidpointAtHit: 1
   projectileSprites: []
   moveFlashes: []
   sfx:

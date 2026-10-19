@@ -27,6 +27,8 @@ public abstract class CharacterLook : ScriptableObject
     [Tooltip("Ticks for one loop of the Idle / Walk animation (60 ticks = 1 second).")]
     public int idleLoopTicks = 60;
     public int walkLoopTicks = 30;
+    [Tooltip("Attack clips are timed to the hit: the clip's MIDDLE (0.5) lands on the tick the move's first hitbox spawns. Frames before 0.5 hold through the startup, frames after play through the strike and recovery, however the move is retimed. Off = the clip just plays evenly across the whole move.")]
+    public bool clipMidpointAtHit;
 
     [Tooltip("Art for this character's projectiles. 'Visual' must match the move's visual name: \"special\" for the standard Special. Use a Center pivot; art faces RIGHT. A projectile with no art here only shows as a yellow box with the Hitboxes toggle on.")]
     public ProjectileSprite[] projectileSprites;
@@ -39,6 +41,8 @@ public abstract class CharacterLook : ScriptableObject
     public Sprite ammoLitSprite;
     [Tooltip("The same bullet when that round is spent (drawn dimmed).")]
     public Sprite ammoEmptySprite;
+    [Tooltip("One icon per HUD slot (Dr. Remy: Poison, Heal, Slow). The one the fighter has picked is lit, the others are dimmed. When set, this replaces the two bullet sprites above.")]
+    public Sprite[] hudIcons;
 
     [Tooltip("This character's own sounds. Anything left empty falls back to the AudioManager's shared sounds.")]
     public CharacterSfx sfx = new CharacterSfx();
@@ -93,6 +97,8 @@ public abstract class CharacterLook : ScriptableObject
 public class ProjectileSprite
 {
     public string visual = "special";
+    [Tooltip("Draw this with the same Player / Enemy outline as the owner's fighter (Fight > Outline Colors). The sprite needs Mesh Type: Full Rect.")]
+    public bool outline;
     public Sprite sprite;
     public float scale = 1f;    // view size multiplier (1 = the import size)
     public bool flip;           // tick if the art faces LEFT: it is mirrored so it flies the right way

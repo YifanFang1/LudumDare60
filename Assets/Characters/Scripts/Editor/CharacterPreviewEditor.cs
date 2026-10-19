@@ -41,11 +41,12 @@ public class CharacterPreviewEditor : Editor
         else
         {
             SerializedProperty moveProp = serializedObject.FindProperty("moveIndex");
-            moveProp.intValue = EditorGUILayout.IntSlider("Move", moveProp.intValue, 0, moves.Length - 1);
+            string[] moveLabels = new string[moves.Length];
+            for (int m = 0; m < moves.Length; m++) moveLabels[m] = p.LabelOf(moves[m]);
+            moveProp.intValue = EditorGUILayout.Popup("Move", Mathf.Clamp(moveProp.intValue, 0, moves.Length - 1), moveLabels);   // a list, so the (INSTALL) versions are easy to find
 
             MoveDef move = moves[Mathf.Clamp(moveProp.intValue, 0, moves.Length - 1)];
-            string moveName = !string.IsNullOrEmpty(move.name) ? move.name : "(unnamed)";
-            if (move == K3N.InstallWhip || move == K3N.InstallPunch) moveName += " (INSTALL)";
+            string moveName = p.LabelOf(move);
             EditorGUILayout.LabelField(" ", moveName + "   " + move.totalTicks + " ticks");
 
             SerializedProperty tickProp = serializedObject.FindProperty("tick");
