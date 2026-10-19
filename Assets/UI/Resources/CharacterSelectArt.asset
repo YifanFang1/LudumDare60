@@ -308,10 +308,10 @@ MonoBehaviour:
     backArt: {fileID: 21300000, guid: d797a833eb6d748958f61ee922604caf, type: 3}
     miniSkill: {fileID: 21300000, guid: c1b9c35a7bd574853a1f1a17a285e49a, type: 3}
     skillIcons:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
+    - {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
+    - {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
+    - {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
     skillBlock: {fileID: 21300000, guid: 0f1902424e2144f8391ab33d52ea9e0a, type: 3}
     traits:
     - {fileID: 21300000, guid: 58f837dc0f39d403587d436f24cdeabc, type: 3}
@@ -323,19 +323,19 @@ MonoBehaviour:
     skills:
     - name: 'LIGHT: CANE JAB'
       description: A medium-range jab with his cane.
-      icon: {fileID: 0}
+      icon: {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
     - name: 'HEAVY: THROW REMY'
       description: Lobs Remy the rat in a high arc that comes down far away.
-      icon: {fileID: 0}
+      icon: {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
     - name: 'GRAB: LEECHES'
       description: Holds the opponent close, then sticks leeches on them. They drain health over time and heal Dr. Remy.
-      icon: {fileID: 0}
+      icon: {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
     - name: 'SPECIAL: REMEDIES'
       description: Tap to switch between a poison cloud, a healing drink and a slowing potion. Hold to use it.
-      icon: {fileID: 0}
+      icon: {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
     - name: 'ULTIMATE: UNLEASH THE RATS'
       description: After a short delay he sprays a shower of rats across the stage. It can't be blocked and can't be interrupted.
-      icon: {fileID: 0}
+      icon: {fileID: -6678054522228262321, guid: 47862bec92c462644a136ff0ba9b5a05, type: 3}
   - label: K3N
     characterId: 16
     backing: {fileID: 21300000, guid: 195f29febbab14b9891779ad4867c876, type: 3}
@@ -432,15 +432,16 @@ MonoBehaviour:
     backArt: {fileID: 21300000, guid: 27ddb3640be204a4880feb64adb6155c, type: 3}
     miniSkill: {fileID: 21300000, guid: 59cabbbdacc2c47ca8cbb362ab920c87, type: 3}
     skillIcons:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
+    - {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
+    - {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
+    - {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
     skillBlock: {fileID: 21300000, guid: cfbd9546a80734ee588c3047fb5e6b18, type: 3}
     traits:
     - {fileID: 21300000, guid: 9b7dd7e1254ec423dbd2dcc2ad1aca1c, type: 3}
     - {fileID: 21300000, guid: a6670797c634f4f62864097791d4a70f, type: 3}
     - {fileID: 21300000, guid: 50d6f938c4bbd400ea0121152dea5a19, type: 3}
+    - {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
     traitPositions:
     - {x: 1600, y: 100}
     - {x: 1915, y: 260}
@@ -450,25 +451,25 @@ MonoBehaviour:
     skills:
     - name: 'LIGHT: FIRE'
       description: An instant, long-range shot from his revolver.
-      icon: {fileID: 0}
+      icon: {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
     - name: 'HEAVY: THROW GUN'
       description: Tosses his gun in a slow, short arc. Don't worry, he has more.
-      icon: {fileID: 0}
+      icon: {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
     - name: 'GRAB: LASSO'
       description: Ropes the opponent from a distance and pulls them in.
-      icon: {fileID: 0}
+      icon: {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
     - name: 'SPECIAL: BULLET'
       description: A fast shot that crosses the whole stage with big knockback. He only has a few bullets each round, so make them count.
-      icon: {fileID: 0}
+      icon: {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
     - name: 'ULTIMATE: RAPID FIRE'
       description: For a few seconds, unlimited bullets that fire almost nonstop.
-      icon: {fileID: 0}
+      icon: {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
     - name: 'PERK: HORSEBACK'
       description: 'His dashes are on horseback: long and fast.'
-      icon: {fileID: 0}
+      icon: {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
     - name: 'PERK: POINT BLANK'
       description: Every hit knocks the opponent back harder the closer they are.
-      icon: {fileID: 0}
+      icon: {fileID: 4609943540765374099, guid: b72ba7d02be561c47a02cd4c8d34123c, type: 3}
   - label: Sandbag
     characterId: 2
     backing: {fileID: 0}
