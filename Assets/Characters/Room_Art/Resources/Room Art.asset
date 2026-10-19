@@ -24,19 +24,40 @@ MonoBehaviour:
   walkLoopTicks: 30
   projectileSprites: []
   sfx:
-    moves: []
+    moves:
+    - move: Light
+      clips:
+      - {fileID: 8300000, guid: cdc198f7e7d296944a7da3b5c6fb2ae5, type: 3}
+      - {fileID: 8300000, guid: 085275b4508aee241b4882ce963011e5, type: 3}
+      - {fileID: 8300000, guid: 5444450164ba3564d95f12c75f11f6cf, type: 3}
+    - move: Heavy
+      clips:
+      - {fileID: 8300000, guid: cdc198f7e7d296944a7da3b5c6fb2ae5, type: 3}
+      - {fileID: 8300000, guid: 085275b4508aee241b4882ce963011e5, type: 3}
+      - {fileID: 8300000, guid: 5444450164ba3564d95f12c75f11f6cf, type: 3}
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: 5fbcf76fd3999424ab9ae525489185c8, type: 3}
     attackStart: []
-    hit: []
-    heavyHit: []
-    grab: []
+    hit:
+    - {fileID: 8300000, guid: cb454c82bde36184e8791fbcd24dbe1f, type: 3}
+    heavyHit:
+    - {fileID: 8300000, guid: 6f0a7dca8c7a8a84c8a15bb81735a7ca, type: 3}
+    grab:
+    - {fileID: 8300000, guid: cdc198f7e7d296944a7da3b5c6fb2ae5, type: 3}
+    - {fileID: 8300000, guid: 085275b4508aee241b4882ce963011e5, type: 3}
+    - {fileID: 8300000, guid: 5444450164ba3564d95f12c75f11f6cf, type: 3}
     block: []
-    dash: []
-    superFlash: {fileID: 0}
+    dash:
+    - {fileID: 8300000, guid: f61b2389a2df2cd4ea8aafb2311d73df, type: 3}
+    superFlash: {fileID: 8300000, guid: c17973d27cd8e754aad7427a754045c3, type: 3}
     ko: {fileID: 0}
     reflect: []
     destroy: []
     summon: []
     hold: []
     heal: []
+    powerUp: []
     outOfAmmo: []
+    theme: {fileID: 0}
   characterId: 13
