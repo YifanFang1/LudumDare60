@@ -48,6 +48,7 @@ public static class BuildFightCanvas
         bool oldCrt = keepOptions && oldScreens.crtOverUI;
         if (existing != null) Undo.DestroyObjectImmediate(existing);
 
+        BuildSelectArt();
         CharacterButtonUI buttonPrefab = BuildCharacterButtonPrefab();
 
         GameObject root = new GameObject(RootName, typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -793,19 +794,74 @@ public static class BuildFightCanvas
         return screen;
     }
 
+    // ================= character select =================
+    // Laid out like the mockups in Assets/UI/CharacterSelect: a 1920x1080 stage (scaled to fit the window) with
+    // the framed 3x3 grid on the left, the gear timer, and the big character panel on the right. More swaps the
+    // grid for the Background / Skills text page and slides the character left. Positions are top-left pixels.
+
+    const string SelectArtFolder = "Assets/UI/CharacterSelect";
+    const string SelectArtAssetPath = "Assets/UI/Resources/CharacterSelectArt.asset";
+    static readonly Color SelectBackdrop = new Color(12f / 255f, 1f / 255f, 21f / 255f, 1f);
+    static readonly Color TimerOrange = new Color(0.96f, 0.54f, 0.12f, 1f);
+
     static GameObject BuildCharacterSelect(Transform parent, CharacterButtonUI buttonPrefab)
     {
-        GameObject screen = NewArtScreen("CharacterSelectScreen", parent, true);
+        TMP_FontAsset font = TradeWindsFont();
+        GameObject screen = NewScreen("CharacterSelectScreen", parent, false);
 
-        TMP_Text title = FreeText(screen.transform, "Title", "Choose your character", 48, TextAlignmentOptions.Center, Color.white);
-        Anchor(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -50f), new Vector2(1000f, 70f));
+        GameObject back = new GameObject("Backdrop", typeof(RectTransform), typeof(Image));
+        back.transform.SetParent(screen.transform, false);
+        Stretch((RectTransform)back.transform);
+        Image backImg = back.GetComponent<Image>();
+        backImg.color = SelectBackdrop;
+        backImg.raycastTarget = false;
 
-        // tabs (vs AI)
-        GameObject tabs = new GameObject("Tabs", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-        tabs.transform.SetParent(screen.transform, false);
-        Anchor((RectTransform)tabs.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -135f), new Vector2(900f, 60f));
-        HorizontalLayoutGroup tabLayout = tabs.GetComponent<HorizontalLayoutGroup>();
-        tabLayout.spacing = 16f;
+        GameObject stageGo = new GameObject("Stage", typeof(RectTransform), typeof(StageFit));
+        stageGo.transform.SetParent(screen.transform, false);
+        RectTransform stage = (RectTransform)stageGo.transform;
+        stage.anchorMin = stage.anchorMax = stage.pivot = new Vector2(0.5f, 0.5f);
+        stage.anchoredPosition = Vector2.zero;
+        stage.sizeDelta = new Vector2(1920f, 1080f);
+
+        Texture2D logo = AssetDatabase.LoadAssetAtPath<Texture2D>(TitleArtFolder + "/Techtonic Logo.png");
+        if (logo != null)
+        {
+            RawImage logoImage = Raw(stage, "Logo", logo);
+            logoImage.raycastTarget = false;
+            CharacterProfilePanel.Place(logoImage.rectTransform, 795f, -4f, logo.width * 0.28f, logo.height * 0.28f);
+        }
+
+        // ----- list page: frame, grid, Back / Fight, tabs (vs AI), status -----
+        GameObject list = new GameObject("ListPage", typeof(RectTransform));
+        list.transform.SetParent(stage, false);
+        Stretch((RectTransform)list.transform);
+
+        PlacedImage(list.transform, "Frame", LoadSprite("UIPanel.png"), 38f, 28f, 732f, 865f);
+        PlacedImage(list.transform, "Title", SelectSprite("General/choose_a_renegade.png"), 101f, 90f, 618f, 71f);
+
+        GameObject gridGo = new GameObject("Grid", typeof(RectTransform), typeof(GridLayoutGroup));
+        gridGo.transform.SetParent(list.transform, false);
+        CharacterProfilePanel.Place((RectTransform)gridGo.transform, 166f, 172f, 490f, 654f);
+        GridLayoutGroup grid = gridGo.GetComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(CharacterButtonUI.TileWidth, CharacterButtonUI.TileHeight);
+        grid.spacing = new Vector2(20f, 27f);
+        grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+        grid.childAlignment = TextAnchor.UpperLeft;
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 3;
+
+        Button backBtn = PlacedArtButton(list.transform, "BackButton", LoadSprite("BACK.png"), LoadSprite("BACKHOVER.png"), 85f, 872f);
+        Button confirm = PlacedArtButton(list.transform, "ConfirmButton", SelectSprite("General/fight.png"), SelectSprite("General/fight_hover.png"), 424f, 872f);
+
+        TMP_Text title = FreeText(list.transform, "TitleText", "Choose your character", 26, TextAlignmentOptions.Center, Muted);
+        CharacterProfilePanel.Place(title.rectTransform, 780f, 405f, 440f, 70f);
+        UseFont(title, font);
+
+        GameObject tabs = new GameObject("Tabs", typeof(RectTransform), typeof(VerticalLayoutGroup));
+        tabs.transform.SetParent(list.transform, false);
+        CharacterProfilePanel.Place((RectTransform)tabs.transform, 800f, 490f, 440f, 132f);
+        VerticalLayoutGroup tabLayout = tabs.GetComponent<VerticalLayoutGroup>();
+        tabLayout.spacing = 12f;
         tabLayout.childControlWidth = true;
         tabLayout.childControlHeight = true;
         tabLayout.childForceExpandWidth = true;
@@ -814,22 +870,77 @@ public static class BuildFightCanvas
         TMP_Text oppLabel;
         Button youTab = Btn(tabs.transform, "YouTab", "You", 60f, out youLabel);
         Button oppTab = Btn(tabs.transform, "OpponentTab", "Opponent", 60f, out oppLabel);
+        youLabel.fontSize = 24;
+        oppLabel.fontSize = 24;
 
-        // scrolling grid of characters
-        GameObject scrollGo = new GameObject("Characters", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
-        scrollGo.transform.SetParent(screen.transform, false);
-        RectTransform scrollRt = (RectTransform)scrollGo.transform;
-        scrollRt.anchorMin = Vector2.zero;
-        scrollRt.anchorMax = Vector2.one;
-        scrollRt.offsetMin = new Vector2(80f, 170f);
-        scrollRt.offsetMax = new Vector2(-80f, -190f);
-        scrollGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.25f);
+        TMP_Text status = FreeText(list.transform, "StatusText", "", 24, TextAlignmentOptions.Center, new Color(0.75f, 0.95f, 0.40f));
+        CharacterProfilePanel.Place(status.rectTransform, 780f, 640f, 440f, 100f);
 
+        // ----- the gear timer (shown on both pages) -----
+        GameObject gearGo = new GameObject("TimerGear", typeof(RectTransform), typeof(Image));
+        gearGo.transform.SetParent(stage, false);
+        Image gearImg = gearGo.GetComponent<Image>();
+        Sprite gearSprite = SelectSprite("General/timer_gear.png");
+        gearImg.sprite = gearSprite;
+        gearImg.raycastTarget = false;
+        CharacterProfilePanel.Place((RectTransform)gearGo.transform, 845f, 183f, 215f, 215f);
+        TMP_Text timer = FreeText(gearGo.transform, "Timer", "30s", 52, TextAlignmentOptions.Center, TimerOrange);
+        Stretch(timer.rectTransform);
+        UseFont(timer, font);
+
+        // ----- the big character panel -----
+        GameObject profileGo = new GameObject("Profile", typeof(RectTransform), typeof(CharacterProfilePanel));
+        profileGo.transform.SetParent(stage, false);
+        RectTransform profileRt = (RectTransform)profileGo.transform;
+        CharacterProfilePanel.Place(profileRt, 0f, 0f, 1920f, 1080f);
+        CharacterProfilePanel profile = profileGo.GetComponent<CharacterProfilePanel>();
+        profile.group = profileRt;
+        profile.backing = PlacedImage(profileRt, "Backing", null, 1260f, 80f, 500f, 1000f);
+        profile.sprite = PlacedImage(profileRt, "Sprite", null, 1260f, 80f, 500f, 1000f);
+        profile.nameArt = PlacedImage(profileRt, "Name", null, 1260f, 80f, 100f, 100f);
+        profile.traits = new Image[3];
+        for (int i = 0; i < 3; i++) profile.traits[i] = PlacedImage(profileRt, "Trait" + (i + 1), null, 1260f, 80f, 100f, 100f);
+        profile.minis = new Image[4];
+        for (int i = 0; i < 4; i++) profile.minis[i] = PlacedImage(profileRt, "Skill" + (i + 1), null, 1260f, 80f, 100f, 100f);
+        TMP_Text fallbackName = FreeText(profileRt, "FallbackName", "", 90, TextAlignmentOptions.Center, Color.white);
+        UseFont(fallbackName, font);
+        fallbackName.gameObject.SetActive(false);
+        profile.fallbackName = fallbackName;
+
+        GameObject moreGo = new GameObject("MoreButton", typeof(RectTransform), typeof(Image), typeof(Button));
+        moreGo.transform.SetParent(profileRt, false);
+        Image moreImg = moreGo.GetComponent<Image>();
+        Button moreBtn = moreGo.GetComponent<Button>();
+        moreBtn.targetGraphic = moreImg;
+        ColorBlock mc = moreBtn.colors;
+        mc.normalColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+        mc.highlightedColor = Color.white;
+        mc.selectedColor = Color.white;
+        mc.pressedColor = new Color(0.75f, 0.75f, 0.75f, 1f);
+        moreBtn.colors = mc;
+        profile.moreButton = moreBtn;
+        profile.moreImage = moreImg;
+
+        // ----- details page: Background / Skills text -----
+        GameObject details = new GameObject("DetailsPage", typeof(RectTransform));
+        details.transform.SetParent(stage, false);
+        Stretch((RectTransform)details.transform);
+
+        Button bgTab = PlacedArtButton(details.transform, "BackgroundTab", SelectSprite("General/background_tab.png"), null, 1125f, 118f);
+        Button skTab = PlacedArtButton(details.transform, "SkillsTab", SelectSprite("General/skills_tab_dark.png"), null, 1485f, 126f);
+        bgTab.transition = Selectable.Transition.None;
+        skTab.transition = Selectable.Transition.None;
+
+        PlacedImage(details.transform, "Bar", SolidSprite(), 1085f, 270f, 6f, 770f);
+
+        GameObject scrollGo = new GameObject("TextScroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
+        scrollGo.transform.SetParent(details.transform, false);
+        CharacterProfilePanel.Place((RectTransform)scrollGo.transform, 1115f, 270f, 770f, 770f);
+        scrollGo.GetComponent<Image>().color = Color.clear;
         GameObject viewport = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
         viewport.transform.SetParent(scrollGo.transform, false);
         Stretch((RectTransform)viewport.transform);
-
-        GameObject content = new GameObject("Content", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
+        GameObject content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
         content.transform.SetParent(viewport.transform, false);
         RectTransform contentRt = (RectTransform)content.transform;
         contentRt.anchorMin = new Vector2(0f, 1f);
@@ -837,41 +948,38 @@ public static class BuildFightCanvas
         contentRt.pivot = new Vector2(0.5f, 1f);
         contentRt.offsetMin = Vector2.zero;
         contentRt.offsetMax = Vector2.zero;
-        GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
-        grid.cellSize = new Vector2(170f, 200f);
-        grid.spacing = new Vector2(14f, 14f);
-        grid.padding = new RectOffset(14, 14, 14, 14);
-        grid.childAlignment = TextAnchor.UpperCenter;
+        VerticalLayoutGroup cv = content.GetComponent<VerticalLayoutGroup>();
+        cv.spacing = 20f;
+        cv.padding = new RectOffset(0, 24, 0, 40);
+        cv.childAlignment = TextAnchor.UpperLeft;
+        cv.childControlWidth = true;
+        cv.childControlHeight = true;
+        cv.childForceExpandWidth = true;
+        cv.childForceExpandHeight = false;
         content.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
         ScrollRect scroll = scrollGo.GetComponent<ScrollRect>();
         scroll.viewport = (RectTransform)viewport.transform;
         scroll.content = contentRt;
         scroll.horizontal = false;
         scroll.vertical = true;
         scroll.movementType = ScrollRect.MovementType.Clamped;
-        scroll.scrollSensitivity = 30f;
+        scroll.scrollSensitivity = 40f;
 
-        // bottom row
-        GameObject row = new GameObject("Buttons", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-        row.transform.SetParent(screen.transform, false);
-        Anchor((RectTransform)row.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 95f), new Vector2(560f, 64f));
-        HorizontalLayoutGroup rowLayout = row.GetComponent<HorizontalLayoutGroup>();
-        rowLayout.spacing = 20f;
-        rowLayout.childControlWidth = true;
-        rowLayout.childControlHeight = true;
-        rowLayout.childForceExpandWidth = true;
-        rowLayout.childForceExpandHeight = true;
-        TMP_Text confirmLabel;
-        TMP_Text backLabel;
-        Button back = Btn(row.transform, "BackButton", "Back", 64f, out backLabel);          // left
-        Button confirm = Btn(row.transform, "ConfirmButton", "Ready", 64f, out confirmLabel);   // right
-
-        TMP_Text status = FreeText(screen.transform, "StatusText", "", 24, TextAlignmentOptions.Center, new Color(0.75f, 0.95f, 0.40f));
-        Anchor(status.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1000f, 40f));
+        TMP_Text bgText = FreeText(content.transform, "BackgroundText", "", 32, TextAlignmentOptions.TopLeft, new Color(0.94f, 0.94f, 0.96f));
+        UseFont(bgText, font);
+        GameObject skillsGo = new GameObject("SkillsList", typeof(RectTransform), typeof(VerticalLayoutGroup));
+        skillsGo.transform.SetParent(content.transform, false);
+        VerticalLayoutGroup sv = skillsGo.GetComponent<VerticalLayoutGroup>();
+        sv.spacing = 26f;
+        sv.childAlignment = TextAnchor.UpperLeft;
+        sv.childControlWidth = true;
+        sv.childControlHeight = true;
+        sv.childForceExpandWidth = true;
+        sv.childForceExpandHeight = false;
+        skillsGo.SetActive(false);
 
         CharacterSelectScreen cs = screen.AddComponent<CharacterSelectScreen>();
-        cs.gridParent = contentRt;
+        cs.gridParent = (RectTransform)gridGo.transform;
         cs.buttonPrefab = buttonPrefab;
         cs.tabsGroup = tabs;
         cs.youTab = youTab;
@@ -879,13 +987,224 @@ public static class BuildFightCanvas
         cs.youTabLabel = youLabel;
         cs.opponentTabLabel = oppLabel;
         cs.confirmButton = confirm;
-        cs.confirmLabel = confirmLabel;
-        cs.backButton = back;
-        cs.backLabel = backLabel;
+        cs.confirmLabel = null;
+        cs.backButton = backBtn;
+        cs.backLabel = null;
         cs.titleText = title;
         cs.statusText = status;
-        AddCornerQuit(screen);
+        cs.listPage = list;
+        cs.detailsPage = details;
+        cs.profile = profile;
+        cs.gear = (RectTransform)gearGo.transform;
+        cs.timerText = timer;
+        cs.backgroundTab = bgTab;
+        cs.skillsTab = skTab;
+        cs.backgroundTabImage = bgTab.GetComponent<Image>();
+        cs.skillsTabImage = skTab.GetComponent<Image>();
+        cs.backgroundOn = SelectSprite("General/background_tab.png");
+        cs.backgroundOff = SelectSprite("General/background_tab_dark.png");
+        cs.skillsOn = SelectSprite("General/skills_tab.png");
+        cs.skillsOff = SelectSprite("General/skills_tab_dark.png");
+        cs.backgroundText = bgText;
+        cs.skillsList = (RectTransform)skillsGo.transform;
+        cs.detailsScroll = scroll;
+        details.SetActive(false);
         return screen;
+    }
+
+    // An Image placed by top-left pixels in the 1920x1080 layout.
+    static Image PlacedImage(Transform parent, string name, Sprite sprite, float x, float y, float w, float h)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        CharacterProfilePanel.Place((RectTransform)go.transform, x, y, w, h);
+        Image img = go.GetComponent<Image>();
+        img.sprite = sprite;
+        img.enabled = sprite != null;
+        img.raycastTarget = false;
+        return img;
+    }
+
+    // A picture button placed by top-left pixels, at the picture's own size. Hover picture optional.
+    static Button PlacedArtButton(Transform parent, string name, Sprite normal, Sprite hover, float x, float y)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+        go.transform.SetParent(parent, false);
+        Vector2 size = normal != null ? normal.rect.size : new Vector2(200f, 80f);
+        CharacterProfilePanel.Place((RectTransform)go.transform, x, y, size.x, size.y);
+        Image img = go.GetComponent<Image>();
+        img.sprite = normal;
+        Button b = go.GetComponent<Button>();
+        b.targetGraphic = img;
+        if (hover != null)
+        {
+            b.transition = Selectable.Transition.SpriteSwap;
+            SpriteState ss = b.spriteState;
+            ss.highlightedSprite = hover;
+            ss.selectedSprite = hover;
+            ss.pressedSprite = hover;
+            b.spriteState = ss;
+        }
+        return b;
+    }
+
+    static void UseFont(TMP_Text t, TMP_FontAsset font)
+    {
+        if (font != null) t.font = font;
+    }
+
+    // A sprite from Assets/UI/CharacterSelect, set up as a plain Sprite (no mipmaps, uncompressed) if it is not yet.
+    static Sprite SelectSprite(string relativePath)
+    {
+        string path = SelectArtFolder + "/" + relativePath;
+        TextureImporter imp = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (imp == null) return null;
+        bool dirty = false;
+        if (imp.textureType != TextureImporterType.Sprite) { imp.textureType = TextureImporterType.Sprite; dirty = true; }
+        if (imp.spriteImportMode != SpriteImportMode.Single) { imp.spriteImportMode = SpriteImportMode.Single; dirty = true; }
+        if (imp.mipmapEnabled) { imp.mipmapEnabled = false; dirty = true; }
+        if (!imp.alphaIsTransparency) { imp.alphaIsTransparency = true; dirty = true; }
+        if (imp.maxTextureSize < 2048) { imp.maxTextureSize = 2048; dirty = true; }
+        if (imp.textureCompression != TextureImporterCompression.Uncompressed) { imp.textureCompression = TextureImporterCompression.Uncompressed; dirty = true; }
+        if (dirty) imp.SaveAndReimport();
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+    }
+
+    // The non-transparent part of a picture, in pixels from its top-left.
+    static Rect OpaqueBounds(Sprite sprite)
+    {
+        if (sprite == null) return new Rect();
+        string path = AssetDatabase.GetAssetPath(sprite);
+        string full = Application.dataPath + path.Substring("Assets".Length);
+        if (!System.IO.File.Exists(full)) return new Rect();
+        Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+        tex.LoadImage(System.IO.File.ReadAllBytes(full));
+        Color32[] px = tex.GetPixels32();
+        int w = tex.width, h = tex.height;
+        int minX = w, minY = h, maxX = -1, maxY = -1;
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                if (px[y * w + x].a <= 20) continue;
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+            }
+        }
+        Object.DestroyImmediate(tex);
+        if (maxX < 0) return new Rect();
+        return new Rect(minX, h - 1 - maxY, maxX - minX + 1, maxY - minY + 1);   // y from the top
+    }
+
+    // Trade Winds (the font for the timer and the text pages) as a TextMeshPro font asset, made on first use.
+    static TMP_FontAsset TradeWindsFont()
+    {
+        const string ttf = "Assets/UI/Fonts/TradeWinds-Regular.ttf";
+        const string assetPath = "Assets/UI/Fonts/TradeWinds SDF.asset";
+        TMP_FontAsset existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
+        if (existing != null) return existing;
+        Font font = AssetDatabase.LoadAssetAtPath<Font>(ttf);
+        if (font == null)
+        {
+            Debug.LogWarning("Trade Winds font not found at " + ttf + ": the timer and text pages use the default font.");
+            return null;
+        }
+        TMP_FontAsset fa = TMP_FontAsset.CreateFontAsset(font, 90, 9, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 1024, 1024, AtlasPopulationMode.Dynamic, true);
+        if (fa == null) return null;
+        fa.name = "TradeWinds SDF";
+        AssetDatabase.CreateAsset(fa, assetPath);
+        if (fa.atlasTexture != null) { fa.atlasTexture.name = "TradeWinds Atlas"; AssetDatabase.AddObjectToAsset(fa.atlasTexture, fa); }
+        if (fa.material != null) { fa.material.name = "TradeWinds Material"; AssetDatabase.AddObjectToAsset(fa.material, fa); }
+        EditorUtility.SetDirty(fa);
+        AssetDatabase.SaveAssets();
+        return fa;
+    }
+
+    // Fills Assets/UI/Resources/CharacterSelectArt.asset from the pictures in Assets/UI/CharacterSelect/<FOLDER>/.
+    // Pictures are refreshed every time; the Background / Skills texts you edit in the asset are kept.
+    static CharacterSelectArt BuildSelectArt()
+    {
+        AssetDatabase.Refresh();
+        CharacterSelectArt asset = AssetDatabase.LoadAssetAtPath<CharacterSelectArt>(SelectArtAssetPath);
+        if (asset == null)
+        {
+            asset = ScriptableObject.CreateInstance<CharacterSelectArt>();
+            AssetDatabase.CreateAsset(asset, SelectArtAssetPath);
+        }
+
+        // folder, character id, label, number of banners, name picture's bottom-right corner
+        object[][] defs =
+        {
+            new object[] { "RUY", Samurai.Id, "Ruy", 3, new Vector2(1868f, 830f) },
+            // Odette: arrow-shaped banners hug the right edge (x is clamped to fit)
+            new object[] { "ODETTE", Painter.Id, "Odette", 3, new Vector2(1868f, 800f),
+                new[] { new Vector2(1915f, 40f), new Vector2(1915f, 270f), new Vector2(1915f, 375f) } },
+            new object[] { "ROOM", Elephant.Id, "Room", 3, new Vector2(1800f, 800f), null, 183.9017f },
+            new object[] { "PATIENCE", Executioner.Id, "Patience", 1, new Vector2(1868f, 830f) },
+            new object[] { "DR_REMY", PlagueDoctor.Id, "Dr. Remy", 3, new Vector2(1868f, 880f) },
+            new object[] { "K3N", K3N.Id, "K3N", 3, new Vector2(1868f, 830f) },
+            new object[] { "NOIR", Cowboy.Id, "Noir", 3, new Vector2(1868f, 830f) },
+        };
+        System.Collections.Generic.List<CharacterSelectArt.Entry> entries = new System.Collections.Generic.List<CharacterSelectArt.Entry>();
+        for (int d = 0; d < defs.Length; d++)
+        {
+            string folder = (string)defs[d][0];
+            int id = (int)defs[d][1];
+            CharacterSelectArt.Entry e = asset.Find(id);
+            bool isNew = e == null;
+            if (isNew) e = new CharacterSelectArt.Entry();
+            e.characterId = id;
+            e.label = (string)defs[d][2];
+            e.backing = SelectSprite(folder + "/backing.png");
+            e.sprite = SelectSprite(folder + "/sprite.png");
+            e.spriteBounds = OpaqueBounds(e.sprite);
+            e.nameArt = SelectSprite(folder + "/name.png");
+            e.moreArt = SelectSprite(folder + "/more.png");
+            e.backArt = SelectSprite(folder + "/back.png");
+            e.miniSkill = SelectSprite(folder + "/mini_skill.png");
+            e.skillBlock = SelectSprite(folder + "/skill_block.png");
+            int n = (int)defs[d][3];
+            e.traits = new Sprite[n];
+            for (int t = 0; t < n; t++) e.traits[t] = SelectSprite(folder + "/trait_" + (t + 1) + ".png");
+            if (isNew) e.nameCorner = (Vector2)defs[d][4];
+            if (isNew && defs[d].Length > 5 && defs[d][5] != null) e.traitPositions = (Vector2[])defs[d][5];
+            if ((isNew || e.tilePortraitY == 0f) && defs[d].Length > 6) e.tilePortraitY = (float)defs[d][6];
+            if (isNew || string.IsNullOrEmpty(e.background)) e.background = "Coming soon.";
+            if (id == PlagueDoctor.Id && (isNew || e.background == "Coming soon.")) FillRemyText(e);
+            entries.Add(e);
+        }
+        // keep entries for characters this builder does not know about
+        if (asset.entries != null)
+        {
+            for (int i = 0; i < asset.entries.Length; i++)
+            {
+                CharacterSelectArt.Entry old = asset.entries[i];
+                if (old == null) continue;
+                bool known = false;
+                for (int d = 0; d < defs.Length; d++) if ((int)defs[d][1] == old.characterId) known = true;
+                if (!known) entries.Add(old);
+            }
+        }
+        asset.entries = entries.ToArray();
+        EditorUtility.SetDirty(asset);
+        AssetDatabase.SaveAssets();
+        return asset;
+    }
+
+    // Dr. Remy's page text (Background from the mockup, Skills from his design). Only written when empty.
+    static void FillRemyText(CharacterSelectArt.Entry e)
+    {
+        e.background = "It wasn't the rats that started the plague. It was the tick infected with the plague that bit the rat and started the plague. The rats were victims too, and they need a cure. So, to gain the humans' trust, the rats went undercover. Dr. Remy was formed, saving patients with his unique set of cures... The people Dr. Remy encountered would describe them as rather quiet. \"He's always mumbling to himself, a squeaky little thing.\" Regardless, the doctor got the job done, and learned a lot about medicine in the process. They were so close to finding the cure, but then their plans were upturned with the abduction...";
+        e.skills = new[]
+        {
+            new CharacterSelectArt.Skill { name = "LIGHT: CANE JAB", description = "A medium-range jab with his cane." },
+            new CharacterSelectArt.Skill { name = "HEAVY: THROW REMY", description = "Lobs Remy the rat in a high arc that comes down far away." },
+            new CharacterSelectArt.Skill { name = "GRAB: LEECHES", description = "Holds the opponent close, then sticks leeches on them. They drain health over time and heal Dr. Remy." },
+            new CharacterSelectArt.Skill { name = "SPECIAL: REMEDIES", description = "Tap to switch between a poison cloud, a healing drink and a slowing potion. Hold to use it." },
+            new CharacterSelectArt.Skill { name = "ULTIMATE: UNLEASH THE RATS", description = "After a short delay he sprays a shower of rats across the stage. It can't be blocked and can't be interrupted." },
+        };
     }
 
     static GameObject BuildHud(Transform parent)
@@ -998,56 +1317,48 @@ public static class BuildFightCanvas
         if (!AssetDatabase.IsValidFolder(PrefabFolder)) AssetDatabase.CreateFolder("Assets/UI", "Prefabs");
 
         GameObject go = new GameObject("CharacterButton", typeof(RectTransform), typeof(Image), typeof(Button), typeof(CharacterButtonUI));
-        ((RectTransform)go.transform).sizeDelta = new Vector2(170f, 200f);
-        Image bg = go.GetComponent<Image>();
-        bg.sprite = BuiltIn("UI/Skin/UISprite.psd");
-        bg.type = Image.Type.Sliced;
-        bg.color = ButtonColor;
+        ((RectTransform)go.transform).sizeDelta = new Vector2(CharacterButtonUI.TileWidth, CharacterButtonUI.TileHeight);
+        Image root = go.GetComponent<Image>();
+        root.color = Color.clear;
         Button button = go.GetComponent<Button>();
-        button.targetGraphic = bg;
+        button.targetGraphic = root;
+        button.transition = Selectable.Transition.None;
 
-        GameObject portraitGo = new GameObject("Portrait", typeof(RectTransform), typeof(Image));
-        portraitGo.transform.SetParent(go.transform, false);
-        RectTransform pr = (RectTransform)portraitGo.transform;
-        pr.anchorMin = new Vector2(0f, 0.24f);
-        pr.anchorMax = new Vector2(1f, 1f);
-        pr.offsetMin = new Vector2(10f, 0f);
-        pr.offsetMax = new Vector2(-10f, -18f);
-        Image portrait = portraitGo.GetComponent<Image>();
-        portrait.raycastTarget = false;
-        portrait.preserveAspect = true;
-
-        GameObject stripGo = new GameObject("ColorStrip", typeof(RectTransform), typeof(Image));
-        stripGo.transform.SetParent(go.transform, false);
-        RectTransform sr = (RectTransform)stripGo.transform;
-        sr.anchorMin = new Vector2(0f, 1f);
-        sr.anchorMax = new Vector2(1f, 1f);
-        sr.pivot = new Vector2(0.5f, 1f);
-        sr.offsetMin = new Vector2(8f, -14f);
-        sr.offsetMax = new Vector2(-8f, -8f);
-        Image strip = stripGo.GetComponent<Image>();
-        strip.raycastTarget = false;
-
-        TMP_Text nameText = FreeText(go.transform, "Name", "Name", 24, TextAlignmentOptions.Center, Color.white);
-        nameText.rectTransform.anchorMin = new Vector2(0f, 0f);
-        nameText.rectTransform.anchorMax = new Vector2(1f, 0.24f);
-        nameText.rectTransform.offsetMin = new Vector2(6f, 4f);
-        nameText.rectTransform.offsetMax = new Vector2(-6f, 0f);
-
+        // bright frame behind the tile: it shows as a border around the tile when chosen
         GameObject selected = new GameObject("Selected", typeof(RectTransform), typeof(Image));
         selected.transform.SetParent(go.transform, false);
-        Stretch((RectTransform)selected.transform);
+        RectTransform sr = (RectTransform)selected.transform;
+        sr.anchorMin = Vector2.zero;
+        sr.anchorMax = Vector2.one;
+        sr.offsetMin = new Vector2(-6f, -6f);
+        sr.offsetMax = new Vector2(6f, 6f);
         Image sel = selected.GetComponent<Image>();
-        sel.sprite = BuiltIn("UI/Skin/UISprite.psd");
-        sel.type = Image.Type.Sliced;
-        sel.color = new Color(0.60f, 0.95f, 0.30f, 0.4f);
+        sel.color = new Color(1f, 0.93f, 0.55f, 1f);
         sel.raycastTarget = false;
         selected.SetActive(false);
 
+        GameObject backingGo = new GameObject("Backing", typeof(RectTransform), typeof(Image));
+        backingGo.transform.SetParent(go.transform, false);
+        Stretch((RectTransform)backingGo.transform);
+        Image backing = backingGo.GetComponent<Image>();
+        backing.raycastTarget = false;
+
+        GameObject maskGo = new GameObject("Mask", typeof(RectTransform), typeof(RectMask2D));
+        maskGo.transform.SetParent(go.transform, false);
+        Stretch((RectTransform)maskGo.transform);
+        GameObject portraitGo = new GameObject("Portrait", typeof(RectTransform), typeof(Image));
+        portraitGo.transform.SetParent(maskGo.transform, false);
+        Image portrait = portraitGo.GetComponent<Image>();
+        portrait.raycastTarget = false;
+
+        TMP_Text nameText = FreeText(go.transform, "Name", "Name", 24, TextAlignmentOptions.Center, Color.white);
+        Stretch(nameText.rectTransform);
+        nameText.gameObject.SetActive(false);
+
         CharacterButtonUI ui = go.GetComponent<CharacterButtonUI>();
         ui.button = button;
+        ui.backing = backing;
         ui.portrait = portrait;
-        ui.colorStrip = strip;
         ui.nameText = nameText;
         ui.selectedMark = selected;
 

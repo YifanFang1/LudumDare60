@@ -1,0 +1,194 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e923362103454aaf955a95419d8f7d5, type: 3}
+  m_Name: CharacterSelectArt
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSelectArt
+  entries:
+  - label: Ruy
+    characterId: 10
+    backing: {fileID: 21300000, guid: cd0bdf8b4b9d2433bb236297ca3101ec, type: 3}
+    sprite: {fileID: 21300000, guid: 72edd6610f5da4f53b9a74c3334a1ab9, type: 3}
+    spriteBounds:
+      serializedVersion: 2
+      x: 185
+      y: 104
+      width: 661
+      height: 898
+    tilePortraitY: 0
+    nameArt: {fileID: 21300000, guid: 16e32512e7ff146b890a7f38910bf7e0, type: 3}
+    moreArt: {fileID: 21300000, guid: b51275066ad314d00b4a3d0fd3ed7f7c, type: 3}
+    backArt: {fileID: 21300000, guid: 0e665652f6ea34eed8ff7874c17fd17c, type: 3}
+    miniSkill: {fileID: 21300000, guid: 4ba4ffae83ab74a089921d5c27e887d9, type: 3}
+    skillBlock: {fileID: 21300000, guid: 8cbe5207073ec4029b9a1d8a29431358, type: 3}
+    traits:
+    - {fileID: 21300000, guid: cea05d3416dce45c0863c4f5d1a33841, type: 3}
+    - {fileID: 21300000, guid: 08c8fd3e465e742e5a8bf149e7a24d1c, type: 3}
+    - {fileID: 21300000, guid: 810c7163655134e48adf1a695fdad3f1, type: 3}
+    traitPositions: []
+    nameCorner: {x: 1868, y: 830}
+    background: Coming soon.
+    skills: []
+  - label: Odette
+    characterId: 11
+    backing: {fileID: 21300000, guid: 66e7cf6d7a6b844218e42b84cac85392, type: 3}
+    sprite: {fileID: 21300000, guid: 59e521beb1f8849d393839251471f21d, type: 3}
+    spriteBounds:
+      serializedVersion: 2
+      x: 126
+      y: 162
+      width: 685
+      height: 912
+    tilePortraitY: 0
+    nameArt: {fileID: 21300000, guid: 631e0ebed41f441ecad157634ac60acc, type: 3}
+    moreArt: {fileID: 21300000, guid: 479497e76ca2248a9bb195db07654837, type: 3}
+    backArt: {fileID: 21300000, guid: 04605f2ac80c84a36b1c29da62d08fb5, type: 3}
+    miniSkill: {fileID: 21300000, guid: 86b6e2885bb1b4949bf3f201546061e9, type: 3}
+    skillBlock: {fileID: 21300000, guid: 33206837901004ec7a234d969d57cebb, type: 3}
+    traits:
+    - {fileID: 21300000, guid: 4fc6ac04518874f5ab6872aa9cddc708, type: 3}
+    - {fileID: 21300000, guid: d3b02125a1afe47ea9d6a9d2f58e6c4f, type: 3}
+    - {fileID: 21300000, guid: eb475b9a7d3e545109fa79080e5781eb, type: 3}
+    traitPositions:
+    - {x: 1915, y: 40}
+    - {x: 1915, y: 270}
+    - {x: 1915, y: 375}
+    nameCorner: {x: 1868, y: 800}
+    background: Coming soon.
+    skills: []
+  - label: Room
+    characterId: 13
+    backing: {fileID: 21300000, guid: 85356beaa41914e01b3a37aa2af9adda, type: 3}
+    sprite: {fileID: 21300000, guid: ec267ed96308c4d729c80c70f0642d86, type: 3}
+    spriteBounds:
+      serializedVersion: 2
+      x: 84
+      y: 213
+      width: 692
+      height: 595
+    tilePortraitY: 183.9017
+    nameArt: {fileID: 21300000, guid: 912d475cb91ef40d1be86bb746d8ca9e, type: 3}
+    moreArt: {fileID: 21300000, guid: 79ae4957ac6d548b8b8ae21fb9c4d0ba, type: 3}
+    backArt: {fileID: 21300000, guid: e9f1b3c8bed054e41893bdd4c75c5039, type: 3}
+    miniSkill: {fileID: 21300000, guid: b2fe9fd3b49404b5ca4992c58499b540, type: 3}
+    skillBlock: {fileID: 21300000, guid: 55c507d33e4664ba29d02c5936a3cd95, type: 3}
+    traits:
+    - {fileID: 21300000, guid: c770868f461fd4797a4fd0cb6fa2baba, type: 3}
+    - {fileID: 21300000, guid: f49717fa3c2f046b69d32d0a2072affe, type: 3}
+    - {fileID: 21300000, guid: f5f1fa6213898417eb4ecfcba6521fa6, type: 3}
+    traitPositions: []
+    nameCorner: {x: 1800, y: 800}
+    background: Coming soon.
+    skills: []
+  - label: Patience
+    characterId: 14
+    backing: {fileID: 21300000, guid: eb6d9c69865f84df7bf9bdda8fddb2a5, type: 3}
+    sprite: {fileID: 21300000, guid: 526691a3738904957aa7dde14578b0f4, type: 3}
+    spriteBounds:
+      serializedVersion: 2
+      x: 297
+      y: 3
+      width: 617
+      height: 956
+    tilePortraitY: 0
+    nameArt: {fileID: 21300000, guid: eddb36b49143e4025a523667528300d4, type: 3}
+    moreArt: {fileID: 21300000, guid: c290d101d22444efb9c0238e87271ebc, type: 3}
+    backArt: {fileID: 21300000, guid: 7b43a174c68724be1976dddefaef9a6e, type: 3}
+    miniSkill: {fileID: 21300000, guid: 52b67046fef114cf49fa833be76e6d61, type: 3}
+    skillBlock: {fileID: 21300000, guid: 5877075bb94d7432585c648d648e579a, type: 3}
+    traits:
+    - {fileID: 21300000, guid: fd10b3f7298dd44adb7bb9315b1370e6, type: 3}
+    traitPositions: []
+    nameCorner: {x: 1868, y: 830}
+    background: Coming soon.
+    skills: []
+  - label: Dr. Remy
+    characterId: 15
+    backing: {fileID: 21300000, guid: 0f4b8a8bf315e4a3583dc3f8e748d04b, type: 3}
+    sprite: {fileID: 21300000, guid: 2c9b7b82b1eaa4a0ea815ad9c2c4e806, type: 3}
+    spriteBounds:
+      serializedVersion: 2
+      x: 14
+      y: 13
+      width: 783
+      height: 929
+    tilePortraitY: 0
+    nameArt: {fileID: 21300000, guid: f8896d069127047b5979a672e2e50948, type: 3}
+    moreArt: {fileID: 21300000, guid: 449b32e701d964b9184428f371784656, type: 3}
+    backArt: {fileID: 21300000, guid: d797a833eb6d748958f61ee922604caf, type: 3}
+    miniSkill: {fileID: 21300000, guid: c1b9c35a7bd574853a1f1a17a285e49a, type: 3}
+    skillBlock: {fileID: 21300000, guid: 0f1902424e2144f8391ab33d52ea9e0a, type: 3}
+    traits:
+    - {fileID: 21300000, guid: 58f837dc0f39d403587d436f24cdeabc, type: 3}
+    - {fileID: 21300000, guid: 8278b77fcb01649318739abdd549634b, type: 3}
+    - {fileID: 21300000, guid: dc8d97929d9424e7e8d717bb922c9894, type: 3}
+    traitPositions: []
+    nameCorner: {x: 1868, y: 880}
+    background: It wasn't the rats that started the plague. It was the tick infected with the plague that bit the rat and started the plague. The rats were victims too, and they need a cure. So, to gain the humans' trust, the rats went undercover. Dr. Remy was formed, saving patients with his unique set of cures... The people Dr. Remy encountered would describe them as rather quiet. "He's always mumbling to himself, a squeaky little thing." Regardless, the doctor got the job done, and learned a lot about medicine in the process. They were so close to finding the cure, but then their plans were upturned with the abduction...
+    skills:
+    - name: 'LIGHT: CANE JAB'
+      description: A medium-range jab with his cane.
+    - name: 'HEAVY: THROW REMY'
+      description: Lobs Remy the rat in a high arc that comes down far away.
+    - name: 'GRAB: LEECHES'
+      description: Holds the opponent close, then sticks leeches on them. They drain health over time and heal Dr. Remy.
+    - name: 'SPECIAL: REMEDIES'
+      description: Tap to switch between a poison cloud, a healing drink and a slowing potion. Hold to use it.
+    - name: 'ULTIMATE: UNLEASH THE RATS'
+      description: After a short delay he sprays a shower of rats across the stage. It can't be blocked and can't be interrupted.
+  - label: K3N
+    characterId: 16
+    backing: {fileID: 21300000, guid: 195f29febbab14b9891779ad4867c876, type: 3}
+    sprite: {fileID: 21300000, guid: d71bbd4d1058f40d1a8e3f91c448977f, type: 3}
+    spriteBounds:
+      serializedVersion: 2
+      x: 124
+      y: 185
+      width: 612
+      height: 798
+    tilePortraitY: 0
+    nameArt: {fileID: 21300000, guid: 4db565a281b0649a9b721a26570f9b6c, type: 3}
+    moreArt: {fileID: 21300000, guid: 54bde36f5418a4b69833a0c4b2f6136f, type: 3}
+    backArt: {fileID: 21300000, guid: ba8cc19db496f40efa87802221a474d7, type: 3}
+    miniSkill: {fileID: 21300000, guid: 0cfc03370ee74495997c1fbc325c43aa, type: 3}
+    skillBlock: {fileID: 21300000, guid: ec224d327259949d2b94b4603a487b22, type: 3}
+    traits:
+    - {fileID: 21300000, guid: 4d7ab8bfaae5f482d99e54a27d67c41e, type: 3}
+    - {fileID: 21300000, guid: 1cfa5326390bc4556925a8b74b79ab32, type: 3}
+    - {fileID: 21300000, guid: bcb4af82e2e554fe29aac205207c831a, type: 3}
+    traitPositions: []
+    nameCorner: {x: 1868, y: 830}
+    background: Coming soon.
+    skills: []
+  - label: Noir
+    characterId: 12
+    backing: {fileID: 21300000, guid: ba8be0e67dfc84b72aa7f955673ce1f8, type: 3}
+    sprite: {fileID: 21300000, guid: 2d0e5357e4a2f449693669f19b435e55, type: 3}
+    spriteBounds:
+      serializedVersion: 2
+      x: 206
+      y: 58
+      width: 658
+      height: 837
+    tilePortraitY: 0
+    nameArt: {fileID: 21300000, guid: 43af4fb821c1f49a7aeb9877461c78b8, type: 3}
+    moreArt: {fileID: 21300000, guid: fe6feb87f298944c0bb2b9ddec222340, type: 3}
+    backArt: {fileID: 21300000, guid: 27ddb3640be204a4880feb64adb6155c, type: 3}
+    miniSkill: {fileID: 21300000, guid: 59cabbbdacc2c47ca8cbb362ab920c87, type: 3}
+    skillBlock: {fileID: 21300000, guid: cfbd9546a80734ee588c3047fb5e6b18, type: 3}
+    traits:
+    - {fileID: 21300000, guid: 9b7dd7e1254ec423dbd2dcc2ad1aca1c, type: 3}
+    - {fileID: 21300000, guid: a6670797c634f4f62864097791d4a70f, type: 3}
+    - {fileID: 21300000, guid: 50d6f938c4bbd400ea0121152dea5a19, type: 3}
+    traitPositions: []
+    nameCorner: {x: 1868, y: 830}
+    background: Coming soon.
+    skills: []

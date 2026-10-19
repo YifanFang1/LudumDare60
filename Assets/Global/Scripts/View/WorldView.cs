@@ -45,6 +45,29 @@ public class WorldView : MonoBehaviour
         public SpriteRenderer art;           // sprite mode: CharacterLook.sprite
         public SpriteRenderer hurt;          // translucent hurtbox overlay (prefab and sprite modes)
         public CharacterLook data;           // null = no art for this character in this build
+        public SpriteRenderer halo;          // Noir's glowing yellow halo while Rapid Fire is on (view only)
+    }
+
+    static Sprite haloSprite;   // soft round glow, pivot in the middle
+
+    static Sprite HaloSprite()
+    {
+        if (haloSprite != null) return haloSprite;
+        const int n = 128;
+        Texture2D tex = new Texture2D(n, n, TextureFormat.RGBA32, false);
+        tex.wrapMode = TextureWrapMode.Clamp;
+        for (int y = 0; y < n; y++)
+        {
+            for (int x = 0; x < n; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(n / 2f, n / 2f)) / (n / 2f);
+                float a = d >= 1f ? 0f : Mathf.Pow(1f - d, 1.6f);
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+            }
+        }
+        tex.Apply();
+        haloSprite = Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), 100f);
+        return haloSprite;
     }
 
     static Sprite whiteSprite;   // 1x1 white, pivot bottom-left, so scale = size
@@ -165,6 +188,12 @@ public class WorldView : MonoBehaviour
                 v.root = v.placeholder.gameObject;
             }
             if (v.placeholder == null) v.hurt = NewQuad("Hurtbox" + i, 5);
+            if (sim.fighters[i].characterId == Cowboy.Id)
+            {
+                v.halo = NewQuad("Halo" + i, -1);   // behind the fighter
+                v.halo.sprite = HaloSprite();
+                v.halo.enabled = false;
+            }
             if (outlineFighters && v.placeholder == null) AddOutlines(v.root, i == match.LocalSlot);
             views[i] = v;
         }
@@ -245,6 +274,7 @@ public class WorldView : MonoBehaviour
 
     void UpdateFighter(FighterView v, Fighter f, int index)
     {
+        UpdateHalo(v, f);
         if (v.placeholder != null)
         {
             Color c = StateTint(BaseColor(v, f), f);
@@ -276,6 +306,22 @@ public class WorldView : MonoBehaviour
             v.hurt.enabled = hurtOn;
             if (hurtOn) Place(v.hurt, f.HurtboxWorld(), new Color(0.2f, 1f, 0.3f, 0.35f));
         }
+    }
+
+    // Noir's Rapid Fire: a pulsing yellow glow around the hurtbox for as long as the buff lasts.
+    void UpdateHalo(FighterView v, Fighter f)
+    {
+        if (v.halo == null) return;
+        bool on = f.IsPoweredUp;
+        v.halo.enabled = on;
+        if (!on) return;
+        Box b = f.HurtboxWorld();
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 8f);
+        float diameter = Mathf.Max(b.w, b.h) * Scale * (1.7f + 0.15f * pulse);
+        float unit = v.halo.sprite.bounds.size.x;
+        v.halo.transform.position = new Vector3((b.x + b.w * 0.5f) * Scale, (b.y + b.h * 0.5f) * Scale, 0f);
+        v.halo.transform.localScale = new Vector3(diameter / unit, diameter / unit, 1f);
+        v.halo.color = new Color(1f, 0.85f, 0.15f, 0.65f + 0.3f * pulse);
     }
 
     // The animation pose comes from the sim: state + how many ticks we have been in it.

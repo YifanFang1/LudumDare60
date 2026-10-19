@@ -17,20 +17,39 @@ MonoBehaviour:
   spriteOffsetX: 0
   spriteOffsetY: 0
   spriteScale: 1
-  flipSprite: 0
+  flipSprite: 1
   placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
   tintByState: 1
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
   sfx:
-    moves: []
+    moves:
+    - move: Light
+      clips:
+      - {fileID: 8300000, guid: 2d9e8a30d677e40f98e2e79d3ec5d82f, type: 3}
+    - move: Heavy
+      clips:
+      - {fileID: 8300000, guid: 2328cf083c16b4e059f51454aaa2d462, type: 3}
+    - move: Grab
+      clips:
+      - {fileID: 8300000, guid: 0e526d85f18a74de282db3fc03f6a9ba, type: 3}
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: 94bdd093e45104f5395b4936057eaa49, type: 3}
+    - move: Ultimate
+      clips:
+      - {fileID: 8300000, guid: 7f6f1219c109840e3b19df020d2be51c, type: 3}
     attackStart: []
     hit: []
     heavyHit: []
-    grab: []
-    block: []
-    dash: []
+    grab:
+    - {fileID: 8300000, guid: 977b99c997e3d4a54b0ea7e76c903f5b, type: 3}
+    block:
+    - {fileID: 8300000, guid: 043de87942a1a4c85989084dd7d027b9, type: 3}
+    dash:
+    - {fileID: 8300000, guid: f1c963e49e92b4bbaa1c8a0a979b43d7, type: 3}
+    - {fileID: 8300000, guid: cbe418a0900984ea5b2aae050dc08c1c, type: 3}
     jump: []
     superFlash: {fileID: 0}
     ko: {fileID: 0}
@@ -41,7 +60,7 @@ MonoBehaviour:
     heal: []
     powerUp: []
     outOfAmmo: []
-    theme: {fileID: 0}
+    theme: {fileID: 8300000, guid: 77209af40ddd5c5479458f2ac02ee701, type: 3}
   voice:
     select:
     - {fileID: 8300000, guid: 6f0c5cf5bc26c6043ad1985934318c0f, type: 3}

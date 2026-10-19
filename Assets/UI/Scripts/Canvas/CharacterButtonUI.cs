@@ -1,40 +1,83 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-// One character on the select screen. This is a prefab (Assets/UI/Prefabs/CharacterButton.prefab):
-// restyle it once and every character button changes.
-public class CharacterButtonUI : MonoBehaviour
+// One tile of the character grid. This is a prefab (Assets/UI/Prefabs/CharacterButton.prefab):
+// a coloured backing, the character's head and shoulders, and a bright frame when chosen. Characters with no
+// select art yet get their normal sprite on a plain colour and their name; the Random and locked tiles are
+// plain colour with a big symbol (see SetupSpecial).
+public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    public const float TileWidth = 150f;
+    public const float TileHeight = 200f;
+
     public Button button;
-    public Image portrait;          // the character's sprite
-    public Image colorStrip;        // shown instead of a sprite: the character's placeholder colour
-    public TMP_Text nameText;
-    public GameObject selectedMark; // switched on for the chosen character
+    public Image backing;           // the coloured gradient
+    public Image portrait;          // the character, cropped to the tile (its parent has a RectMask2D)
+    public TMP_Text nameText;       // only for tiles with no art: the name, or the symbol on a special tile
+    public GameObject selectedMark; // switched on for the chosen character (a bright frame)
+
+    // old field kept so existing prefabs still load
+    public Image colorStrip;
 
     public int CharacterId { get; private set; }
+    bool locked;
+    Action<int, bool> hover;
 
-    public void Setup(int id, Action<int> onClick)
+    public void Setup(int id, Action<int> onClick, Action<int, bool> onHover = null)
     {
         CharacterId = id;
-        if (nameText != null) nameText.text = CharacterList.NameOf(id);
+        hover = onHover;
+        locked = false;
 
-        CharacterData art = CharacterRegistry.Get(id);   // null for characters written purely in code
-        bool hasSprite = art != null && art.sprite != null;
-        if (portrait != null)
+        CharacterSelectArt art = CharacterSelectArt.Load();
+        CharacterSelectArt.Entry e = art != null ? art.Find(id) : null;
+        if (e != null && e.sprite != null && e.backing != null)
         {
+            backing.sprite = e.backing;
+            backing.color = Color.white;
+            portrait.enabled = true;
+            portrait.sprite = e.sprite;
+            portrait.color = Color.white;
+            portrait.preserveAspect = false;
+            // fill the tile's width with the character, top of the head 6 px from the top edge
+            Rect b = e.spriteBounds.width > 0f ? e.spriteBounds : new Rect(0f, 0f, e.sprite.rect.width, e.sprite.rect.height);
+            float s = TileWidth * 1.05f / b.width;
+            RectTransform rt = portrait.rectTransform;
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0f, 1f);
+            rt.sizeDelta = new Vector2(e.sprite.rect.width * s, e.sprite.rect.height * s);
+            rt.anchoredPosition = new Vector2(TileWidth * 0.5f - (b.x + b.width * 0.5f) * s, e.tilePortraitY != 0f ? e.tilePortraitY : -(6f - b.y * s));
+            if (nameText != null) nameText.gameObject.SetActive(false);
+        }
+        else
+        {
+            CharacterLook look = CharacterRegistry.GetLook(id);
+            backing.sprite = null;
+            backing.color = look != null ? look.placeholderColor : new Color(0.4f, 0.4f, 0.4f);
+            bool hasSprite = look != null && look.sprite != null;
             portrait.enabled = hasSprite;
             if (hasSprite)
             {
-                portrait.sprite = art.sprite;
+                portrait.sprite = look.sprite;
+                portrait.color = Color.white;
                 portrait.preserveAspect = true;
+                RectTransform rt = portrait.rectTransform;
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = new Vector2(8f, 40f);
+                rt.offsetMax = new Vector2(-8f, -8f);
             }
-        }
-        if (colorStrip != null)
-        {
-            colorStrip.enabled = art != null;
-            if (art != null) colorStrip.color = art.placeholderColor;
+            if (nameText != null)
+            {
+                nameText.gameObject.SetActive(true);
+                nameText.text = CharacterList.NameOf(id);
+                nameText.fontSize = 24;
+                nameText.rectTransform.anchorMin = Vector2.zero;
+                nameText.rectTransform.anchorMax = new Vector2(1f, 0.2f);
+                nameText.rectTransform.offsetMin = nameText.rectTransform.offsetMax = Vector2.zero;
+            }
         }
 
         if (button != null)
@@ -42,6 +85,44 @@ public class CharacterButtonUI : MonoBehaviour
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(() => onClick(id));
         }
+    }
+
+    // The Random tile ("?") and the locked "coming soon" tile: a plain colour with one big symbol.
+    public void SetupSpecial(int id, string symbol, Color background, Color symbolColor, Action<int> onClick, bool isLocked)
+    {
+        CharacterId = id;
+        locked = isLocked;
+        hover = null;
+        backing.sprite = null;
+        backing.color = background;
+        portrait.enabled = false;
+        if (nameText != null)
+        {
+            nameText.gameObject.SetActive(true);
+            nameText.text = symbol;
+            nameText.color = symbolColor;
+            nameText.fontSize = isLocked ? 30 : 160;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.rectTransform.anchorMin = Vector2.zero;
+            nameText.rectTransform.anchorMax = Vector2.one;
+            nameText.rectTransform.offsetMin = nameText.rectTransform.offsetMax = Vector2.zero;
+        }
+        if (button != null)
+        {
+            button.onClick.RemoveAllListeners();
+            if (!isLocked) button.onClick.AddListener(() => onClick(id));
+            button.interactable = !isLocked;
+        }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (hover != null && !locked) hover(CharacterId, true);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (hover != null && !locked) hover(CharacterId, false);
     }
 
     public void SetSelected(bool selected)
@@ -63,6 +144,6 @@ public class CharacterButtonUI : MonoBehaviour
 
     public void SetInteractable(bool interactable)
     {
-        if (button != null) button.interactable = interactable;
+        if (button != null) button.interactable = interactable && !locked;
     }
 }

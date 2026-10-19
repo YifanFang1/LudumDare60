@@ -70,3 +70,16 @@ Main menu > Play > **Mode** (name, Online, Offline vs AI, Back). Online opens th
 - Every change of screen goes through `GlitchTransition`: the CRT's full-screen glitch ramps up, `MatchScreens` switches the page at the peak, then it fades. Tune it with `Full-screen glitch` on the CRT Profile (`Fight > CRT Settings`). Leave `Match Screens > Transition` empty to switch screens instantly. It needs the CRT filter running.
 - Options opens the Controls page; Credits is a placeholder page. `QUIT.png` (the non-hover picture) is missing, so Quit uses `QUITHOVER` dimmed until hovered.
 - The glass-crack effect (`ShatterEffect`, `Fracture`, ...) plays when you press a key on the title screen and when a match starts. Every other screen change uses the glitch. It lives on `ShatterOverlay` (last child of the canvas); clear `Shatter` on Match Screens to use the glitch everywhere.
+
+## Character select (mockup layout)
+
+Laid out like the mockups: a framed 3x3 grid on the left (Patience, Ruy, Odette / Remy, K3N, Noir / Room, Random "?", a locked "SOON" slot), a gear timer, and a big character panel on the right (backing, character, name, three tilted word banners, four skill blocks, **MORE**). Everything sits on a 1920x1080 `Stage` that scales to fit the window.
+
+- Hovering a tile previews that character; clicking picks them. The "?" tile is a single Random pick (any fighter except Sandbag, rolled when you confirm).
+- **MORE** opens the Background / Skills page: the character slides left, the grid is replaced by the text. **BACK >>** returns.
+- Online only: the gear counts down from 30 s and confirms the current pick (or Random) when it reaches 0. Vs AI has no timer and the gear is hidden. Change **Pick Seconds** on `CharacterSelectScreen`.
+- Art: `Assets/UI/CharacterSelect/<FOLDER>/` (`backing`, `sprite`, `name`, `more`, `back`, `mini_skill`, `skill_block`, `trait_1..3`) and `General/`. **Fight > Rebuild Default Canvas** reads them into `Assets/UI/Resources/CharacterSelectArt.asset`.
+- Text: edit **Background** and **Skills** per character in that asset (a rebuild keeps them). Dr. Remy's are filled in; the others say "Coming soon." The optional **Trait Positions** override where each banner goes.
+- A character with no folder shows its normal sprite on a plain colour and has no MORE page. To add one: drop its pictures in a new folder, add a line to `BuildSelectArt` in `BuildFightCanvas.cs`, rebuild.
+- Fonts: the timer and text pages use Trade Winds (`Assets/UI/Fonts`); the builder makes the TextMeshPro font asset the first time.
+- Sandbag (the training dummy) is no longer on the grid; Random never picked it anyway.
