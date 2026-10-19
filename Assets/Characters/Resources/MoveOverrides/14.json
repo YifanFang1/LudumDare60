@@ -1,0 +1,111 @@
+{
+    "moves": [
+        {
+            "name": "Light",
+            "totalTicks": 17,
+            "cooldown": 5,
+            "hitboxes": [
+                {
+                    "spawnTick": 8,
+                    "lifetime": 8,
+                    "damage": 5,
+                    "hitstun": 12,
+                    "knockback": 40,
+                    "x": 400,
+                    "y": 900,
+                    "w": 1000,
+                    "h": 300,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Heavy",
+            "totalTicks": 32,
+            "cooldown": 10,
+            "hitboxes": [
+                {
+                    "spawnTick": 21,
+                    "lifetime": 6,
+                    "damage": 10,
+                    "hitstun": 20,
+                    "knockback": 70,
+                    "x": 550,
+                    "y": 900,
+                    "w": 1800,
+                    "h": 300,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Grab",
+            "totalTicks": 48,
+            "cooldown": 15,
+            "hitboxes": [
+                {
+                    "spawnTick": 5,
+                    "lifetime": 25,
+                    "damage": 5,
+                    "hitstun": 40,
+                    "knockback": 30,
+                    "x": 500,
+                    "y": 600,
+                    "w": 1000,
+                    "h": 1000,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Special",
+            "totalTicks": 30,
+            "cooldown": 30,
+            "hitboxes": []
+        },
+        {
+            "name": "Ultimate",
+            "totalTicks": 45,
+            "cooldown": 0,
+            "hitboxes": []
+        },
+        {
+            "name": "JumpLight",
+            "totalTicks": 14,
+            "cooldown": 0,
+            "hitboxes": [
+                {
+                    "spawnTick": 3,
+                    "lifetime": 8,
+                    "damage": 5,
+                    "hitstun": 14,
+                    "knockback": 30,
+                    "x": 200,
+                    "y": 0,
+                    "w": 800,
+                    "h": 700,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "JumpHeavy",
+            "totalTicks": 24,
+            "cooldown": 0,
+            "hitboxes": [
+                {
+                    "spawnTick": 6,
+                    "lifetime": 6,
+                    "damage": 10,
+                    "hitstun": 20,
+                    "knockback": 60,
+                    "x": 100,
+                    "y": 0,
+                    "w": 1000,
+                    "h": 900,
+                    "vx": 0
+                }
+            ]
+        }
+    ]
+}
