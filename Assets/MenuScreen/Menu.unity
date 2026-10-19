@@ -8199,7 +8199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ec6945e4cb8a436f915e3006600aa98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterPreview
-  characterId: -1
+  characterId: 15
   character: {fileID: 0}
   moveIndex: 0
   tick: 0
@@ -15648,11 +15648,13 @@ MonoBehaviour:
   glassBreak: {fileID: 8300000, guid: dfb9d6ed109d1424aa25f5151c317cdc, type: 3}
   tvOff: {fileID: 8300000, guid: abc45c7d861a449879abb4b90ef90298, type: 3}
   menuMusic: {fileID: 8300000, guid: a56bae3fbbd637e4ba060afb8cc5528b, type: 3}
-  characterSelectMusic: {fileID: 8300000, guid: 726fed668e1e8104996c65324109379e, type: 3}
+  characterSelectMusic: {fileID: 8300000, guid: a56bae3fbbd637e4ba060afb8cc5528b, type: 3}
   fightMusic: {fileID: 8300000, guid: a0565e8203b3e4f4496821ffe94142bd, type: 3}
   sfxVolume: 1
   uiVolume: 0.8
   musicVolume: 0.5
+  voiceVolume: 1
+  logMissingVoiceLines: 0
 --- !u!114 &2075206614
 MonoBehaviour:
   m_ObjectHideFlags: 0

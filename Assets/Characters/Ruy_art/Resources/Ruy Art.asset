@@ -31,6 +31,7 @@ MonoBehaviour:
     grab: []
     block: []
     dash: []
+    jump: []
     superFlash: {fileID: 0}
     ko: {fileID: 0}
     reflect: []
@@ -41,4 +42,39 @@ MonoBehaviour:
     powerUp: []
     outOfAmmo: []
     theme: {fileID: 8300000, guid: 5d026a0c53b4e1541bd9d3a488d149c3, type: 3}
+  voice:
+    dialogue:
+    - line: You know, they call me a genie. It's cause I grant death wishes.
+      clip: {fileID: 8300000, guid: 7f7cb80cfadbdcc46ad7080b86f2d65a, type: 3}
+    - line: That was a Ruy-ly good punch.
+      clip: {fileID: 8300000, guid: 0baf917fd8f02744bb35a5dc5af2b27f, type: 3}
+    - line: It seems I have been thoroughly pun-nished.
+      clip: {fileID: 8300000, guid: aed263ddba7172b47abd67bfe278beed, type: 3}
+    - line: "Hey! That\u2019s a Ruy-crime!"
+      clip: {fileID: 8300000, guid: f500f6479422e794aab331945659cadf, type: 3}
+    - line: You're being such a Kill-Ruy.
+      clip: {fileID: 8300000, guid: 89f00a3601ee41242af9f6b787c409a3, type: 3}
+    - line: Sure-you-can beat me?
+      clip: {fileID: 8300000, guid: 26a1267ad0519fc479c3d98706bec5ed, type: 3}
+    - line: Man, I'm bored, can you at least try to fight back?
+      clip: {fileID: 8300000, guid: f174ee98f89e824428e61a0ffc16aea7, type: 3}
+    - line: Get dest-Ruy-ed!
+      clip: {fileID: 8300000, guid: aedaff597ed2c154ebec06a91b9a78c6, type: 3}
+    moves:
+    - move: Heavy
+      clips:
+      - {fileID: 8300000, guid: 4a4057efcd1321c428e1de2618632db5, type: 3}
+      - {fileID: 8300000, guid: aaafce3574177e445a7ec7f6390df5c3, type: 3}
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: 7ee78667c0ad00646a1946ba560e5a85, type: 3}
+    - move: Ultimate
+      clips:
+      - {fileID: 8300000, guid: 6d83566898075ab42909ab09c2f636d9, type: 3}
+    hurt:
+    - {fileID: 8300000, guid: e43c202b25d499f479fa47b641eb0237, type: 3}
+    - {fileID: 8300000, guid: fd8a054ca61999447a8b7c907bf7d6ea, type: 3}
+    hurtChance: 0.4
+    ko: []
+    roundWin: []
   characterId: 10
