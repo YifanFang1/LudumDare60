@@ -44,10 +44,10 @@ MonoBehaviour:
     backArt: {fileID: 21300000, guid: 0e665652f6ea34eed8ff7874c17fd17c, type: 3}
     miniSkill: {fileID: 21300000, guid: 4ba4ffae83ab74a089921d5c27e887d9, type: 3}
     skillIcons:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
+    - {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
+    - {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
+    - {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
     skillBlock: {fileID: 21300000, guid: 8cbe5207073ec4029b9a1d8a29431358, type: 3}
     traits:
     - {fileID: 21300000, guid: cea05d3416dce45c0863c4f5d1a33841, type: 3}
@@ -59,22 +59,22 @@ MonoBehaviour:
     skills:
     - name: 'LIGHT: JAB'
       description: A quick, straight punch.
-      icon: {fileID: 0}
+      icon: {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
     - name: 'HEAVY: KICK'
       description: A slower kick with longer reach.
-      icon: {fileID: 0}
+      icon: {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
     - name: 'GRAB: THROW'
       description: Grabs up close and tosses the opponent. Hold back to throw them behind you.
-      icon: {fileID: 0}
+      icon: {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
     - name: 'SPECIAL: SHADOKEN'
       description: Hold to charge, release to throw a fireball. The longer the charge, the harder it hits. Only one can be on screen at a time.
-      icon: {fileID: 0}
+      icon: {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
     - name: 'ULTIMATE: HORYUKEN'
       description: A rising uppercut that's invincible as it starts and launches the opponent sky-high. Very punishable if blocked.
-      icon: {fileID: 0}
+      icon: {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
     - name: 'PERK: RAGE'
       description: The more health he's lost, the harder all of his attacks hit.
-      icon: {fileID: 0}
+      icon: {fileID: 1553512389127000679, guid: 0d038d3fbf06a0745ba6151001a96353, type: 3}
   - label: Odette
     characterId: 11
     backing: {fileID: 21300000, guid: 66e7cf6d7a6b844218e42b84cac85392, type: 3}
@@ -174,10 +174,10 @@ MonoBehaviour:
     backArt: {fileID: 21300000, guid: e9f1b3c8bed054e41893bdd4c75c5039, type: 3}
     miniSkill: {fileID: 21300000, guid: b2fe9fd3b49404b5ca4992c58499b540, type: 3}
     skillIcons:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
+    - {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
+    - {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
+    - {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
     skillBlock: {fileID: 21300000, guid: 55c507d33e4664ba29d02c5936a3cd95, type: 3}
     traits:
     - {fileID: 21300000, guid: c770868f461fd4797a4fd0cb6fa2baba, type: 3}
@@ -192,25 +192,25 @@ MonoBehaviour:
     skills:
     - name: 'LIGHT: TRUNK WHIP'
       description: A short, heavy swing of the trunk.
-      icon: {fileID: 0}
+      icon: {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
     - name: 'HEAVY: TRUNK SLAM'
       description: Slow to start, but hits like a falling tree.
-      icon: {fileID: 0}
+      icon: {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
     - name: 'GRAB: TRUNK GRAB'
       description: Holds the opponent in his trunk. Use Vine Boom during the hold for a hit that can't miss; otherwise he throws them.
-      icon: {fileID: 0}
+      icon: {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
     - name: 'SPECIAL: VINE BOOM'
       description: Hits everything around him and destroys enemy projectiles.
-      icon: {fileID: 0}
+      icon: {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
     - name: 'ULTIMATE: ADDRESS ME'
       description: He grows huge for a few seconds. Everything he does gets bigger and stronger, and hits can't stagger him.
-      icon: {fileID: 0}
+      icon: {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
     - name: 'PERK: STAMPEDE'
       description: His forward dash is an attack, and it charges further the more he's hurt.
-      icon: {fileID: 0}
+      icon: {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
     - name: 'PERK: UNSTOPPABLE'
       description: He can't block, but he has more health than anyone and shrugs off slows, scrambles and bleeding.
-      icon: {fileID: 0}
+      icon: {fileID: 3804159098053151957, guid: b4cdbe03cd0a4094f9687ed50f7856a4, type: 3}
   - label: Patience
     characterId: 14
     backing: {fileID: 21300000, guid: eb6d9c69865f84df7bf9bdda8fddb2a5, type: 3}
@@ -367,10 +367,10 @@ MonoBehaviour:
     backArt: {fileID: 21300000, guid: ba8cc19db496f40efa87802221a474d7, type: 3}
     miniSkill: {fileID: 21300000, guid: 0cfc03370ee74495997c1fbc325c43aa, type: 3}
     skillIcons:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
+    - {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
+    - {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
+    - {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
     skillBlock: {fileID: 21300000, guid: ec224d327259949d2b94b4603a487b22, type: 3}
     traits:
     - {fileID: 21300000, guid: 4d7ab8bfaae5f482d99e54a27d67c41e, type: 3}
@@ -385,22 +385,22 @@ MonoBehaviour:
     skills:
     - name: 'LIGHT: CAPE WHIP'
       description: A jab with a little extra reach.
-      icon: {fileID: 0}
+      icon: {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
     - name: 'HEAVY: CHARGED PUNCH'
       description: Hold to charge, release to punch. The longer the charge, the harder it hits.
-      icon: {fileID: 0}
+      icon: {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
     - name: 'GRAB: HAND GRAB'
       description: A slower grab that holds the opponent before throwing them.
-      icon: {fileID: 0}
+      icon: {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
     - name: 'SPECIAL: RAPID PUNCHES'
       description: Hold to keep throwing flurries of jabs.
-      icon: {fileID: 0}
+      icon: {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
     - name: 'ULTIMATE: INSTALL'
       description: Powers up with any amount of meter. While the meter drains, he hits harder and his moves have no cooldowns. Press again to switch it off.
-      icon: {fileID: 0}
+      icon: {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
     - name: 'PERK: SECOND WIND'
       description: His moves recover faster as he loses health.
-      icon: {fileID: 0}
+      icon: {fileID: -556367054473800272, guid: f654730e4b601544683373608300aa82, type: 3}
   - label: Noir
     characterId: 12
     backing: {fileID: 21300000, guid: ba8be0e67dfc84b72aa7f955673ce1f8, type: 3}
