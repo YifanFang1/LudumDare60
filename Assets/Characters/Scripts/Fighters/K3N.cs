@@ -19,8 +19,8 @@ public class K3N : BaseFighter
     public const int PunchFullCharge = 60;
 
     public static readonly MoveDef CapeWhip = Melee("Light",
-        totalTicks: 16, spawnTick: 5, activeTicks: 3,
-        box: new Box(400, 900, 1200, 400),
+        totalTicks: 16, spawnTick: 8, activeTicks: 4,
+        box: new Box(400, 1000, 1600, 500),
         damage: 5, hitstun: 12, knockback: 40, cooldown: LightCooldown);
 
     public static readonly MoveDef ChargedPunch = MakeChargedPunch();

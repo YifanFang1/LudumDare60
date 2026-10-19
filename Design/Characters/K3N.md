@@ -24,7 +24,7 @@ A brawler who saves up meter and then spends it for a burst of power. Outside In
 ## Generic moves
 | Move | Name / look | Sheet says | Startup | Active | Total | Dmg | Hitstun | KB | Box | CD | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| Light (J) | Cape whip | Cape whip around | 5 (std 4) | 3 | 16 (std 15) | 5 | 12 | 40 | `Box(400, 900, 1200, 400)` (std w 900) | 5 | **Front only, a bit longer than a jab (confirmed).** 0.3 more reach, 1 tick slower |
+| Light (J) | Cape whip | Cape whip around | 8 | 4 | 16 (std 15) | 5 | 12 | 40 | `Box(400, 1000, 1600, 500)` (std w 900) | 5 | **Front only, a bit longer than a jab (confirmed).** 0.3 more reach, 1 tick slower |
 | Heavy (K) | Charged Punch | Charged Punch | 10 after release | 4 | 28 + charge | 12 → 20 | 20 → 26 | 80 → 120 | `Box(300, 700, 1300, 700)` (std) | 10 | **Hold K to charge, release to punch (confirmed, D-42).** 60 ticks to full (confirmed) |
 | Grab (L) | Grab with hand | Grab with hand | 5 | 2 | 40 | 12 | 40 | 90 | `Box(300, 600, 700, 1000)` | 15 | Standard |
 | Forward dash | Quick hop forward | "Quick leap back" (swapped) | - | - | 10 | - | - | - | - | 20 | **The labels were swapped in the sheet (confirmed).** Stays on the ground. 10 ticks / 150 = 1.5 units (std 14/130) |
