@@ -4,6 +4,7 @@ using UnityEngine;
 // Assets/UI/Resources/CharacterSelectArt.asset and is (re)filled by Fight > Rebuild Default Canvas from the
 // pictures in Assets/UI/CharacterSelect/<CHARACTER>/. Edit the texts here; a rebuild keeps them.
 // Characters with no entry (no art yet) show their normal sprite on a plain colour and have no More page.
+// An entry can hold only some pictures (Sandbag has just its grid tiles so far); the rest fall back the same way.
 [CreateAssetMenu(fileName = "CharacterSelectArt", menuName = "Fight/Character Select Art")]
 public class CharacterSelectArt : ScriptableObject
 {
@@ -25,10 +26,16 @@ public class CharacterSelectArt : ScriptableObject
         public Sprite backing;
         [Tooltip("The big character picture.")]
         public Sprite sprite;
+        [Tooltip("The grid tile, finished art with backing and portrait (150x200). Empty = the tile is made from backing + sprite.")]
+        public Sprite select;
+        [Tooltip("The grid tile while this character is the current pick: a black silhouette on the backing (150x200).")]
+        public Sprite picked;
         [Tooltip("The part of the sprite that is not transparent, in sprite pixels from its top-left (x, y, width, height). Used to centre it. Empty = the whole sprite.")]
         public Rect spriteBounds;
         [Tooltip("Pixel-art pictures: how many screen pixels each picture pixel becomes. 0 = automatic (native size, shrunk to fit).")]
         public float spriteScale;
+        [Tooltip("Moves the big character picture from its automatic spot, in 1920x1080 pixels (+x right, +y down). Set in BuildFightCanvas.BuildSelectArt.")]
+        public Vector2 spriteOffset;
         [Tooltip("Grid tile only: the portrait's Rect Transform as the Inspector shows it (Pos X, Pos Y, Width, Height; top-left anchored). Width 0 = automatic placement.")]
         public Rect tilePortraitRect;
         public Sprite nameArt;
@@ -49,6 +56,10 @@ public class CharacterSelectArt : ScriptableObject
     }
 
     public Entry[] entries;
+    [Tooltip("The Random (\"?\") tile. Empty = a grey tile with a \"?\".")]
+    public Sprite randomSelect;
+    [Tooltip("The Random (\"?\") tile while Random is the current pick.")]
+    public Sprite randomPicked;
 
     public Entry Find(int characterId)
     {

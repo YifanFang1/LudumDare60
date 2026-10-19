@@ -73,13 +73,16 @@ Main menu > Play > **Mode** (name, Online, Offline vs AI, Back). Online opens th
 
 ## Character select (mockup layout)
 
-Laid out like the mockups: a framed 3x3 grid on the left (Patience, Ruy, Odette / Remy, K3N, Noir / Room, Random "?", a locked "SOON" slot), a gear timer, and a big character panel on the right (backing, character, name, three tilted word banners, four skill blocks, **MORE**). Everything sits on a 1920x1080 `Stage` that scales to fit the window.
+Laid out like the mockups (in `Assets/UI/CharacterSelect/Mockups/`): a framed 3x3 grid on the left (Patience, Ruy, Odette / Remy, K3N, Noir / Room, Random "?", and Sandbag vs AI or a locked "SOON" slot online), a gear timer, and a big character panel on the right (backing, character, name, three tilted word banners, four skill blocks, **MORE**). Everything sits on a 1920x1080 `Stage` that scales to fit the window.
 
 - Hovering a tile previews that character; clicking picks them. The "?" tile is a single Random pick (any fighter except Sandbag, rolled when you confirm).
+- **Online:** pick yourself and press **READY**. **Vs AI, two steps:** pick yourself and press **READY**, then the grid starts fresh under "Choose an opponent": pick the AI's fighter and press **FIGHT!**. **BACK** on step 2 returns to step 1 with your pick kept; on step 1 it leaves. The steps swap through the screen-change glitch.
+- Clicking a tile turns it into its black silhouette (`picked.png`; the "?" uses `General/random_picked.png`) for as long as it is the current pick. A tile with no picked picture gets the bright frame instead. The tile images only change after **Fight > Rebuild Default Canvas**, since the overlay is part of the `CharacterButton` prefab.
 - **MORE** opens the Background / Skills page: the character slides left, the grid is replaced by the text. **BACK >>** returns.
 - Online only: the gear counts down from 30 s and confirms the current pick (or Random) when it reaches 0. Vs AI has no timer and the gear is hidden. Change **Pick Seconds** on `CharacterSelectScreen`.
-- Art: `Assets/UI/CharacterSelect/<FOLDER>/` (`backing`, `sprite`, `name`, `more`, `back`, `mini_skill`, `skill_block`, `trait_1..3`) and `General/`. **Fight > Rebuild Default Canvas** reads them into `Assets/UI/Resources/CharacterSelectArt.asset`.
-- Text: edit **Background** and **Skills** per character in that asset (a rebuild keeps them). Dr. Remy's are filled in; the others say "Coming soon." The optional **Trait Positions** override where each banner goes.
+- Art: `Assets/UI/CharacterSelect/<FOLDER>/` (`select` and `picked` = the 150x200 grid tile and its black version; `backing`, `sprite`, `name`, `more`, `back`, `mini_skill`, `skill_block`, `trait_1..3` = the big panel) and `General/` (`ready`, `fight`, `choose_a_renegade`, `choose_an_opponent`, `random_select`, `random_picked`, tabs, gear). **Fight > Rebuild Default Canvas** reads them into `Assets/UI/Resources/CharacterSelectArt.asset`. A character with no `select.png` gets a tile cut from `backing` + `sprite`. `SANDBAG/` only has its two tiles so far, so its big panel uses the no-art look.
+- Text: edit **Background** and **Skills** per character in that asset (a rebuild keeps them). Dr. Remy's are filled in; the others say "Coming soon."
+- Layout: each character's banner positions, name corner and **Sprite Offset** (moves the big picture) are set in the `SelectArtDef` table in `BuildSelectArt` (`BuildFightCanvas.cs`) and reapplied on every rebuild, so tune them there, not in the asset. Keep the banners and the name off the character's face.
 - A character with no folder shows its normal sprite on a plain colour and has no MORE page. To add one: drop its pictures in a new folder, add a line to `BuildSelectArt` in `BuildFightCanvas.cs`, rebuild.
 - Fonts: the timer and text pages use Trade Winds (`Assets/UI/Fonts`); the builder makes the TextMeshPro font asset the first time.
-- Sandbag (the training dummy) is no longer on the grid; Random never picked it anyway.
+- Sandbag (the training dummy) is on the grid vs AI only, on both steps (bottom-right). Random never picks it.

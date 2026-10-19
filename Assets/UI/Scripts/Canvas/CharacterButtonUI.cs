@@ -5,7 +5,9 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 // One tile of the character grid. This is a prefab (Assets/UI/Prefabs/CharacterButton.prefab):
-// a coloured backing, the character's head and shoulders, and a bright frame when chosen. Characters with no
+// the character's finished tile picture (CharacterSelectArt's `select`; without one, a coloured backing with the
+// character's head and shoulders), and a black silhouette (`picked`) while it is the chosen one, or a bright
+// frame if it has no picked picture. Characters with no
 // select art yet get their normal sprite on a plain colour and their name; the Random and locked tiles are
 // plain colour with a big symbol (see SetupSpecial).
 public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -18,6 +20,7 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
     public Image portrait;          // the character, cropped to the tile (its parent has a RectMask2D)
     public TMP_Text nameText;       // only for tiles with no art: the name, or the symbol on a special tile
     public GameObject selectedMark; // switched on for the chosen character (a bright frame)
+    public Image pickedIcon;        // covers the whole tile with the black "picked" silhouette while it is the current pick
 
     // old field kept so existing prefabs still load
     public Image colorStrip;
@@ -25,6 +28,7 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
     public int CharacterId { get; private set; }
     bool locked;
     Action<int, bool> hover;
+    Sprite pickedSprite;            // null = no picked art yet: the picked tile keeps the bright frame instead
 
     public void Setup(int id, Action<int> onClick, Action<int, bool> onHover = null)
     {
@@ -34,7 +38,9 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
         CharacterSelectArt art = CharacterSelectArt.Load();
         CharacterSelectArt.Entry e = art != null ? art.Find(id) : null;
-        if (e != null && e.sprite != null && e.backing != null)
+        SetPickedSprite(e != null ? e.picked : null);
+        if (e != null && e.select != null) ShowTileArt(e.select);   // finished tile art: drawn as it is
+        else if (e != null && e.sprite != null && e.backing != null)
         {
             backing.sprite = e.backing;
             backing.color = Color.white;
@@ -93,16 +99,22 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
         }
     }
 
-    // The Random tile ("?") and the locked "coming soon" tile: a plain colour with one big symbol.
-    public void SetupSpecial(int id, string symbol, Color background, Color symbolColor, Action<int> onClick, bool isLocked)
+    // The Random tile ("?") and the locked "coming soon" tile: their tile art if there is some, else a plain
+    // colour with one big symbol. `picked` is the tile's look while it is the current pick (Random has one).
+    public void SetupSpecial(int id, string symbol, Color background, Color symbolColor, Action<int> onClick, bool isLocked, Sprite tile = null, Sprite picked = null)
     {
         CharacterId = id;
         locked = isLocked;
         hover = null;
-        backing.sprite = null;
-        backing.color = background;
-        portrait.enabled = false;
-        if (nameText != null)
+        SetPickedSprite(picked);
+        if (tile != null) ShowTileArt(tile);
+        else
+        {
+            backing.sprite = null;
+            backing.color = background;
+            portrait.enabled = false;
+        }
+        if (nameText != null && tile == null)
         {
             nameText.gameObject.SetActive(true);
             nameText.text = symbol;
@@ -131,9 +143,30 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
         if (hover != null && !locked) hover(CharacterId, false);
     }
 
+    // selected = the current pick: the tile turns into its black silhouette (or the bright frame if it has none).
     public void SetSelected(bool selected)
     {
-        if (selectedMark != null && selectedMark.activeSelf != selected) selectedMark.SetActive(selected);
+        bool showPicked = selected && pickedSprite != null && pickedIcon != null;
+        if (pickedIcon != null && pickedIcon.enabled != showPicked) pickedIcon.enabled = showPicked;
+        bool frame = selected && !showPicked;
+        if (selectedMark != null && selectedMark.activeSelf != frame) selectedMark.SetActive(frame);
+    }
+
+    // A finished 150x200 tile picture (backing and portrait in one) fills the tile; no portrait, no name.
+    void ShowTileArt(Sprite tile)
+    {
+        backing.sprite = tile;
+        backing.color = Color.white;
+        portrait.enabled = false;
+        if (nameText != null) nameText.gameObject.SetActive(false);
+    }
+
+    void SetPickedSprite(Sprite picked)
+    {
+        pickedSprite = picked;
+        if (pickedIcon == null) return;
+        pickedIcon.sprite = picked;
+        pickedIcon.enabled = false;
     }
 
     // Greyed out but still clickable (used by the Random picker for characters that are not in the draw).
