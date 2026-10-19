@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 // Sound effects and music. Put it on the same GameObject as the match session (GameManager).
 //
@@ -17,6 +18,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] blockSounds;      // a hit is blocked
     public AudioClip[] grabSounds;       // a grab lands (empty = use hitSounds)
     public AudioClip[] dashSounds;       // a dash starts
+    public AudioClip[] jumpSounds;       // a fighter jumps off the ground
     public AudioClip superFlashSound;    // an Ultimate starts (the freeze)
     public AudioClip koSound;
     // Roster extras (all optional, empty = silent).
@@ -31,8 +33,13 @@ public class AudioManager : MonoBehaviour
     public int heavyHitDamage = 10;      // Brawler: Light does 5, Heavy does 12
 
     [Header("Match")]
-    public AudioClip fightStart;         // "Ready... Fight!" when a match begins
-    public AudioClip roundStart;         // when round 2 or 3 begins (empty = use fightStart)
+    // The round call ("Round 1", "Round 2", "Final Round") plays just before each round's countdown,
+    // timed so it finishes as the countdown starts (during the intros in round 1, during the pause
+    // after the KO in later rounds). The countdown sound plays when the 3-2-1 starts.
+    [FormerlySerializedAs("roundStart")] public AudioClip round1Sound;
+    public AudioClip round2Sound;        // any round that isn't the first or the final one
+    public AudioClip finalRoundSound;    // a round that decides the match (empty = round2Sound)
+    [FormerlySerializedAs("fightStart")] public AudioClip countdownSound;   // "3, 2, 1, Fight!"
     public AudioClip winJingle;          // from your side: you won
     public AudioClip loseJingle;
     public AudioClip drawJingle;
@@ -67,6 +74,8 @@ public class AudioManager : MonoBehaviour
     // won the round before (a drawn round keeps the current music).
     int themeSlot = -1;          // fighter slot whose theme is playing, -1 = fightMusic
     int lastRoundWinner = -1;    // remembered during the pause after a KO, used when the next round starts
+    int calledRound;             // the last round whose round call has played
+    int countedRound;            // the last round whose countdown sound has played
 
     void Awake()
     {
@@ -81,6 +90,18 @@ public class AudioManager : MonoBehaviour
         sfx = AddSource(false);
         ui = AddSource(false);
         music = AddSource(true);
+
+        // Clips with "Preload Audio Data" off load on first use, which can make that first play
+        // late or silent. The announcer is timed, so load these up front.
+        Preload(round1Sound);
+        Preload(round2Sound);
+        Preload(finalRoundSound);
+        Preload(countdownSound);
+    }
+
+    static void Preload(AudioClip clip)
+    {
+        if (clip != null) clip.LoadAudioData();
     }
 
     AudioSource AddSource(bool loop)
@@ -117,6 +138,7 @@ public class AudioManager : MonoBehaviour
         // The sim clears roundWinner when the next round starts, so note it while the KO pause lasts.
         if (match.Phase == MatchPhase.Playing && match.Sim.roundWinner >= 0)
             lastRoundWinner = match.Sim.roundWinner;
+        if (match.Phase == MatchPhase.Playing) Announce(match.Sim);
 
         music.volume = musicVolume;
         SetMusic(MusicFor(match.Phase));
@@ -146,7 +168,48 @@ public class AudioManager : MonoBehaviour
         resultPlayed = false;
         themeSlot = -1;
         lastRoundWinner = -1;
-        PlayUI(fightStart);
+        calledRound = 0;
+        countedRound = 0;
+    }
+
+    // The round call and the countdown, read from the sim's timers each frame (they are not sim
+    // events because the round call has to start BEFORE the round's countdown does).
+    void Announce(GameSim sim)
+    {
+        if (sim.IsOver) return;
+
+        // Ticks until the next countdown starts, and which round it is for.
+        int next = sim.round;
+        int ticksLeft = 0;
+        if (sim.introTicks > 0) ticksLeft = sim.introTicks;
+        else if (sim.roundOverTicks > 0) { next = sim.round + 1; ticksLeft = sim.roundOverTicks; }
+
+        if (calledRound < next)
+        {
+            AudioClip call = RoundCall(sim, next);
+            int lead = call != null ? Mathf.CeilToInt(call.length * 60f) : 0;
+            if (ticksLeft <= lead)
+            {
+                calledRound = next;
+                PlayUI(call);
+            }
+        }
+
+        if (countedRound < sim.round && sim.introTicks == 0 && sim.roundOverTicks == 0 && sim.countdownTicks > 0)
+        {
+            countedRound = sim.round;
+            PlayUI(countdownSound);
+        }
+    }
+
+    // Round 1, the final round (both players one round from winning), or any other round.
+    AudioClip RoundCall(GameSim sim, int round)
+    {
+        if (round == 1) return round1Sound;
+        int last = GameSim.RoundsToWin - 1;
+        bool final = sim.roundsWon[0] == last && sim.roundsWon[1] == last;
+        if (final && finalRoundSound != null) return finalRoundSound;
+        return round2Sound;
     }
 
     // The sound set of the character a fighter slot is playing, or null.
@@ -205,8 +268,11 @@ public class AudioManager : MonoBehaviour
             case SimEventType.KO:
                 PlayUI(c != null && c.ko != null ? c.ko : koSound);
                 break;
+            case SimEventType.Jump:
+                PlaySfx(Pick(c != null ? c.jump : null, jumpSounds));
+                break;
             case SimEventType.RoundStart:
-                PlayUI(roundStart != null ? roundStart : fightStart);
+                // The round call and countdown are played by Announce.
                 if (lastRoundWinner == 0 || lastRoundWinner == 1) themeSlot = lastRoundWinner;
                 lastRoundWinner = -1;
                 break;
