@@ -353,14 +353,27 @@ public class JuiceManager : MonoBehaviour
                 bool heavy = e.amount >= profile.heavyThreshold;
                 int facing = AwayFrom(sim, e.a, e.b);
                 Shake(heavy ? profile.heavyHitTrauma : profile.lightHitTrauma);
-                if (IsUltimate(sim.fighters[e.a])) UltimateImpact(SimToWorld(e.x, e.y));
+                if (e.ultimate) UltimateImpactOnce(e.a, SimToWorld(e.x, e.y));
                 shake.AddHillTilt(-facing);   // facing is +1 when the attacker is on the left
                 break;
             }
 
             case SimEventType.Block:
                 Shake(profile.blockTrauma);
-                if (profile.impactOnBlockedUltimate && IsUltimate(sim.fighters[e.a])) UltimateImpact(SimToWorld(e.x, e.y));
+                if (profile.impactOnBlockedUltimate && e.ultimate) UltimateImpactOnce(e.a, SimToWorld(e.x, e.y));
+                break;
+
+            case SimEventType.SuperFlash:
+                // A new Ultimate: its first hit (or block) gets the impact frame again.
+                if (e.a >= 0 && e.a < 2) ultimateImpactDone[e.a] = false;
+                break;
+
+            case SimEventType.PowerUp:
+                // A toggle Ultimate (K3N's Install) has no super flash and no hit of its own, so its
+                // impact frame plays the moment it switches ON, centred on him. Not when it switches
+                // off, and not for ROOM's Address Me (it raises PowerUp too, but already has a flash).
+                if (e.amount == 1 && e.a >= 0 && e.a < 2 && sim.fighters[e.a].UltimateIsToggle)
+                    UltimateImpact(SimToWorld(e.x, e.y + 1000));
                 break;
 
             case SimEventType.KO:
@@ -745,11 +758,24 @@ public class JuiceManager : MonoBehaviour
         impactFrame.Show(ticks / 60f, world.FighterRoot(0), world.FighterRoot(1));
     }
 
-    // The attacker is in the middle of their Ultimate. (A projectile Ultimate that lands after
-    // its thrower has recovered won't count; none of the characters have one yet.)
-    static bool IsUltimate(Fighter attacker)
+    // One impact frame per Ultimate: the first of its hitboxes to connect gets it. Without this, a
+    // multi-hit Ultimate (Dr. Remy's rat shower) flashed, zoomed and glitched on every single rat.
+    // Which hits count comes from the sim (SimEvent.ultimate), so a projectile Ultimate that lands
+    // after its thrower has recovered (0d3tte's Paint Splat at long range) still counts.
+    readonly bool[] ultimateImpactDone = new bool[2];
+
+    void UltimateImpactOnce(int attacker, Vector2 pos)
     {
-        return attacker.state == FighterStateId.Attack && attacker.move != null && attacker.move.ultimate;
+        if (attacker < 0 || attacker > 1 || ultimateImpactDone[attacker]) return;
+        ultimateImpactDone[attacker] = true;
+        UltimateImpact(pos);
+    }
+
+    // True while the impact frame is showing (DefeatSequence waits so it doesn't save the white
+    // silhouette as a fighter's "real" material).
+    public static bool ImpactFrameShowing
+    {
+        get { return instance != null && instance.impactFrame != null && instance.impactFrame.Active; }
     }
 
     // Everything an Ultimate hit gets: impact frame (with its inverted flicker), a zoom punch towards
@@ -777,6 +803,7 @@ public class JuiceManager : MonoBehaviour
             reactionsFor[i] = int.MinValue;   // re-read the profiles: the characters may have changed
         }
         impactFrame.Stop();
+        ultimateImpactDone[0] = ultimateImpactDone[1] = false;
         // TODO: clear flashes
     }
 

@@ -3,6 +3,7 @@
 //
 //   Light (J)      Cape whip: a jab with a little more reach.
 //   Heavy (K)      Charged Punch: hold K to charge, let go to punch. 12 -> 20 damage over 60 ticks.
+//                  He steps forward a little just before the punch lands.
 //   Grab           Hand grab: the standard held grab, slower (tick 17, 10 active)
 //   Dashes         quick and short: forward hop 1.5 units, back leap 1.6 units
 //   Special (I)    Rapid Punches: hold I to keep punching. Each pass is a triple jab (3 hitboxes, 1 damage each); 3 passes tapped, up to 10.
@@ -17,6 +18,10 @@ public class K3N : BaseFighter
     public const int InstallDrainPerTick = 2;      // a full bar lasts about 8 seconds
     public const int InstallDamagePercent = 130;
     public const int PunchFullCharge = 60;
+    // Charged Punch steps him forward: LungeSpeed milli-units a tick for the LungeTicks ticks just
+    // before the punch comes out (8 x 50 = 0.4 units). Only after he lets go of the charge.
+    public const int LungeTicks = 8;
+    public const int LungeSpeed = 50;
 
     public static readonly MoveDef CapeWhip = MakeCapeWhip();
 
@@ -163,6 +168,17 @@ public class K3N : BaseFighter
     {
         if (installOn) return 0;
         return ticks * (100 - MissingHpPercent / 2) / 100;   // Second Wind
+    }
+
+    // The Charged Punch's forward step (both the normal and the Install version). Timed from the
+    // punch's own spawn tick, so it stays lined up if the punch is retuned in the Character Preview.
+    // Bodies still can't pass through each other, so he stops at the opponent.
+    public override void OnMoveTick(GameSim sim)
+    {
+        if (!IsDoing(ChargedPunch) && !IsDoing(InstallPunch)) return;
+        int punchTick = move.hitboxes[0].spawnTick;
+        bool lunging = stateTick >= punchTick - LungeTicks && stateTick < punchTick;
+        vx = lunging ? facing * LungeSpeed : 0;
     }
 
     public override void OnHitboxSpawned(GameSim sim, HitboxInstance hit)
