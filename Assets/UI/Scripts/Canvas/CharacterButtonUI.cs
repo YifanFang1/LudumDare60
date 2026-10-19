@@ -143,12 +143,13 @@ public class CharacterButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
         if (hover != null && !locked) hover(CharacterId, false);
     }
 
-    // Every tile shows its dark silhouette; the current pick (selected) lights up in colour. A tile with no
-    // silhouette art is always in colour and gets the bright frame when selected instead.
-    public void SetSelected(bool selected)
+    // Every tile shows its dark silhouette; the current pick (selected) and the tile under the mouse
+    // (hovered) light up in colour. A tile with no silhouette art is always in colour and gets the
+    // bright frame when selected instead (hovering doesn't add the frame).
+    public void SetSelected(bool selected, bool hovered = false)
     {
         bool hasDark = pickedSprite != null && pickedIcon != null;
-        bool showDark = hasDark && !selected;
+        bool showDark = hasDark && !selected && !hovered;
         if (pickedIcon != null && pickedIcon.enabled != showDark) pickedIcon.enabled = showDark;
         bool frame = selected && !hasDark;
         if (selectedMark != null && selectedMark.activeSelf != frame) selectedMark.SetActive(frame);

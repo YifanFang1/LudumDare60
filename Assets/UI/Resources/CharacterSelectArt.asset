@@ -50,8 +50,20 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 810c7163655134e48adf1a695fdad3f1, type: 3}
     traitPositions: []
     nameCorner: {x: 1868, y: 830}
-    background: Coming soon.
-    skills: []
+    background: "By most metrics, Ruy pretty much had a perfect life. He was born to an oil tycoon and always grew up with the best. The best school, the best cars, the best clothes. Any hardship that did come his way, toss it a wad of money and it all went away. After years of being the best, it can get kinda boring though... Ruy decided he wanted to take on something new, so he joined a street fighting ring called the IDBF (Illicit Downtown Brawling Federation). He always wanted to be part of the fights he had seen in his favorite movies. Starting off, he couldn't even land a hit on the other guy, and the beatings hurt bad. But this was new, and finally something exciting. He's going to keep training to become the best street fighter in the world. Well, he's kinda been taken from the world now, so he's training to be the best of the Renegades until he can return to Earth to be the best there..."
+    skills:
+    - name: "LIGHT: JAB"
+      description: "A quick, straight punch."
+    - name: "HEAVY: KICK"
+      description: "A slower kick with longer reach."
+    - name: "GRAB: THROW"
+      description: "Grabs up close and tosses the opponent. Hold back to throw them behind you."
+    - name: "SPECIAL: SHADOKEN"
+      description: "Hold to charge, release to throw a fireball. The longer the charge, the harder it hits. Only one can be on screen at a time."
+    - name: "ULTIMATE: HORYUKEN"
+      description: "A rising uppercut that's invincible as it starts and launches the opponent sky-high. Very punishable if blocked."
+    - name: "PERK: RAGE"
+      description: "The more health he's lost, the harder all of his attacks hit."
   - label: Odette
     characterId: 11
     backing: {fileID: 21300000, guid: 66e7cf6d7a6b844218e42b84cac85392, type: 3}
@@ -92,8 +104,22 @@ MonoBehaviour:
     - {x: 1915, y: 270}
     - {x: 1915, y: 375}
     nameCorner: {x: 1868, y: 800}
-    background: Coming soon.
-    skills: []
+    background: "A creation carefully concocted throughout the 1830s and 1850s, 0d3tte was originally built as a toy. She traveled all around Europe, amazing everyone from the baker's wife to the emperor with her song and dance. Day and night, day and night, it was the same song and dance... until that fateful day when her partner dropped her. The streets say it was jealous sabotage, but regardless, with a missing arm and irreparable damage throughout, she was now defective for the stage. Still, 0d3tte was an expensive toy, so the theater quickly installed a pen nib replacement and put her to work transcribing sheet music for the ballet she once performed. Then, the aliens took her as a specimen of mechanical life. Now that they have given her a new life, she has transformed from a delicate doll to a dazzling dagger."
+    skills:
+    - name: "LIGHT: JAB"
+      description: "A quick one-armed jab."
+    - name: "HEAVY: LEG SWEEP"
+      description: "A rising kick that also catches opponents jumping in."
+    - name: "GRAB: SHORT GRAB"
+      description: "Less reach than most grabs, but a little faster."
+    - name: "SPECIAL: REFLECTIVE CANVAS"
+      description: "Briefly raises a canvas that sends enemy projectiles back as her own. It doesn't stop close-up attacks."
+    - name: "ULTIMATE: PAINT SPLAT"
+      description: "A fast shot that can't be blocked, only jumped. On a hit, it scrambles the opponent's controls for a few seconds."
+    - name: "PERK: FEARLESS RUSH"
+      description: "Her forward dash is invincible. Her back dash costs her a little health."
+    - name: "PERK: PAINT SKATING"
+      description: "Every hit she lands leaves a paint puddle. On paint, she moves faster and her opponent moves slower."
   - label: Room
     characterId: 13
     backing: {fileID: 21300000, guid: 85356beaa41914e01b3a37aa2af9adda, type: 3}
@@ -134,8 +160,22 @@ MonoBehaviour:
     - {x: 1196, y: 245}
     - {x: 1045, y: 395}
     nameCorner: {x: 1835, y: 815}
-    background: Coming soon.
-    skills: []
+    background: "In the day of the caveman, it was not the lion nor the tiger nor the snake the people feared. It was him. He was the king of the jungle. A being of a different plane. Everyone foolishly thought they could hunt him down and feed their tribes for months. But he persisted. Each time hunters went after him, he would stomp them out, then go to their village to ruin their food stores and demolish their meager homes of mud and stone. He would never be happy until his revenge was served. He is yet to be addressed. Unfortunately, they managed to accidentally take him, but this is not the same as defeat. He WILL get his revenge. It's just a matter of when."
+    skills:
+    - name: "LIGHT: TRUNK WHIP"
+      description: "A short, heavy swing of the trunk."
+    - name: "HEAVY: TRUNK SLAM"
+      description: "Slow to start, but hits like a falling tree."
+    - name: "GRAB: TRUNK GRAB"
+      description: "Holds the opponent in his trunk. Use Vine Boom during the hold for a hit that can't miss; otherwise he throws them."
+    - name: "SPECIAL: VINE BOOM"
+      description: "Hits everything around him and destroys enemy projectiles."
+    - name: "ULTIMATE: ADDRESS ME"
+      description: "He grows huge for a few seconds. Everything he does gets bigger and stronger, and hits can't stagger him."
+    - name: "PERK: STAMPEDE"
+      description: "His forward dash is an attack, and it charges further the more he's hurt."
+    - name: "PERK: UNSTOPPABLE"
+      description: "He can't block, but he has more health than anyone and shrugs off slows, scrambles and bleeding."
   - label: Patience
     characterId: 14
     backing: {fileID: 21300000, guid: eb6d9c69865f84df7bf9bdda8fddb2a5, type: 3}
@@ -169,11 +209,27 @@ MonoBehaviour:
     skillBlock: {fileID: 21300000, guid: 5877075bb94d7432585c648d648e579a, type: 3}
     traits:
     - {fileID: 21300000, guid: fd10b3f7298dd44adb7bb9315b1370e6, type: 3}
+    - {fileID: 21300000, guid: 2f75488e74809f446b99787b503d8432, type: 3}
     traitPositions:
     - {x: 1915, y: 8}
+    - {x: 1915, y: 130}
     nameCorner: {x: 1868, y: 830}
-    background: Coming soon.
-    skills: []
+    background: "Believed to be the messenger of a deity brought into existence by a cult, Patience carries out judgment upon those whom their deity has deemed the scourge of humankind: the ones who do not feel guilt or seek redemption for their transgressions. For these people, Patience feels only wrath, contempt, and disgust, and Patience will ensure that they seek atonement whether they want to or not. Patience does have a soft spot for those who punish themselves through feelings of pure remorse and seek atonement before Patience's involvement. For these people, Patience will come to them and provide them a way to obtain absolution for their transgressions. Patience does not hate humanity; rather, they hate the pain and unhappiness that humanity causes, and they seek to purge the pain and unhappiness in the world, no matter the cost."
+    skills:
+    - name: "LIGHT: WHIP"
+      description: "A short lash that makes the opponent bleed."
+    - name: "HEAVY: CHARGED WHIP"
+      description: "Hold to charge for extra reach, release to lash. Makes the opponent bleed."
+    - name: "GRAB: IRON MAIDEN"
+      description: "A very close-range grab that drags the opponent in and makes them bleed."
+    - name: "SPECIAL: BEAR TRAP"
+      description: "Sets a trap at their feet that springs when stepped on. Jump to avoid it. It can't be blocked, slows the victim and makes them bleed."
+    - name: "ULTIMATE: GUILLOTINE"
+      description: "Marks the opponent's spot, then drops an unblockable blade there. Get out of the outline!"
+    - name: "PERK: BLEED"
+      description: "Bleeding drains health over time, and a badly bleeding opponent hits weaker."
+    - name: "PERK: DISMEMBER"
+      description: "Keep landing hits and the opponent is slowed down."
   - label: Dr. Remy
     characterId: 15
     backing: {fileID: 21300000, guid: 0f4b8a8bf315e4a3583dc3f8e748d04b, type: 3}
@@ -263,8 +319,20 @@ MonoBehaviour:
     - {x: 1645, y: 330}
     - {x: 1645, y: 520}
     nameCorner: {x: 1868, y: 830}
-    background: Coming soon.
-    skills: []
+    background: "The year is 2000. Kennith's mom had just dropped him off at the mall again. She couldn't afford a proper babysitter, so the next best thing was to drop Kennith off at the mall with $10 and let him have fun. Kennith spent a lot of time at Hort's Hefty Arcade and got really, really good at every machine, the name \"K3N\" always being the top scorer of the month. On this fateful day, though, Hort brought out a new arcade machine: \"Tech Tonic.\" Kennith immediately fell in love with the game and started grinding all day long as Ruy to prepare for the game's first tournament. Out of nowhere, a trunk reached out of the screen and grabbed Kennith into the game. Somehow, despite no words being spoken by this creature, K3N knew his mission: humble Ruy. Even though he's not from this world, he understands that he won't be able to return until the Renegades' mission is complete."
+    skills:
+    - name: "LIGHT: CAPE WHIP"
+      description: "A jab with a little extra reach."
+    - name: "HEAVY: CHARGED PUNCH"
+      description: "Hold to charge, release to punch. The longer the charge, the harder it hits."
+    - name: "GRAB: HAND GRAB"
+      description: "A slower grab that holds the opponent before throwing them."
+    - name: "SPECIAL: RAPID PUNCHES"
+      description: "Hold to keep throwing flurries of jabs."
+    - name: "ULTIMATE: INSTALL"
+      description: "Powers up with any amount of meter. While the meter drains, he hits harder and his moves have no cooldowns. Press again to switch it off."
+    - name: "PERK: SECOND WIND"
+      description: "His moves recover faster as he loses health."
   - label: Noir
     characterId: 12
     backing: {fileID: 21300000, guid: ba8be0e67dfc84b72aa7f955673ce1f8, type: 3}
@@ -305,8 +373,22 @@ MonoBehaviour:
     - {x: 1915, y: 260}
     - {x: 1620, y: 540}
     nameCorner: {x: 1868, y: 830}
-    background: Coming soon.
-    skills: []
+    background: "[???] used to be his name. Once an actor in the 1950s, [???] was a master at his craft, appearing in all of the biggest films. He was beloved by all for years, but one day, the crowds stopped coming. The next big thing had arrived, and [???] was the face of yesterday. He needed to do something different, so he decided to try method acting. One week he was a prince, the next a gangster, and the next even a dinosaur (that was a weird moment). After living so many different lives, it's easy to start losing grip of which one is your own. Eventually, [???] was given the identity of Noir: your classic rootin' tootin' cowboy who's going to stop the town's bad guy and get the girl. Noir did the job well, and the crowds once again knew his name, but Noir did not. Noir became obsessed with riding his horse and hunting down bad guys. He often got into brawls on the street and was kicked out of many, many bars. One day, amidst his crisis, Noir disappeared. Everyone thought he got himself killed in a street fight, but in reality, maybe one day Noir will return."
+    skills:
+    - name: "LIGHT: FIRE"
+      description: "An instant, long-range shot from his revolver."
+    - name: "HEAVY: THROW GUN"
+      description: "Tosses his gun in a slow, short arc. Don't worry, he has more."
+    - name: "GRAB: LASSO"
+      description: "Ropes the opponent from a distance and pulls them in."
+    - name: "SPECIAL: BULLET"
+      description: "A fast shot that crosses the whole stage with big knockback. He only has a few bullets each round, so make them count."
+    - name: "ULTIMATE: RAPID FIRE"
+      description: "For a few seconds, unlimited bullets that fire almost nonstop."
+    - name: "PERK: HORSEBACK"
+      description: "His dashes are on horseback: long and fast."
+    - name: "PERK: POINT BLANK"
+      description: "Every hit knocks the opponent back harder the closer they are."
   - label: Sandbag
     characterId: 2
     backing: {fileID: 0}
@@ -345,3 +427,4 @@ MonoBehaviour:
     skills: []
   randomSelect: {fileID: 21300000, guid: 58b3e02a8e3e9ea41b154c822285ef3b, type: 3}
   randomPicked: {fileID: 21300000, guid: eeb6c470485be964482f24e0b777215a, type: 3}
+  opponentTitle: {fileID: 21300000, guid: afe5f58a83884ed4bba44ac76d3b52a9, type: 3}

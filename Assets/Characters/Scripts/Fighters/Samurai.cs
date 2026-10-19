@@ -1,6 +1,7 @@
 // RUY: roster character, id 10. Shoto. Design: Design/Characters/Ruy.md
 // (The class is still called Samurai: main renamed ArcadeGuy to Samurai, and D-40 keeps class
-// names to avoid churn. The in-game name is "Ruy".)
+// names to avoid churn. The in-game name is "Ruy". Likewise the moves are called Hadoken and
+// Shoryuken in code, but Shadoken and Horyuken in game.)
 //
 // The all-rounder who gets stronger as the round goes badly.
 //   Light, Heavy, Grab, dashes   standard

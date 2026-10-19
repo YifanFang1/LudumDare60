@@ -254,13 +254,16 @@ public class CharacterSelectScreen : MonoBehaviour
         for (int i = 0; i < buttons.Count; i++)
         {
             if (buttons[i].CharacterId == LockedId) { buttons[i].SetInteractable(false); continue; }
-            buttons[i].SetSelected(buttons[i].CharacterId == shownTile);
+            // The hovered tile shows in colour too, while you can still pick.
+            bool hovered = !lockedIn && !switching && buttons[i].CharacterId == hoverId;
+            buttons[i].SetSelected(buttons[i].CharacterId == shownTile, hovered);
             buttons[i].SetDimmed(false);
             buttons[i].SetInteractable(!lockedIn && !switching);
         }
 
         if (youTitle != null) youTitle.SetActive(!pickingOpponent);
         if (opponentTitle != null) opponentTitle.SetActive(pickingOpponent);
+        else SwapTitlePicture(pickingOpponent);
         if (titleText != null)
         {
             string title = pickingOpponent ? "Choose an opponent" : "Choose your character";
@@ -297,6 +300,38 @@ public class CharacterSelectScreen : MonoBehaviour
             LockIn();
         }
         if (timerText != null) timerText.text = Mathf.CeilToInt(timeLeft) + "s";
+    }
+
+    // Scenes built before the Opponent Title object existed only have the "Choose a renegade" picture
+    // (and no title slots filled in). Find that picture once and swap it for CharacterSelectArt's
+    // opponentTitle while picking the AI's fighter, so no scene edit is needed.
+    Image titleImage;
+    Sprite renegadeTitle;
+    bool titleSearched;
+
+    void SwapTitlePicture(bool opponent)
+    {
+        if (!titleSearched)
+        {
+            titleSearched = true;
+            foreach (Image img in GetComponentsInChildren<Image>(true))
+            {
+                if (img.sprite != null && img.sprite.name == "choose_a_renegade")
+                {
+                    titleImage = img;
+                    renegadeTitle = img.sprite;
+                    break;
+                }
+            }
+        }
+        if (titleImage == null) return;
+        CharacterSelectArt art = CharacterSelectArt.Load();
+        Sprite want = opponent && art != null && art.opponentTitle != null ? art.opponentTitle : renegadeTitle;
+        if (titleImage.sprite != want)
+        {
+            titleImage.sprite = want;
+            titleImage.preserveAspect = true;   // the two pictures are slightly different shapes
+        }
     }
 
     // The big panel shows the hovered tile, else the last one you clicked.
@@ -360,9 +395,13 @@ public class CharacterSelectScreen : MonoBehaviour
             Image img = icon.GetComponent<Image>();
             img.sprite = block;
             img.raycastTarget = false;
+            img.preserveAspect = true;
+            // A fixed size: with only a preferred size, rows with long descriptions squeezed the
+            // square narrower, so the squares came out different sizes.
             LayoutElement ile = icon.GetComponent<LayoutElement>();
-            ile.preferredWidth = 100f;
-            ile.preferredHeight = 95f;
+            ile.minWidth = ile.preferredWidth = 100f;
+            ile.minHeight = ile.preferredHeight = 95f;
+            ile.flexibleWidth = 0f;
         }
         GameObject tg = new GameObject("Text", typeof(RectTransform), typeof(LayoutElement));
         tg.transform.SetParent(row.transform, false);

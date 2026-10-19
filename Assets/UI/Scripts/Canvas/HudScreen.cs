@@ -129,6 +129,7 @@ public class HudScreen : MonoBehaviour
         }
         EnsureMeters();
         EnsureTimerAndPips();
+        EnsureAmmo();
         if (!wired && resultButton != null)
         {
             MakeRematchButton();
@@ -414,6 +415,7 @@ public class HudScreen : MonoBehaviour
 
         UpdateWorldNames(sim);
         UpdateMeters(sim);
+        UpdateAmmo(sim);
         UpdateRoundPips(sim);
         UpdateTimer(sim);
         UpdateBanner(sim);
@@ -439,6 +441,77 @@ public class HudScreen : MonoBehaviour
                 if (!ready[i].gameObject.activeSelf) ready[i].gameObject.SetActive(true);
                 string text = !full ? "ULTIMATE" : i == match.LocalSlot ? "ULTIMATE READY - press " + FightControls.BindingOf(7) + " to ultimate" : "ULTIMATE READY";
                 SetText(ready[i], text);
+            }
+        }
+    }
+
+    // ---------- bullet row (Noir): a few bullets just above the Ultimate bar, lit = still loaded ----------
+
+    const int AmmoSlots = 6;
+    const float AmmoSize = 46f;
+    const float AmmoStep = 40f;
+    Image[][] ammoIcons;
+    GameObject[] ammoRows;
+
+    void EnsureAmmo()
+    {
+        if (ammoIcons != null) return;
+        ammoIcons = new Image[2][];
+        ammoRows = new GameObject[2];
+        for (int side = 0; side < 2; side++)
+        {
+            bool right = side == 1;
+            GameObject row = new GameObject(right ? "RightAmmo" : "LeftAmmo", typeof(RectTransform));
+            row.transform.SetParent(transform, false);
+            RectTransform rrt = (RectTransform)row.transform;
+            Vector2 a = new Vector2(right ? 1f : 0f, 0f);
+            rrt.anchorMin = rrt.anchorMax = rrt.pivot = a;
+            rrt.anchoredPosition = new Vector2(right ? -40f : 40f, 110f);   // above the Ultimate bar (y 40) and its label (y 70-104)
+            rrt.sizeDelta = new Vector2(AmmoStep * AmmoSlots, AmmoSize);
+            ammoRows[side] = row;
+            ammoIcons[side] = new Image[AmmoSlots];
+            for (int i = 0; i < AmmoSlots; i++)
+            {
+                GameObject go = new GameObject("Bullet" + (i + 1), typeof(RectTransform), typeof(Image));
+                go.transform.SetParent(row.transform, false);
+                RectTransform rt = (RectTransform)go.transform;
+                rt.anchorMin = rt.anchorMax = rt.pivot = a;
+                rt.anchoredPosition = new Vector2((right ? -1f : 1f) * AmmoStep * i, 0f);
+                rt.sizeDelta = new Vector2(AmmoSize, AmmoSize);
+                Image img = go.GetComponent<Image>();
+                img.preserveAspect = true;
+                img.raycastTarget = false;
+                ammoIcons[side][i] = img;
+            }
+            row.SetActive(false);
+        }
+    }
+
+    void UpdateAmmo(GameSim sim)
+    {
+        if (ammoIcons == null) return;
+        for (int side = 0; side < 2; side++)
+        {
+            Fighter f = sim.fighters[side];
+            int max = f.AmmoMax;
+            bool show = max > 0;
+            if (ammoRows[side].activeSelf != show) ammoRows[side].SetActive(show);
+            if (!show) continue;
+
+            CharacterLook look = CharacterRegistry.GetLook(f.characterId);
+            Sprite lit = look != null && look.ammoLitSprite != null ? look.ammoLitSprite : Circle();
+            Sprite empty = look != null && look.ammoEmptySprite != null ? look.ammoEmptySprite : Circle();
+            int loaded = f.AmmoLit;
+            // Unlimited ammo (Rapid Fire) lights every bullet and makes them pulse gold.
+            Color litColor = f.IsPoweredUp ? Color.Lerp(Color.white, new Color(1f, 0.85f, 0.2f), 0.4f + 0.6f * Mathf.PingPong(Time.unscaledTime * 4f, 1f)) : Color.white;
+            for (int i = 0; i < ammoIcons[side].Length; i++)
+            {
+                Image img = ammoIcons[side][i];
+                bool on = i < loaded;
+                bool exists = i < max;
+                if (img.enabled != exists) img.enabled = exists;
+                img.sprite = on ? lit : empty;
+                img.color = on ? litColor : new Color(1f, 1f, 1f, 0.45f);
             }
         }
     }

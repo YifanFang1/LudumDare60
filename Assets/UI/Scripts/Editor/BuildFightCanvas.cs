@@ -1142,9 +1142,9 @@ public static class BuildFightCanvas
                 spriteOffset = new Vector2(-90f, 0f),
                 traitPositions = new[] { new Vector2(1508f, 144f), new Vector2(1196f, 245f), new Vector2(1045f, 395f) },
                 tilePortraitRect = new Rect(-13.3f, -20.5f, 204.1582f, 183.9017f) },
-            // Patience: her one banner sits above her crown, not across her face
-            new SelectArtDef { folder = "PATIENCE", id = Executioner.Id, label = "Patience", traits = 1,
-                traitPositions = new[] { new Vector2(1915f, 8f) } },
+            // Patience: her banners sit at the top right, above her crown, not across her face
+            new SelectArtDef { folder = "PATIENCE", id = Executioner.Id, label = "Patience", traits = 2,
+                traitPositions = new[] { new Vector2(1915f, 8f), new Vector2(1915f, 130f) } },
             new SelectArtDef { folder = "DR_REMY", id = PlagueDoctor.Id, label = "Dr. Remy", traits = 3, nameCorner = new Vector2(1868f, 815f) },
             // K3N: the banners line the right edge, clear of his head and his ice weapon
             new SelectArtDef { folder = "K3N", id = K3N.Id, label = "K3N", traits = 3,
@@ -1205,6 +1205,7 @@ public static class BuildFightCanvas
         asset.entries = entries.ToArray();
         asset.randomSelect = SelectSprite("General/random_select.png");
         asset.randomPicked = SelectSprite("General/random_picked.png");
+        asset.opponentTitle = SelectSprite("General/choose_an_opponent.png");
         EditorUtility.SetDirty(asset);
         AssetDatabase.SaveAssets();
         return asset;

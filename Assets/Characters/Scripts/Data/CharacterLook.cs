@@ -34,6 +34,12 @@ public abstract class CharacterLook : ScriptableObject
     [Tooltip("An image flashed over the fighter (stretched to the move's attack area, the box that hurts enemies) when a move starts, then quickly faded out. 'Move' is the move name: Light, Heavy, Grab, Special, Ultimate... View only.")]
     public MoveFlash[] moveFlashes;
 
+    [Header("HUD (optional)")]
+    [Tooltip("For a character with limited ammo (Noir): the lit bullet in the HUD's row above the health bar.")]
+    public Sprite ammoLitSprite;
+    [Tooltip("The same bullet when that round is spent (drawn dimmed).")]
+    public Sprite ammoEmptySprite;
+
     [Tooltip("This character's own sounds. Anything left empty falls back to the AudioManager's shared sounds.")]
     public CharacterSfx sfx = new CharacterSfx();
 
@@ -52,6 +58,14 @@ public abstract class CharacterLook : ScriptableObject
         if (projectileSprites == null || string.IsNullOrEmpty(visual)) return null;
         for (int i = 0; i < projectileSprites.Length; i++)
             if (projectileSprites[i] != null && projectileSprites[i].visual == visual) return projectileSprites[i];
+        return null;
+    }
+
+    public ProjectileSprite FindTelegraphEntry()
+    {
+        if (projectileSprites == null) return null;
+        for (int i = 0; i < projectileSprites.Length; i++)
+            if (projectileSprites[i] != null && projectileSprites[i].playOnTelegraph) return projectileSprites[i];
         return null;
     }
 
@@ -92,6 +106,8 @@ public class ProjectileSprite
     public bool loop;
     [Tooltip("Placed hitboxes only (ones that do not fly or follow the fighter, like Patience's blade): keep showing this for this many seconds after it appears, even if the hitbox itself is gone sooner. 0 = only while the hitbox exists.")]
     public float lingerSeconds;
+    [Tooltip("Start playing when the owner's Telegraph warning appears, timed so the LAST frame lands exactly when the attack does (Patience's guillotine: the blade drops, then hits). Set Linger Seconds to the animation length plus how long to hold the last frame. The hitbox itself then draws nothing.")]
+    public bool playOnTelegraph;
 }
 
 // One entry in CharacterLook.moveFlashes: an image shown over the fighter when a move starts.
