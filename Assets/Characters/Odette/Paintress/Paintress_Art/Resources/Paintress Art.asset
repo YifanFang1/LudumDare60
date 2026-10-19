@@ -24,16 +24,43 @@ MonoBehaviour:
   walkLoopTicks: 30
   projectileSprites: []
   sfx:
-    moves: []
+    moves:
+    - move: Light
+      clips:
+      - {fileID: 8300000, guid: 8d7a4e3af7f825147a5518fd7d12616a, type: 3}
+      - {fileID: 8300000, guid: 0378e216eb4c2dd41b71b883b472469c, type: 3}
+      - {fileID: 8300000, guid: 46d04477915f6c34dbdd3e402a508655, type: 3}
+      - {fileID: 8300000, guid: 813234a59aeb41745ac3d6cc883df69b, type: 3}
+      - {fileID: 8300000, guid: 7b4582dd067e4f94fbb7d562d443e69e, type: 3}
+    - move: Heavy
+      clips:
+      - {fileID: 8300000, guid: 3bec1d6769589b94da037d87f0b6d9d6, type: 3}
+      - {fileID: 8300000, guid: 9275819866c8a0d4abc91076b8493cd8, type: 3}
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: d777ecba6db304f4eb9a62f3a2fa20ae, type: 3}
     attackStart: []
     hit: []
     heavyHit: []
-    grab: []
-    block: []
-    dash: []
-    superFlash: {fileID: 0}
+    grab:
+    - {fileID: 8300000, guid: 3bec1d6769589b94da037d87f0b6d9d6, type: 3}
+    - {fileID: 8300000, guid: 9275819866c8a0d4abc91076b8493cd8, type: 3}
+    block:
+    - {fileID: 8300000, guid: 0378e216eb4c2dd41b71b883b472469c, type: 3}
+    - {fileID: 8300000, guid: 46d04477915f6c34dbdd3e402a508655, type: 3}
+    - {fileID: 8300000, guid: 7b4582dd067e4f94fbb7d562d443e69e, type: 3}
+    dash:
+    - {fileID: 8300000, guid: e8df1a4fb17dccf4495854ad260121b5, type: 3}
+    - {fileID: 8300000, guid: 4214d2f5686bb844c8f4a68db1c919b5, type: 3}
+    jump: []
+    superFlash: {fileID: 8300000, guid: c24b9aad4505c2a41b37a5623aeaba2c, type: 3}
     ko: {fileID: 0}
-    reflect: []
+    reflect:
+    - {fileID: 8300000, guid: 8d7a4e3af7f825147a5518fd7d12616a, type: 3}
+    - {fileID: 8300000, guid: 0378e216eb4c2dd41b71b883b472469c, type: 3}
+    - {fileID: 8300000, guid: 46d04477915f6c34dbdd3e402a508655, type: 3}
+    - {fileID: 8300000, guid: 813234a59aeb41745ac3d6cc883df69b, type: 3}
+    - {fileID: 8300000, guid: 7b4582dd067e4f94fbb7d562d443e69e, type: 3}
     destroy: []
     summon: []
     hold: []
@@ -41,4 +68,12 @@ MonoBehaviour:
     powerUp: []
     outOfAmmo: []
     theme: {fileID: 8300000, guid: 7aeed64b587af8e459022031de3e1e3c, type: 3}
+  voice:
+    dialogue: []
+    volume: 1
+    moves: []
+    hurt: []
+    hurtChance: 0.4
+    ko: []
+    roundWin: []
   characterId: 11
