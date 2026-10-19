@@ -373,7 +373,7 @@ public class RosterTests
         GameSim sim = NewMatch(Brawler.Id, Elephant.Id, 1200);
         sim.Step(Buttons.Light, BackP1);
         Run(sim, None, BackP1, 20);
-        Assert.AreEqual(200 - 6, sim.fighters[1].hp);
+        Assert.AreEqual(150 - 6, sim.fighters[1].hp);
     }
 
     static GameSim RoomHolding()
@@ -413,7 +413,7 @@ public class RosterTests
 
         Press(sim, Buttons.Special, 0, 60);
 
-        Assert.AreEqual(200, room.hp);
+        Assert.AreEqual(150, room.hp);
         Assert.AreEqual(0, sim.CountHitboxes(1, slowShot));
     }
 
@@ -638,7 +638,7 @@ public class RosterTests
     // ================= Paintress =================
 
     [Test]
-    public void PaintressForwardDashIsInvincibleAndTheBackDashCostsHp()
+    public void PaintressForwardDashIsInvincibleAndTheBackDashSlowsHer()
     {
         GameSim sim = NewMatch(Painter.Id, Sandbag.Id, 8000);
         Fighter p = sim.fighters[0];
@@ -657,7 +657,9 @@ public class RosterTests
         sim.Step(Buttons.Left, None);
         Assert.AreEqual(FighterStateId.Dash, p.state);
         Assert.IsFalse(p.IsIntangible);
-        Assert.AreEqual(75 - Painter.BackDashCost, p.hp);
+        Assert.AreEqual(75, p.hp);
+        Assert.AreEqual(Painter.BackDashSlowPercent, p.slowPercent);
+        Assert.Greater(p.slowTicks, 0);
     }
 
     [Test]
@@ -679,18 +681,7 @@ public class RosterTests
         Run(sim, None, None, 6);
         sim.Step(Buttons.Dash | Buttons.Left, None);    // away
         Assert.IsTrue(p.IsAirborne && p.state == FighterStateId.Dash);
-        Assert.AreEqual(75 - Painter.BackDashCost, p.hp, "a back air dash costs HP");
-    }
-
-    [Test]
-    public void PaintressBackDashCannotKOHer()
-    {
-        GameSim sim = NewMatch(Painter.Id, Sandbag.Id, 8000);
-        sim.fighters[0].hp = 3;
-        sim.Step(Buttons.Left, None);
-        sim.Step(None, None);
-        sim.Step(Buttons.Left, None);
-        Assert.AreEqual(1, sim.fighters[0].hp);
+        Assert.Greater(p.slowTicks, 0, "a back air dash slows her too");
     }
 
     [Test]

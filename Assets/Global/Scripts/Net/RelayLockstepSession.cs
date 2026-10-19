@@ -32,8 +32,8 @@ public class RelayLockstepSession : MatchSessionBase
     // 19: Room's Ultimate grows him 1.5x with hyper armor (no more copies).
     // 22: completed matchup intro sheet, including replies and mirror-match timing.
     // 20: Remy's Ultimate waits 1 s, then showers rats. 24: it is uninterruptable (hyper armor).
-    // 25: K3N's Light is slower to start and reaches further (spawn 8, 4 active, 1600x500 box). 26: K3N's Charged Punch is slower and long (spawn 20, 7 active, 4000x500 box). 27: K3N's Grab is slower (spawn 17, 10 active, box 400,700,700,1000). 28: K3N's Special has three retimed hitboxes. 30: Ruy's Hadoken spawns higher (box y 1300). 31: K3N's Install Special has five hitboxes, and every Install attack drains 150 of the bar. 32: Dr. Remy takes no damage during his Ultimate. 33: Dr. Remy has 100 HP and a 0.5 s Ultimate delay; K3N's Light, Charged Punch and Install damage are lower; Room gains no meter while grown. 34: Dr. Remy's rats start after 15 ticks.
-    const string Version = "34";
+    // 25: K3N's Light is slower to start and reaches further (spawn 8, 4 active, 1600x500 box). 26: K3N's Charged Punch is slower and long (spawn 20, 7 active, 4000x500 box). 27: K3N's Grab is slower (spawn 17, 10 active, box 400,700,700,1000). 28: K3N's Special has three retimed hitboxes. 30: Ruy's Hadoken spawns higher (box y 1300). 31: K3N's Install Special has five hitboxes, and every Install attack drains 150 of the bar. 32: Dr. Remy takes no damage during his Ultimate. 33: Dr. Remy has 100 HP and a 0.5 s Ultimate delay; K3N's Light, Charged Punch and Install damage are lower; Room gains no meter while grown. 34: Dr. Remy's rats start after 15 ticks. 35: Paintress's back dash slows herself 50% for 2 s, her dash cooldown is 0.5 s instead of costing HP, and she hits harder (Light 6, Heavy 13, Grab 12, Splat 6); Room has 150 HP.
+    const string Version = "35";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 

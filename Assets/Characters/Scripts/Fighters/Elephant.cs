@@ -1,7 +1,7 @@
 // ROOM: roster character, id 13. Grappler. Design: Design/Characters/Room.md
 // (The class is still called Elephant, D-40. The in-game name is "Room": the elephant in the room.)
 //
-// A huge, slow tank who CAN'T BLOCK. 200 HP, walk 30, a bigger body (1.4 x 2.3 units).
+// A huge, slow tank who CAN'T BLOCK. 150 HP, walk 30, a bigger body (1.4 x 2.3 units).
 // His boxes reach further forward than the standard ones because his body is wider.
 //   Light (J)      Trunk whip: short reach, 9 damage.
 //   Heavy (K)      Trunk slam: slow (18 ticks), big (18 damage).
@@ -84,7 +84,7 @@ public class Elephant : BaseFighter
     public bool Grown { get { return grownTicks > 0; } }
     static int Grow(int value) { return value * GrowPercent / 100; }
 
-    public override int MaxHp { get { return 200; } }
+    public override int MaxHp { get { return 150; } }
     public override int WalkSpeed { get { return Grown ? Grow(30) : 30; } }
     public override Box Hurtbox
     {
