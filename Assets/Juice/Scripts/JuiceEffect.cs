@@ -61,6 +61,7 @@ public class JuiceEffect : MonoBehaviour
     ParticleSystemRenderer[] renderers;
     ParticleSystem[] systems;
     ParticleSystemSimulationSpace[] baseSpaces;   // each system's Simulation Space as set on the prefab
+    bool[] isSubEmitter;  // driven by another system in this prefab; Sticky leaves these alone
     Quaternion baseRotation;
     Vector3 baseScale;
     #endregion
@@ -97,6 +98,19 @@ public class JuiceEffect : MonoBehaviour
             main.scalingMode = ParticleSystemScalingMode.Hierarchy;   // so the scale argument works
             main.useUnscaledTime = true;                              // same clock as the rest of juice
             main.stopAction = ParticleSystemStopAction.None;          // pooled: never destroy or disable itself
+        }
+
+        // Mark systems that are another system's sub-emitter (e.g. Lightning's Charge).
+        isSubEmitter = new bool[systems.Length];
+        for (int i = 0; i < systems.Length; i++)
+        {
+            ParticleSystem.SubEmittersModule subs = systems[i].subEmitters;
+            if (!subs.enabled) continue;
+            for (int s = 0; s < subs.subEmittersCount; s++)
+            {
+                int k = System.Array.IndexOf(systems, subs.GetSubEmitterSystem(s));
+                if (k >= 0) isSubEmitter[k] = true;
+            }
         }
 
         int baseOrder = drawLayer == DrawLayer.InFrontOfFighters ? FrontOrder : BackOrder;
@@ -146,11 +160,14 @@ public class JuiceEffect : MonoBehaviour
     /// <summary>
     /// True = particles move with the effect (Local space). False = back to the prefab's own setting.
     /// Only matters for effects that follow a fighter.
+    /// Sub-emitters keep the prefab's setting: Unity draws them in the wrong place in Local space,
+    /// and what they drop (e.g. Lightning's chain) should stay where it was dropped anyway.
     /// </summary>
     public void SetSticky(bool sticky)
     {
         for (int i = 0; i < systems.Length; i++)
         {
+            if (isSubEmitter[i]) continue;
             ParticleSystem.MainModule main = systems[i].main;
             main.simulationSpace = sticky ? ParticleSystemSimulationSpace.Local : baseSpaces[i];
         }
