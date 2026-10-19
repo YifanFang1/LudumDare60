@@ -38,5 +38,7 @@ MonoBehaviour:
     summon: []
     hold: []
     heal: []
+    powerUp: []
     outOfAmmo: []
+    theme: {fileID: 8300000, guid: 0ffd9992ee1417f4294b71148279ca89, type: 3}
   characterId: 13
