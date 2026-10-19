@@ -245,8 +245,8 @@ public class RosterTests
             hits += Count(sim, SimEventType.Hit);
         }
 
-        Assert.AreEqual(10, hits, "a held string lands every punch");
-        Assert.AreEqual(100 - 10 * 2, sim.fighters[1].hp);
+        Assert.AreEqual(30, hits, "a held string lands every jab: 10 passes of 3");
+        Assert.AreEqual(100 - 30 * 1, sim.fighters[1].hp);
     }
 
     [Test]
@@ -254,7 +254,7 @@ public class RosterTests
     {
         GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 1200);
         Press(sim, Buttons.Special, 0, 60);
-        Assert.AreEqual(100 - 3 * 2, sim.fighters[1].hp);
+        Assert.AreEqual(100 - 3 * 3 * 1, sim.fighters[1].hp);   // 3 passes of a 3-hit jab, 1 damage each
     }
 
     [Test]

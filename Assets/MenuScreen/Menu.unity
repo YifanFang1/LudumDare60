@@ -8199,10 +8199,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ec6945e4cb8a436f915e3006600aa98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterPreview
-  characterId: 15
+  characterId: 16
   character: {fileID: 0}
-  moveIndex: 0
-  tick: 19
+  moveIndex: 5
+  tick: 0
   playing: 0
   playSpeed: 1
   faceRight: 1
@@ -15654,6 +15654,9 @@ MonoBehaviour:
   uiVolume: 0.8
   musicVolume: 0.5
   voiceVolume: 1
+  musicFadeOutSeconds: 0.6
+  musicFadeInSeconds: 1
+  musicEarlySeconds: 2.5
   logMissingVoiceLines: 0
 --- !u!114 &2075206614
 MonoBehaviour:

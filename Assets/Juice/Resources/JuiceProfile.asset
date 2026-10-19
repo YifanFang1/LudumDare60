@@ -41,4 +41,6 @@ MonoBehaviour:
   impactTicks: 16
   lowHealthPercent: 40
   defaultCharacter: {fileID: 11400000, guid: 9d2f1c8d73e87e1429d238994f9bde76, type: 2}
-  characters: []
+  characters:
+  - {fileID: 11400000, guid: 9b0d2029f6734752af4d98aa77c529c5, type: 2}
+  - {fileID: 11400000, guid: 44cb155e3d594b7f9ec8a97a322335fa, type: 2}

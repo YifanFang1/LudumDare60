@@ -5,7 +5,7 @@
 //   Heavy (K)      Charged Punch: hold K to charge, let go to punch. 12 -> 20 damage over 60 ticks.
 //   Grab           standard
 //   Dashes         quick and short: forward hop 1.5 units, back leap 1.6 units
-//   Special (I)    Rapid Punches: hold I to keep punching (2 damage each), 3 hits tapped, up to 10.
+//   Special (I)    Rapid Punches: hold I to keep punching. Each pass is a triple jab (3 hitboxes, 1 damage each); 3 passes tapped, up to 10.
 //   O button       Install (perk 1, D-48). NOT a normal Ultimate: a fresh press of O turns it on
 //                  with ANY meter (no superflash), it drains 2 meter a tick, and O again turns it
 //                  off. While it's on: +30% damage, no move cooldowns, no meter gain.
@@ -42,12 +42,26 @@ public class K3N : BaseFighter
     // ticks of recovery. Hitstun 10 is longer than the 5 ticks between punches, so a string that
     // hits keeps hitting. Knockback is tiny (3 x 10 ticks = 0.03 units a hit) so ten punches don't
     // push the victim out of reach.
+    //
+    // Each pass spawns THREE hitboxes, 2 ticks apart (ticks 6, 8 and 10 of the move): a quick
+    // triple jab. Each does 1 damage, so a pass is 3 damage (it was one 2-damage hit).
     static MoveDef MakeRapidPunches()
     {
         MoveDef m = Melee("Special",
-            totalTicks: 25, spawnTick: 6, activeTicks: 3,
+            totalTicks: 25, spawnTick: 6, activeTicks: 2,
             box: new Box(300, 800, 900, 600),
-            damage: 2, hitstun: 10, knockback: 3, cooldown: SpecialCooldown);
+            damage: 1, hitstun: 10, knockback: 1, cooldown: SpecialCooldown);
+        HitboxDef first = m.hitboxes[0];
+        m.hitboxes = new HitboxDef[3];
+        for (int i = 0; i < 3; i++)
+        {
+            m.hitboxes[i] = new HitboxDef
+            {
+                spawnTick = 6 + 2 * i, lifetime = first.lifetime, box = first.box,
+                damage = first.damage, hitstun = first.hitstun, knockback = first.knockback,
+                followOwner = true,
+            };
+        }
         m.holdButton = Buttons.Special;
         m.loopStart = 6;
         m.loopEnd = 10;
