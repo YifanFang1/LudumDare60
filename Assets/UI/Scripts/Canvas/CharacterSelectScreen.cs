@@ -360,9 +360,13 @@ public class CharacterSelectScreen : MonoBehaviour
             Image img = icon.GetComponent<Image>();
             img.sprite = block;
             img.raycastTarget = false;
+            img.preserveAspect = true;
+            // A fixed size: with only a preferred size, rows with long descriptions squeezed the
+            // square narrower, so the squares came out different sizes.
             LayoutElement ile = icon.GetComponent<LayoutElement>();
-            ile.preferredWidth = 100f;
-            ile.preferredHeight = 95f;
+            ile.minWidth = ile.preferredWidth = 100f;
+            ile.minHeight = ile.preferredHeight = 95f;
+            ile.flexibleWidth = 0f;
         }
         GameObject tg = new GameObject("Text", typeof(RectTransform), typeof(LayoutElement));
         tg.transform.SetParent(row.transform, false);
