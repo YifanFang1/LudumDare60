@@ -23,8 +23,14 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites:
-  - visual: 
+  - visual: Poison
     sprite: {fileID: 6701125874796175287, guid: a173614ec202b4059aaac8b295f909dc, type: 3}
+  - visual: Heal
+    sprite: {fileID: 2562034983933048709, guid: d53e30a27af244c73997bfb4ab59d3bf, type: 3}
+  - visual: Slow
+    sprite: {fileID: -3795657488945032045, guid: 43701104583864e858d9ca6a7c3ecc84, type: 3}
+  - visual: Rat
+    sprite: {fileID: 2711180820685309906, guid: 1d186204f19e5465cbdc851c21eac8bf, type: 3}
   sfx:
     moves: []
     attackStart: []
@@ -41,4 +47,5 @@ MonoBehaviour:
     hold: []
     heal: []
     outOfAmmo: []
+    theme: {fileID: 0}
   characterId: 15
