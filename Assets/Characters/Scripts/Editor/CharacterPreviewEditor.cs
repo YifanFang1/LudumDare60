@@ -83,7 +83,7 @@ public class CharacterPreviewEditor : Editor
         CharacterData asset = look as CharacterData;   // an inspector character: edits are saved in its asset
         if (asset == null)
         {
-            EditorGUILayout.HelpBox("This character is written in code, so edits here are live but are lost when scripts reload. Press 'Copy values' and paste them into its .cs file to keep them.", MessageType.Info);
+            EditorGUILayout.HelpBox("This character is written in code, so edits here are live but are lost when scripts reload. Press 'Save all moves' to keep them (saved as a json the game applies on top of the .cs numbers).", MessageType.Info);
         }
 
         DrawTimeline(move, tickProp);
@@ -131,6 +131,12 @@ public class CharacterPreviewEditor : Editor
         }
 
         if (GUILayout.Button("Copy values")) GUIUtility.systemCopyBuffer = FrameText(move);
+
+        if (asset == null)
+        {
+            if (GUILayout.Button("Save all moves (applies in game)")) SaveOverrides(p);
+            if (GUILayout.Button("Delete saved edits (back to .cs values)")) DeleteOverrides(p);
+        }
     }
 
     // Startup (blue), active (red) and recovery (grey) across the move's ticks. Click or drag to set the tick.
@@ -162,6 +168,28 @@ public class CharacterPreviewEditor : Editor
             tickProp.intValue = Mathf.Clamp(Mathf.FloorToInt((e.mousePosition.x - r.x) / r.width * total), 0, move.totalTicks - 1);
             e.Use();
         }
+    }
+
+    static string OverridePath(int id)
+    {
+        return "Assets/Characters/Resources/MoveOverrides/" + id + ".json";
+    }
+
+    // Writes every move of this character (the live values shown here) to the override json.
+    static void SaveOverrides(CharacterPreview p)
+    {
+        MoveDef[] moves = p.Moves();
+        string path = OverridePath(p.characterId);
+        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
+        System.IO.File.WriteAllText(path, JsonUtility.ToJson(MoveOverrides.Capture(moves), true));
+        AssetDatabase.ImportAsset(path);
+        Debug.Log("Saved frame data to " + path + ". Bump the relay Version before the next online build.");
+    }
+
+    static void DeleteOverrides(CharacterPreview p)
+    {
+        string path = OverridePath(p.characterId);
+        if (AssetDatabase.DeleteAsset(path)) Debug.Log("Deleted " + path + ". Reload scripts (or restart Play) to see the .cs values again.");
     }
 
     static string FrameText(MoveDef move)

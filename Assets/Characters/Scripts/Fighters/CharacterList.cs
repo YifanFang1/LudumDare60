@@ -123,6 +123,7 @@ public static class CharacterList
         if (!entries.TryGetValue(id, out e)) e = entries[Sandbag.Id];
         Fighter f = e.make();
         f.characterId = e.id;
+        if (e.def == null) MoveOverrides.Apply(f, e.id);   // saved Character Preview edits (code characters only)
         return f;
     }
 

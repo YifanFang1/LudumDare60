@@ -28,6 +28,12 @@ public static class CharacterRegistry
     // Load every character asset again (also the editor tools' "Reload characters" button).
     public static void Reload()
     {
+        MoveOverrides.Loader = delegate(int id)
+        {
+            TextAsset text = Resources.Load<TextAsset>("MoveOverrides/" + id);
+            return text == null ? null : JsonUtility.FromJson<MoveOverrides.FileData>(text.text);
+        };
+        MoveOverrides.Reset();
         loadedOnce = true;
         byId.Clear();
         CharacterList.ClearData();
