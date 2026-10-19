@@ -269,9 +269,12 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    // A random shout from a list. Short lists don't play every time, so the same one or two clips
+    // don't get repetitive: 1 clip = 1/3 of the time, 2 clips = 2/3, 3 or more = always.
     void PlayVoice(int slot, AudioClip[] clips)
     {
         if (!Has(clips)) return;
+        if (clips.Length < 3 && Random.value >= clips.Length / 3f) return;
         PlayVoice(slot, clips[Random.Range(0, clips.Length)]);
     }
 
@@ -281,7 +284,8 @@ public class AudioManager : MonoBehaviour
         AudioSource s = voices[slot];
         s.Stop();
         s.clip = clip;
-        s.volume = voiceVolume;
+        CharacterVoice v = VoiceOf(slot);
+        s.volume = voiceVolume * (v != null ? v.volume : 1f);
         s.Play();
     }
 

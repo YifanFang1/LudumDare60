@@ -16,6 +16,10 @@ public class CharacterVoice
     [Tooltip("Spoken versions of this character's on-screen lines (intro exchanges, win and lose lines). 'Line' must match the text on screen.")]
     public VoiceLine[] dialogue;
 
+    [Range(0f, 1f)]
+    [Tooltip("This character's voice volume, on top of the AudioManager's Voice Volume. Lower it for a voice that's recorded louder than the others.")]
+    public float volume = 1f;
+
     [Tooltip("Shout when a move starts. 'Move' is the move name: Light, Heavy, Grab, Special, Ultimate, JumpLight, JumpHeavy.")]
     public MoveSfx[] moves;
     [Tooltip("Getting hit. Picked at random.")]

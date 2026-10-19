@@ -45,35 +45,36 @@ MonoBehaviour:
   voice:
     dialogue:
     - line: You know, they call me a genie. It's cause I grant death wishes.
-      clip: {fileID: 8300000, guid: 7f7cb80cfadbdcc46ad7080b86f2d65a, type: 3}
+      clip: {fileID: 8300000, guid: f2ea2dd0ec7d634449b2cdad9be41048, type: 3}
     - line: That was a Ruy-ly good punch.
-      clip: {fileID: 8300000, guid: 0baf917fd8f02744bb35a5dc5af2b27f, type: 3}
+      clip: {fileID: 8300000, guid: 9eb8ea25df622e941b677c940fa252ed, type: 3}
     - line: It seems I have been thoroughly pun-nished.
-      clip: {fileID: 8300000, guid: aed263ddba7172b47abd67bfe278beed, type: 3}
+      clip: {fileID: 8300000, guid: 1628663de3661cf4aa54c68733ad66b0, type: 3}
     - line: "Hey! That\u2019s a Ruy-crime!"
-      clip: {fileID: 8300000, guid: f500f6479422e794aab331945659cadf, type: 3}
+      clip: {fileID: 8300000, guid: 47f32c55f048e4d40bc53b87f2f6a5c1, type: 3}
     - line: You're being such a Kill-Ruy.
-      clip: {fileID: 8300000, guid: 89f00a3601ee41242af9f6b787c409a3, type: 3}
+      clip: {fileID: 8300000, guid: 276d50bbb63d56c4e8c3b96006a271c0, type: 3}
     - line: Sure-you-can beat me?
-      clip: {fileID: 8300000, guid: 26a1267ad0519fc479c3d98706bec5ed, type: 3}
+      clip: {fileID: 8300000, guid: 4ba70de99445a5a41bbe1ad07086f706, type: 3}
     - line: Man, I'm bored, can you at least try to fight back?
-      clip: {fileID: 8300000, guid: f174ee98f89e824428e61a0ffc16aea7, type: 3}
+      clip: {fileID: 8300000, guid: 581e828661cc7c14db9cdf7fc9e4db0b, type: 3}
     - line: Get dest-Ruy-ed!
-      clip: {fileID: 8300000, guid: aedaff597ed2c154ebec06a91b9a78c6, type: 3}
+      clip: {fileID: 8300000, guid: ff14b1b9677651448bbc6fcbde8e313f, type: 3}
+    volume: 1
     moves:
     - move: Heavy
       clips:
-      - {fileID: 8300000, guid: 4a4057efcd1321c428e1de2618632db5, type: 3}
-      - {fileID: 8300000, guid: aaafce3574177e445a7ec7f6390df5c3, type: 3}
+      - {fileID: 8300000, guid: 48d5cd13befb539468fc45eea46509ce, type: 3}
+      - {fileID: 8300000, guid: 6ca0b40371801ab43bad56428368e2f7, type: 3}
     - move: Special
       clips:
-      - {fileID: 8300000, guid: 7ee78667c0ad00646a1946ba560e5a85, type: 3}
+      - {fileID: 8300000, guid: 44448927e38f60b439407247974ad618, type: 3}
     - move: Ultimate
       clips:
-      - {fileID: 8300000, guid: 6d83566898075ab42909ab09c2f636d9, type: 3}
+      - {fileID: 8300000, guid: ee76262e7ae6bd24195b54233f367a2d, type: 3}
     hurt:
-    - {fileID: 8300000, guid: e43c202b25d499f479fa47b641eb0237, type: 3}
-    - {fileID: 8300000, guid: fd8a054ca61999447a8b7c907bf7d6ea, type: 3}
+    - {fileID: 8300000, guid: 3b6d97925008cb041abdac933119a8f3, type: 3}
+    - {fileID: 8300000, guid: 5b27785a6edf9024188f3178c5bdb96f, type: 3}
     hurtChance: 0.4
     ko: []
     roundWin: []
