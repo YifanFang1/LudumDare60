@@ -11,7 +11,7 @@ public class MatchupDialogueTests
         Assert.AreEqual(a.secondText, b.secondText);
         Assert.AreEqual(10, a.firstId);
         Assert.AreEqual(12, a.secondId);
-        Assert.AreEqual("Wet Urn? What are you on about, Buckaroo?", a.secondText);
+        Assert.AreEqual("Wet Urn? What are ya on about, Buckaroo?", a.secondText);
         GameSim sim = new GameSim();
         a.Configure(sim, 10, 0);
         Assert.AreEqual(0, sim.introFirstSlot);
@@ -96,8 +96,8 @@ public class MatchupDialogueTests
     [Test]
     public void EmptyMatchupsKeepExplicitPlaceholderAndNegativeVariantsAreSafe()
     {
-        Assert.AreEqual("To be implemented.", MatchupDialogue.Select(13, 15, 0).firstText);
-        Assert.AreEqual("Are you from Tennesse? Cause you're the only 10 I see.", MatchupDialogue.Select(10, 10, 0).firstText);
+        Assert.AreEqual("To be implemented.", MatchupDialogue.Select(Sandbag.Id, 10, 0).firstText);   // every roster pair has dialogue; the training dummy has none
+        Assert.AreEqual("Are you from Tennessee? 'Cause you're the only 10 I see.", MatchupDialogue.Select(10, 10, 0).firstText);
         Assert.IsTrue(MatchupDialogue.Select(10, 16, int.MinValue).firstText != null);
     }
 }
