@@ -114,3 +114,5 @@ InitTestScene*.unity*
 # macOS / filesystem junk
 .DS_Store
 .fuse_hidden*
+*.orig
+*.rej

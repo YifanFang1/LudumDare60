@@ -9,6 +9,7 @@ public class HitboxInstance
     public HitboxDef def;
     public int originX;        // where it is, when it doesn't follow its owner (projectiles, placed hitboxes)
     public int originY;
+    public int vy;             // current upward speed of a lob (starts at def.vy)
     public int facing;
     public int lifetime;       // ticks left
     public int age;            // ticks it has existed (for HitboxDef.armTicks)

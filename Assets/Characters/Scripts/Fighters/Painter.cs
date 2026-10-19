@@ -35,10 +35,10 @@ public class Painter : BaseFighter
         box: new Box(300, 300, 1100, 1800),
         damage: 11, hitstun: 20, knockback: 70, cooldown: HeavyCooldown);
 
-    public static readonly MoveDef ShortGrab = Grab("Grab",
+    public static readonly MoveDef ShortGrab = HoldGrab(Grab("Grab",
         totalTicks: 38, spawnTick: 4, activeTicks: 2,
         box: new Box(300, 600, 500, 1000),
-        damage: 10, hitstun: 40, knockback: 90, cooldown: GrabCooldown);
+        damage: 10, hitstun: 40, knockback: 90, cooldown: GrabCooldown));
 
     public static readonly MoveDef Canvas = MakeCanvas();
     public static readonly MoveDef PaintSplat = MakePaintSplat();
