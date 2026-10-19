@@ -7413,9 +7413,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ec6945e4cb8a436f915e3006600aa98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterPreview
-  characterId: 13
+  characterId: 16
   character: {fileID: 0}
-  moveIndex: 0
+  moveIndex: 6
   tick: 0
   playing: 0
   playSpeed: 1

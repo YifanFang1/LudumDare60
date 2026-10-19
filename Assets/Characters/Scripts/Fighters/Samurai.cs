@@ -31,7 +31,7 @@ public class Samurai : BaseFighter
     {
         MoveDef m = Projectile("Special",
             totalTicks: 30, spawnTick: 12, lifetime: 150,
-            box: new Box(400, 900, 500, 400),
+            box: new Box(400, 1300, 500, 400),   // spawns higher (was y 900)
             speed: 100, damage: 10, hitstun: 18, knockback: 60,
             visual: "special", cooldown: SpecialCooldown);
         m.holdButton = Buttons.Special;
