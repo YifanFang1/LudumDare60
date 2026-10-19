@@ -28,7 +28,12 @@ public class RelayLockstepSession : MatchSessionBase
     // 15: synchronized two-character introduction before the countdown.
     // 16: round timer is 80 seconds.
     // 17: ordered matchup dialogue with synchronized reading time.
+<<<<<<< Updated upstream
     const string Version = "17";
+=======
+    // 21: completed matchup intro sheet, including replies and mirror-match timing.
+    const string Version = "21";
+>>>>>>> Stashed changes
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 
