@@ -946,6 +946,25 @@ public class CountdownTests
         NUnit.Framework.Assert.AreEqual("", sim.CountdownText);
     }
 
+    // Real matches: "ROUND 1" on its own, then 3-2-1, then FIGHT; nobody moves until FIGHT.
+    [NUnit.Framework.Test]
+    public void RoundCallComesBeforeTheCountdown()
+    {
+        GameSim sim = new GameSim { countdownOn = true, roundCallOn = true };
+        sim.Reset(1, CharacterList.Factory(0), CharacterList.Factory(0));
+        for (int i = 0; i < GameSim.RoundCallTicks + GameSim.CountdownTicks; i++)
+        {
+            if (i < GameSim.RoundCallTicks)
+                NUnit.Framework.Assert.AreEqual(GameSim.CountdownTicks, sim.countdownTicks, "the 3-2-1 waits for the round call");
+            if (i == GameSim.RoundCallTicks) NUnit.Framework.Assert.AreEqual("3", sim.CountdownText);
+            sim.Step(Buttons.Right, Buttons.Left);
+            NUnit.Framework.Assert.AreEqual(-GameSim.StartX, sim.fighters[0].x);
+        }
+        NUnit.Framework.Assert.AreEqual("FIGHT!", sim.CountdownText);
+        sim.Step(Buttons.Right, 0);
+        NUnit.Framework.Assert.Greater(sim.fighters[0].x, -GameSim.StartX);
+    }
+
     [NUnit.Framework.Test]
     public void CountdownRestartsForNextRoundAndResetAndIsHashed()
     {

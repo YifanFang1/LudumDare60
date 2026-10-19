@@ -11,6 +11,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
 {
+    int dialogueSequence;
     protected GameSim sim = new GameSim();
     protected LockstepRunner runner = new LockstepRunner();
 
@@ -153,8 +154,11 @@ public abstract class MatchSessionBase : MonoBehaviour, IMatchSession
         names[localSlot] = mine;
         names[1 - localSlot] = online ? "P" + (2 - localSlot) : "AI";
         Warning = "";
+        int dialogueVariant = online ? setup.seed : dialogueSequence++;
+        MatchupDialogue.Select(setup.p0Character, setup.p1Character, dialogueVariant).Configure(sim, setup.p0Character, dialogueVariant);
         sim.introductionsOn = true;
         sim.countdownOn = true;
+        sim.roundCallOn = true;
         sim.roundTimerOn = online;   // no timer vs AI: rounds last until a KO
         sim.Reset(setup.seed, CharacterList.Factory(setup.p0Character), CharacterList.Factory(setup.p1Character));
 

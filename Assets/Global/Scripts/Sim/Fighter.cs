@@ -520,6 +520,7 @@ public abstract class Fighter
             usedAirMove = false;
             usedAirDash = false;
             EnterState(FighterStateId.Jump);
+            sim.AddEvent(SimEventType.Jump, index, -1, x, y, 0);
             return;
         }
 

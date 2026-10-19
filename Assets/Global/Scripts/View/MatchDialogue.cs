@@ -10,8 +10,11 @@ public static class MatchDialogue
 
     public static string Start(GameSim sim)
     {
+        // With the round call phase on: "ROUND 1" on its own, then just the numbers.
+        if (sim.roundCallTicks > 0) return Round(sim);
         if (sim.countdownTicks <= 0) return sim.fightBannerTicks > 0 ? "FIGHT!" : "";
         string number = ((sim.countdownTicks + 59) / 60).ToString();
+        if (sim.roundCallOn) return number;
         if (sim.round == 1 && sim.countdownTicks > 120)
             return "MATCH START\n" + Round(sim) + "  " + number;
         return Round(sim) + "\n" + number;

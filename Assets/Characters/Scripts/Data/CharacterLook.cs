@@ -34,6 +34,9 @@ public abstract class CharacterLook : ScriptableObject
     [Tooltip("This character's own sounds. Anything left empty falls back to the AudioManager's shared sounds.")]
     public CharacterSfx sfx = new CharacterSfx();
 
+    [Tooltip("This character's voice: spoken intro and win/lose lines, and combat shouts. See CharacterVoice.cs.")]
+    public CharacterVoice voice = new CharacterVoice();
+
     // -1 when flipSprite is ticked, else 1. Multiply the art's x scale by it.
     public float SpriteFlip { get { return flipSprite ? -1f : 1f; } }
 
@@ -89,6 +92,8 @@ public class CharacterSfx
     public AudioClip[] block;
     [Tooltip("This character dashing.")]
     public AudioClip[] dash;
+    [Tooltip("This character jumping off the ground.")]
+    public AudioClip[] jump;
     [Tooltip("This character's Ultimate freeze.")]
     public AudioClip superFlash;
     [Tooltip("This character being knocked out.")]

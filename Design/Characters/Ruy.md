@@ -48,7 +48,7 @@ After the 30-tick superflash, a rising uppercut that's **invincible on startup**
 |---|---|
 | 0 | He jumps straight up (`vy = 230`, peaks about 2.4 units) with a little forward drift (`vx = facing * 20`) |
 | 0-7 | Intangible: hits and projectiles pass through him |
-| 2-13 | Uppercut hitbox `Box(100, 0, 900, 2400)`, following him up |
+| 2-13 | Uppercut hitbox `Box(100, 0, 900, 2400)`, following him up. **On hit it launches** the victim (`vy = 280`, about 3.6 units up, `vx = 40` away instead of the 120 knockback); they stay in hitstun until they land |
 | ~42 | Lands. **The move must keep playing after landing** (see Implementation notes) |
 | 52 | Move ends |
 

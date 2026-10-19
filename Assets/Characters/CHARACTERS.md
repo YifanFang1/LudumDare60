@@ -363,5 +363,13 @@ Noir's empty click: a fresh Special press with no bullets left raises the `OutOf
 
 K3N (id 16) is set up in `Assets/Characters/K3N/Resources/K3N Art.asset` (clips in `Assets/Characters/K3N/k3n sfx`): Light = cape, Special = smallpunch, hit = smallpunch, heavy hit (12+ damage, the Charged Punch) = bigpunch, dash = dash, block = zeepzorp-01..04 (his pet), Install on = powerup. Install raises the `PowerUp` sim event (amount 1 on, 0 off); only "on" plays a sound. Any character can use the **Power Up** slot.
 
+### Voice lines
+Fill **Voice** on the same art asset (the class is in `Characters/Scripts/Data/CharacterVoice.cs`):
+- **Dialogue:** one entry per spoken line. Paste the line's text into **Line** (from `MatchupDialogue.cs` for intros, `CharacterDialogue.cs` for win/lose lines, or straight off the screen) and drag the recording into **Clip**. Lines are matched by text, ignoring capitals, spaces and punctuation, and each is spoken once when it appears. Put each line on the asset of the character who **says** it. Tick **Log Missing Voice Lines** on the AudioManager to have the Console list every line that has no recording yet.
+- **Moves:** a shout per move name (Light, Heavy, Special, Ultimate...).
+- **Hurt** (played on a hit with **Hurt Chance**), **KO**, **Round Win** (not the last round, since the win line plays then).
+
+Voices play on their own source per fighter at normal pitch, so a new line cuts off that fighter's previous one. The on-screen intro time comes from the text length, not the recording, so a recording longer than its line is cut off when the next line starts.
+
 ### Menu sounds
 The AudioManager's Menu section holds the shared UI sounds: Button Click (every button) and Confirm, Page Switch (middle of the glitch transition), Glitch Sound (start of the glitch transition), Glass Break (title press and match start shatter), TV Off (Quit). They live in `Assets/UI/SFX`.
