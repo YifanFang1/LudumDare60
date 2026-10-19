@@ -1,0 +1,352 @@
+{
+    "moves": [
+        {
+            "name": "Light",
+            "totalTicks": 16,
+            "cooldown": 5,
+            "hitboxes": [
+                {
+                    "spawnTick": 2,
+                    "lifetime": 6,
+                    "damage": 5,
+                    "hitstun": 12,
+                    "knockback": 40,
+                    "x": 630,
+                    "y": 1150,
+                    "w": 1500,
+                    "h": 300,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Heavy",
+            "totalTicks": 32,
+            "cooldown": 10,
+            "hitboxes": [
+                {
+                    "spawnTick": 12,
+                    "lifetime": 60,
+                    "damage": 8,
+                    "hitstun": 18,
+                    "knockback": 50,
+                    "x": 200,
+                    "y": 1100,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 100
+                }
+            ]
+        },
+        {
+            "name": "Grab",
+            "totalTicks": 40,
+            "cooldown": 15,
+            "hitboxes": [
+                {
+                    "spawnTick": 14,
+                    "lifetime": 12,
+                    "damage": 6,
+                    "hitstun": 40,
+                    "knockback": 30,
+                    "x": 300,
+                    "y": 600,
+                    "w": 700,
+                    "h": 1000,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "Special",
+            "totalTicks": 45,
+            "cooldown": 30,
+            "hitboxes": []
+        },
+        {
+            "name": "Ultimate",
+            "totalTicks": 150,
+            "cooldown": 0,
+            "hitboxes": [
+                {
+                    "spawnTick": 66,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 105
+                },
+                {
+                    "spawnTick": 69,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 120
+                },
+                {
+                    "spawnTick": 72,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 75
+                },
+                {
+                    "spawnTick": 75,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 120
+                },
+                {
+                    "spawnTick": 78,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 60
+                },
+                {
+                    "spawnTick": 81,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 90
+                },
+                {
+                    "spawnTick": 84,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 120
+                },
+                {
+                    "spawnTick": 87,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 90
+                },
+                {
+                    "spawnTick": 90,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 60
+                },
+                {
+                    "spawnTick": 93,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 90
+                },
+                {
+                    "spawnTick": 96,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 75
+                },
+                {
+                    "spawnTick": 99,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 105
+                },
+                {
+                    "spawnTick": 102,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 105
+                },
+                {
+                    "spawnTick": 105,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 60
+                },
+                {
+                    "spawnTick": 108,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 75
+                },
+                {
+                    "spawnTick": 111,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 105
+                },
+                {
+                    "spawnTick": 114,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 135
+                },
+                {
+                    "spawnTick": 117,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 105
+                },
+                {
+                    "spawnTick": 120,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 120
+                },
+                {
+                    "spawnTick": 123,
+                    "lifetime": 150,
+                    "damage": 1,
+                    "hitstun": 12,
+                    "knockback": 5,
+                    "x": -225,
+                    "y": 1775,
+                    "w": 450,
+                    "h": 450,
+                    "vx": 120
+                }
+            ]
+        },
+        {
+            "name": "JumpLight",
+            "totalTicks": 14,
+            "cooldown": 0,
+            "hitboxes": [
+                {
+                    "spawnTick": 3,
+                    "lifetime": 8,
+                    "damage": 5,
+                    "hitstun": 14,
+                    "knockback": 30,
+                    "x": 200,
+                    "y": 0,
+                    "w": 800,
+                    "h": 700,
+                    "vx": 0
+                }
+            ]
+        },
+        {
+            "name": "JumpHeavy",
+            "totalTicks": 24,
+            "cooldown": 0,
+            "hitboxes": [
+                {
+                    "spawnTick": 6,
+                    "lifetime": 6,
+                    "damage": 10,
+                    "hitstun": 20,
+                    "knockback": 60,
+                    "x": 100,
+                    "y": 0,
+                    "w": 1000,
+                    "h": 900,
+                    "vx": 0
+                }
+            ]
+        }
+    ]
+}
