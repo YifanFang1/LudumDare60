@@ -9,14 +9,14 @@
 //   Special (I)    Rapid Punches: hold I to keep punching. Each pass is a triple jab (3 hitboxes, 1 damage each); 3 passes tapped, up to 10.
 //   O button       Install (perk 1, D-48). NOT a normal Ultimate: a fresh press of O turns it on
 //                  with ANY meter (no superflash), it drains 2 meter a tick, and O again turns it
-//                  off. While it's on: +30% damage, no move cooldowns, no meter gain.
+//                  off. While it's on: +15% damage, no move cooldowns, no meter gain.
 //   Perk 2         Second Wind: his cooldowns shrink as he loses health (up to -50%).
 public class K3N : BaseFighter
 {
     public const int Id = 16;
 
     public const int InstallDrainPerTick = 2;      // a full bar lasts about 8 seconds
-    public const int InstallDamagePercent = 130;
+    public const int InstallDamagePercent = 115;
     public const int InstallAttackDrain = 150;     // every Install attack (Light, Heavy or Special) also costs this much bar (1000 = full)
     public const int PunchFullCharge = 60;
     // Charged Punch steps him forward: LungeSpeed milli-units a tick for the LungeTicks ticks just
@@ -31,7 +31,7 @@ public class K3N : BaseFighter
         return Melee("Light",
             totalTicks: 16, spawnTick: 8, activeTicks: 4,
             box: new Box(400, 1000, 1600, 500),
-            damage: 5, hitstun: 12, knockback: 40, cooldown: LightCooldown);
+            damage: 4, hitstun: 12, knockback: 40, cooldown: LightCooldown);
     }
 
     // Grab with hand: the standard held grab (damage 12, hitstun 40, 20-tick hold), but slower to
@@ -57,7 +57,7 @@ public class K3N : BaseFighter
         MoveDef m = Melee("Heavy",
             totalTicks: 28, spawnTick: 20, activeTicks: 7,
             box: new Box(300, 900, 4000, 500),
-            damage: 12, hitstun: 20, knockback: 80, cooldown: HeavyCooldown);
+            damage: 10, hitstun: 20, knockback: 80, cooldown: HeavyCooldown);
         m.holdButton = Buttons.Heavy;
         m.chargeTick = 0;
         m.chargeMax = PunchFullCharge;
@@ -209,7 +209,7 @@ public class K3N : BaseFighter
     {
         if (hit.def == ChargedPunch.hitboxes[0] || hit.def == InstallPunch.hitboxes[0])
         {
-            hit.damage = 12 + 8 * chargeTicks / PunchFullCharge;
+            hit.damage = 10 + 8 * chargeTicks / PunchFullCharge;
             hit.hitstun = 20 + 6 * chargeTicks / PunchFullCharge;
             hit.knockback = 80 + 40 * chargeTicks / PunchFullCharge;
         }

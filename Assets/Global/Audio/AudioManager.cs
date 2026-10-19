@@ -56,6 +56,7 @@ public class AudioManager : MonoBehaviour
 
     [Header("Music")]
     public AudioClip menuMusic;          // lobby and waiting for an opponent
+    public AudioClip afterMatchMusic;    // the menu and character select music once a match has been played (Battle Theme); empty = keep the normal menu music
     public AudioClip characterSelectMusic;   // empty = keep the menu music playing
     public AudioClip fightMusic;         // round 1, and later rounds if the winner has no theme
 
@@ -102,6 +103,8 @@ public class AudioManager : MonoBehaviour
 
     // So menus can play click sounds without needing a reference (or this component at all).
     static AudioManager instance;
+    // True once a match has finished this session: the menu then plays afterMatchMusic.
+    static bool PlayedMatch;
 
     IMatchSession match;
     AudioSource sfx;      // fight sounds, slightly random pitch
@@ -539,12 +542,14 @@ public class AudioManager : MonoBehaviour
         switch (phase)
         {
             case MatchPhase.CharacterSelect:
+                if (PlayedMatch && afterMatchMusic != null) return afterMatchMusic;
                 return characterSelectMusic != null ? characterSelectMusic : menuMusic;
             case MatchPhase.Playing:
                 // Silent during the intros and once the match is won, so the dialogue and then the
                 // jingle stand out. A character theme (rounds 2-3) starts with the round call; the
                 // default battle theme waits for most of the 3-2-1 (Music Early Seconds before FIGHT!).
                 GameSim sim = match.Sim;
+                if (sim.IsOver) PlayedMatch = true;
                 if (sim.IsOver || sim.introTicks > 0) return null;
                 AudioClip song = FightMusic();
                 if (song != fightMusic) return song;
@@ -553,7 +558,7 @@ public class AudioManager : MonoBehaviour
                 return song;
             default:
                 instance.characterSelectMusic = null;
-                return menuMusic;
+                return PlayedMatch && afterMatchMusic != null ? afterMatchMusic : menuMusic;
         }
     }
 

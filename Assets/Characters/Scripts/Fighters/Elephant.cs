@@ -93,6 +93,7 @@ public class Elephant : BaseFighter
     public override bool IgnoresHitstun { get { return Grown; } }
     public override int ScalePercent { get { return Grown ? GrowPercent : 100; } }
     public override bool IsPoweredUp { get { return Grown; } }
+    public override bool CanGainMeter { get { return !Grown; } }   // no Ultimate meter while grown
     public override string HudInfo { get { return Grown ? "GROWN" : null; } }
     public override int HashExtra() { return grownTicks; }
 

@@ -44,14 +44,14 @@
             "cooldown": 15,
             "hitboxes": [
                 {
-                    "spawnTick": 10,
+                    "spawnTick": 30,
                     "lifetime": 3,
                     "damage": 2,
                     "hitstun": 40,
                     "knockback": 30,
                     "x": 300,
                     "y": 600,
-                    "w": 1200,
+                    "w": 2748,
                     "h": 1000,
                     "vx": 0
                 }
@@ -90,7 +90,7 @@
                 {
                     "spawnTick": 3,
                     "lifetime": 8,
-                    "damage": 2,
+                    "damage": 5,
                     "hitstun": 14,
                     "knockback": 30,
                     "x": 200,

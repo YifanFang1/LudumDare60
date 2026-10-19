@@ -450,6 +450,8 @@ public class HudScreen : MonoBehaviour
     const int AmmoSlots = 6;
     const float AmmoSize = 46f;
     const float AmmoStep = 40f;
+    const float PotionSize = 84f;   // Remy's potion icons are drawn bigger than the bullets
+    const float PotionStep = 80f;
     Image[][] ammoIcons;
     GameObject[] ammoRows;
 
@@ -511,6 +513,10 @@ public class HudScreen : MonoBehaviour
                 bool on = f.HudIconOn(i);
                 bool exists = i < max;
                 if (img.enabled != exists) img.enabled = exists;
+                RectTransform irt = (RectTransform)img.transform;
+                float size = perSlot ? PotionSize : AmmoSize, step = perSlot ? PotionStep : AmmoStep;
+                irt.sizeDelta = new Vector2(size, size);
+                irt.anchoredPosition = new Vector2((side == 1 ? -1f : 1f) * step * i, 0f);
                 if (perSlot)
                 {
                     img.sprite = icons[Mathf.Min(i, icons.Length - 1)];

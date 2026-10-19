@@ -1,7 +1,7 @@
 // DR. REMY (+ Remy's Rat): roster character, id 15. Mixup. Design: Design/Characters/DrRemy.md
 // (The class is still called PlagueDoctor, D-40. The in-game name is "Dr. Remy"; the rat is Remy.)
 //
-// A frail, quick doctor who picks the right potion for the moment. 60 HP, walk 75.
+// A frail, quick doctor who picks the right potion for the moment. 100 HP, walk 75.
 //   Light (J)      Cane jab: a little more reach than a jab.
 //   Heavy (K)      Throw Remy: a rat projectile. No on-screen limit, only the cooldown.
 //   Grab (L)       Leech grab: 6 damage, and leeches drain 1 HP a second for 5 s, healing him.
@@ -12,7 +12,7 @@
 //                    Heal    he drinks it: +10 HP (never above 60). Its own 5 s cooldown.
 //                    Slow    thrown: on hit, a 3 s slow.
 //                  Using any potion puts the others on a 30-tick cooldown too.
-//   Ultimate (O)   Unleash the Rats: after a 1 s delay, a shower of 20 rats is shot forward over
+//   Ultimate (O)   Unleash the Rats: after a 0.25 s delay, a shower of 20 rats is shot forward over
 //                  about 1 s (random speed each). Can't be blocked. 1 damage each.
 //                  Uninterruptable: hyper armor from the start (hits hurt, no hitstun).
 //   Perk 1         Apothecary: the potion choice (above).
@@ -79,11 +79,11 @@ public class PlagueDoctor : BaseFighter
         return m;
     }
 
-    // Unleash the Rats: after UltDelay ticks (1 s) Remy sprays a shower of rats. Each rat spawns at the top middle
+    // Unleash the Rats: after UltDelay ticks (0.25 s) Remy sprays a shower of rats. Each rat spawns at the top middle
     // of his hurtbox and is shot FORWARD in a flat arc (fast vx, only a small vy), with its own speed and kick picked from a fixed pseudo-random
     // sequence (sim code can't use Random), so the shower lands all over the stage. Each rat's art is
     // one of the six in the rats folder ("rat_shower_1".."rat_shower_6", view only).
-    public const int UltDelay = 60;
+    public const int UltDelay = 15;
     public const int ShowerRats = 20;
     public const int ShowerGap = 3;      // ticks between rats
     public const int ShowerRatDamage = 1;
@@ -122,11 +122,13 @@ public class PlagueDoctor : BaseFighter
     public int selectedPotion = PotionPoison;   // resets to Poison each round (a fresh fighter)
     public bool cycledThisPress;                // this press of I already switched the potion
 
-    public override int MaxHp { get { return 60; } }
+    public override int MaxHp { get { return 100; } }
     public override int WalkSpeed { get { return 75; } }
 
-    // Hyper armor during the Ultimate (delay and shower): hits still hurt, but never interrupt it.
-    public override bool IgnoresHitstun { get { return state == FighterStateId.Attack && move == UnleashTheRats; } }
+    // The Ultimate (delay and shower) can't be interrupted and takes no damage: hits pass through him.
+    bool InUltimate { get { return state == FighterStateId.Attack && move == UnleashTheRats; } }
+    public override bool IgnoresHitstun { get { return InUltimate; } }
+    public override bool IsIntangible { get { return InUltimate; } }
 
     protected override MoveDef LightAttack { get { return CaneJab; } }
     protected override MoveDef HeavyAttack { get { return ThrowRemy; } }

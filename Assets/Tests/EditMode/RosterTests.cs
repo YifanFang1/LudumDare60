@@ -214,7 +214,7 @@ public class RosterTests
         int before = k3n.meter;
         Press(sim, Buttons.Light, 0, 20);
 
-        Assert.AreEqual(100 - 5 * 130 / 100, sim.fighters[1].hp);
+        Assert.AreEqual(100 - 4 * 115 / 100, sim.fighters[1].hp);
         Assert.AreEqual(before - 21 * K3N.InstallDrainPerTick, k3n.meter, "only the drain: no meter from the hit");
     }
 
@@ -265,8 +265,8 @@ public class RosterTests
         GameSim full = NewMatch(K3N.Id, Sandbag.Id, 1200);
         Press(full, Buttons.Heavy, 60, 40);
 
-        Assert.AreEqual(88, tapped.fighters[1].hp);
-        Assert.AreEqual(80, full.fighters[1].hp);
+        Assert.AreEqual(90, tapped.fighters[1].hp);
+        Assert.AreEqual(82, full.fighters[1].hp);
     }
 
     [Test]
@@ -833,12 +833,12 @@ public class RosterTests
     }
 
     [Test]
-    public void RemyRatShowerWaitsOneSecondAndCannotBeBlocked()
+    public void RemyRatShowerWaitsAndCannotBeBlocked()
     {
         MoveDef m = PlagueDoctor.UnleashTheRats;
         for (int i = 0; i < m.hitboxes.Length; i++)
         {
-            Assert.GreaterOrEqual(m.hitboxes[i].spawnTick, PlagueDoctor.UltDelay, "no rat before the 1 s delay");
+            Assert.GreaterOrEqual(m.hitboxes[i].spawnTick, PlagueDoctor.UltDelay, "no rat before the delay");
             Assert.IsTrue(m.hitboxes[i].unblockable);
             StringAssert.StartsWith("rat_shower_", m.hitboxes[i].visual);
         }
@@ -862,8 +862,8 @@ public class RosterTests
         Assert.AreEqual(FighterStateId.Attack, sim.fighters[0].state);
         int before = sim.fighters[0].hp;
         Run(sim, None, Buttons.Light, 30);
-        Assert.Less(sim.fighters[0].hp, before, "the hit still does damage");
-        Assert.AreEqual(FighterStateId.Attack, sim.fighters[0].state, "hyper armor: still in the move");
+        Assert.AreEqual(before, sim.fighters[0].hp, "no damage during the Ultimate");
+        Assert.AreEqual(FighterStateId.Attack, sim.fighters[0].state, "still in the move");
     }
 
     [Test]
