@@ -32,6 +32,9 @@ public class WorldView : MonoBehaviour
     public bool showToggles = true;        // the "Debug boxes" panel (bottom left) with checkboxes for the above
     public bool outlineFighters = true;    // Player / Enemy outlines around the art (colours: Fight > Outline Colors)
     public Material placeholderMaterial;   // optional. If boxes look black, use an Unlit sprite material
+    [Range(0f, 1f)]
+    [Tooltip("How see-through the grey floor line is (the sim's floor, where feet touch). 0 = hidden, 1 = solid grey.")]
+    public float groundLineAlpha = 0.15f;
 
     class FighterView
     {
@@ -117,7 +120,7 @@ public class WorldView : MonoBehaviour
         }
 
         SpriteRenderer ground = NewQuad("Ground", -1);
-        ground.color = Color.gray;
+        ground.color = new Color(0.5f, 0.5f, 0.5f, groundLineAlpha);   // faint, so the stage art's own floor shows
         ground.transform.position = new Vector3(-10f, -0.06f, 0f);
         ground.transform.localScale = new Vector3(20f, 0.06f, 1f);
 
