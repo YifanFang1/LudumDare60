@@ -41,6 +41,14 @@ public abstract class CharacterLook : ScriptableObject
     public abstract int CharacterId { get; }
 
     // The sprite for a projectile's visual name, or null if this look has none.
+    public ProjectileSprite FindProjectileEntry(string visual)
+    {
+        if (projectileSprites == null || string.IsNullOrEmpty(visual)) return null;
+        for (int i = 0; i < projectileSprites.Length; i++)
+            if (projectileSprites[i] != null && projectileSprites[i].visual == visual) return projectileSprites[i];
+        return null;
+    }
+
     public Sprite FindProjectileSprite(string visual)
     {
         if (projectileSprites == null || string.IsNullOrEmpty(visual)) return null;
@@ -58,6 +66,8 @@ public class ProjectileSprite
 {
     public string visual = "special";
     public Sprite sprite;
+    public float scale = 1f;    // view size multiplier (1 = the import size)
+    public bool flip;           // tick if the art faces LEFT: it is mirrored so it flies the right way
 }
 
 // One character's sound set. Every slot is optional: empty = the AudioManager's shared sound plays.

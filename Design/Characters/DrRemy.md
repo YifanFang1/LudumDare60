@@ -25,7 +25,7 @@ A frail, quick doctor who wins by choosing the right potion for the moment. Pois
 | Move | Name / look | Sheet says | Startup | Active | Total | Dmg | Hitstun | KB | Box | CD | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Light (J) | Cane jab | Jab - hit with the stick medium range | 5 | 3 | 16 | 5 | 12 | 40 | `Box(400, 900, 1200, 300)` (std w 900) | 5 | 0.3 more reach than a jab |
-| Heavy (K) | Throw Remy | Throws remy at the enemy | 12 | lifetime 60 | 32 | 8 | 18 | 50 | `Box(300, 600, 500, 400)` | 10 | **A projectile; he can throw again after, with no wait for the rat to come back (confirmed).** Speed 90, so about 5.4 units. Visual key `rat` |
+| Heavy (K) | Throw Remy | Throws remy at the enemy | 12 | lifetime 60 | 32 | 8 | 18 | 50 | `Box(200, 1100, 450, 450)` | 10 | **An overhead lob (changed 2026-10-18): the rat is thrown up and over and drops on the opponent; it ends at the floor, about 46 ticks and 2.7 units out. He can throw again after, with no wait for the rat to come back (confirmed).** Speed 60, rise 45, gravity 3. Visual key `rat` |
 | Grab (L) | Leech grab | Grab: sticks leeches on the guy | 5 | 2 | 40 | 6 (std 12) | 40 | 90 | `Box(300, 600, 700, 1000)` | 15 | Standard range. Less damage, but it applies **leeches** (perk 2) |
 | Forward dash | Short dash | Short Dash | - | - | 10 | - | - | - | - | 20 | 10 ticks / 120 = 1.2 units (std 1.8) |
 | Back dash | Short dash | Short Dash | - | - | 10 | - | - | - | - | 20 | 10 ticks / 110 = 1.1 units |

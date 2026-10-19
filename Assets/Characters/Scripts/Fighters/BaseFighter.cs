@@ -78,10 +78,10 @@ public abstract class BaseFighter : Fighter
 
     // Unblockable, short reach, long whiff recovery (33 ticks). Hold back when it lands to throw
     // the opponent behind you.
-    public static readonly MoveDef StandardGrab = Grab("Grab",
+    public static readonly MoveDef StandardGrab = HoldGrab(Grab("Grab",
         totalTicks: 40, spawnTick: 5, activeTicks: 2,
         box: new Box(300, 600, 700, 1000),
-        damage: 12, hitstun: 40, knockback: 90, cooldown: GrabCooldown);
+        damage: 12, hitstun: 40, knockback: 90, cooldown: GrabCooldown));
 
     // A projectile that crosses the arena in about 2.5 s. Only one on screen at a time (CanUseMove).
     public static readonly MoveDef StandardSpecial = Projectile("Special",
@@ -190,6 +190,23 @@ public abstract class BaseFighter : Fighter
     {
         MoveDef move = Melee(name, totalTicks, spawnTick, activeTicks, box, damage, hitstun, knockback, cooldown);
         move.hitboxes[0].grab = true;
+        return move;
+    }
+
+    // Every grab except the Elephant's: the grab pins the victim body to body in front of the
+    // grabber (GrabHoldDistance = the two bodies just touching), holds them GrabHoldTicks, then
+    // the grab's damage lands and the victim is knocked back only a little (GrabThrowKnockback).
+    // It uses the held-grab machinery (HitboxDef.holdTicks), so a hit on the grabber breaks it.
+    public const int GrabHoldTicks = 20;
+    public const int GrabHoldDistance = 1000;
+    public const int GrabThrowKnockback = 30;
+
+    protected static MoveDef HoldGrab(MoveDef move)
+    {
+        HitboxDef h = move.hitboxes[0];
+        h.holdTicks = GrabHoldTicks;
+        h.pullTo = GrabHoldDistance;
+        h.knockback = System.Math.Min(h.knockback, GrabThrowKnockback);
         return move;
     }
 

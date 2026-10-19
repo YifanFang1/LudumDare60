@@ -47,8 +47,7 @@ public class Cowboy : BaseFighter
             totalTicks: 48, spawnTick: 10, activeTicks: 3,
             box: new Box(300, 600, 2200, 1000),
             damage: 12, hitstun: 40, knockback: 90, cooldown: GrabCooldown);
-        m.hitboxes[0].pullTo = 900;   // drags them in front of him before the throw
-        return m;
+        return HoldGrab(m);   // the lasso reels them in to arm's length, holds them, then the throw
     }
 
     // A 20-tick twirl with no hitbox; the buff starts when the superflash ends.

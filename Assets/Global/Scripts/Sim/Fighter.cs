@@ -221,6 +221,7 @@ public abstract class Fighter
     public virtual int HashExtra() { return 0; }
 
     // Blocking tuning, shared by every character.
+    public const int BackBlockWalkPercent = 50;   // walking back while blocking moves at this % of walk speed
     public const int BlockstunPercent = 60;    // blockstun = this % of the move's hitstun
     public const int BlockPushPercent = 100;   // pushback on block = this % of the move's knockback
 
@@ -522,7 +523,12 @@ public abstract class Fighter
             return;
         }
 
-        vx = direction * (WalkSpeed * SpeedPercent(sim) / 100);
+        int walk = WalkSpeed * SpeedPercent(sim) / 100;
+        // Walking backwards while blocking (holding back, the same test IsBlocking uses) is half speed.
+        // holdingBack is only updated at the end of the tick, so test this tick's input here.
+        int backButton = facing > 0 ? Buttons.Left : Buttons.Right;
+        if ((input & backButton) != 0 && direction != 0 && CanBlock && holdTicks == 0) walk = walk * BackBlockWalkPercent / 100;
+        vx = direction * walk;
         FighterStateId wanted = vx != 0 ? FighterStateId.Walk : FighterStateId.Idle;
         if (state != wanted) EnterState(wanted);
     }

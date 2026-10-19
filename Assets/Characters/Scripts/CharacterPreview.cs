@@ -39,6 +39,8 @@ public class CharacterPreview : MonoBehaviour
     [Tooltip("Which outline colours to preview. Custom is plain white here.")]
     public SpriteOutline.Style outline = SpriteOutline.Style.Player;
 
+    GameObject viewInstance;           // the animated View Prefab, on a hidden child (editor only)
+    GameObject viewSource;             // the prefab viewInstance was made from
     SpriteRenderer art;                // lives on a hidden child object, never saved in the scene
     SpriteOutline artOutline;          // on the same hidden object
 
@@ -145,6 +147,7 @@ public class CharacterPreview : MonoBehaviour
 #if UNITY_EDITOR
         EditorApplication.update -= EditorStep;
 #endif
+        DestroyView();
         if (art == null) return;
         if (Application.isPlaying) Destroy(art.gameObject);
         else DestroyImmediate(art.gameObject);
@@ -152,11 +155,89 @@ public class CharacterPreview : MonoBehaviour
         artOutline = null;
     }
 
+    void DestroyView()
+    {
+        if (viewInstance != null)
+        {
+            if (Application.isPlaying) Destroy(viewInstance); else DestroyImmediate(viewInstance);
+        }
+        viewInstance = null;
+        viewSource = null;
+    }
+
+#if UNITY_EDITOR
+    // An animated character: shows its View Prefab posed exactly like the match does, scrubbed to
+    // tick / totalTicks of the current move's clip. Returns true if it is drawing the prefab.
+    bool SyncView(CharacterLook look)
+    {
+        GameObject src = (look != null && showSprite) ? look.viewPrefab : null;
+        if (src != viewSource)
+        {
+            DestroyView();
+            viewSource = src;
+            if (src != null)
+            {
+                viewInstance = Instantiate(src);
+                viewInstance.hideFlags = HideFlags.HideAndDontSave;
+                viewInstance.transform.SetParent(transform, false);
+                Animator a = viewInstance.GetComponentInChildren<Animator>();
+                if (a != null) a.enabled = false;   // we sample the clip by hand
+            }
+        }
+        if (viewInstance == null) return false;
+
+        int facing = faceRight ? 1 : -1;
+        viewInstance.transform.localPosition = new Vector3(facing * look.spriteOffsetX, look.spriteOffsetY, 0f);
+        viewInstance.transform.localScale = new Vector3(facing * look.SpriteFlip * look.spriteScale, look.spriteScale, 1f);
+
+        MoveDef move = CurrentMove();
+        AnimationClip clip = move != null ? FindClip(viewInstance, move.name) : null;
+        if (clip == null) clip = FindClip(viewInstance, "Idle");
+        if (clip != null)
+        {
+            float t = move != null && move.totalTicks > 0 ? tick / (float)move.totalTicks : 0f;
+            clip.SampleAnimation(viewInstance, Mathf.Clamp(t, 0f, 0.9999f) * clip.length);
+        }
+        return true;
+    }
+
+    // The clip behind the Animator state called `stateName` (the same state the match plays).
+    static AnimationClip FindClip(GameObject instance, string stateName)
+    {
+        Animator a = instance.GetComponentInChildren<Animator>();
+        if (a == null || a.runtimeAnimatorController == null || string.IsNullOrEmpty(stateName)) return null;
+
+        UnityEditor.Animations.AnimatorController ac = a.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
+        if (ac != null && ac.layers.Length > 0)
+        {
+            UnityEditor.Animations.ChildAnimatorState[] states = ac.layers[0].stateMachine.states;
+            for (int i = 0; i < states.Length; i++)
+            {
+                if (states[i].state.name == stateName && states[i].state.motion is AnimationClip)
+                    return (AnimationClip)states[i].state.motion;
+            }
+        }
+        AnimationClip[] clips = a.runtimeAnimatorController.animationClips;
+        for (int i = 0; i < clips.Length; i++)
+        {
+            if (clips[i].name == stateName || clips[i].name.EndsWith("_" + stateName)) return clips[i];
+        }
+        return null;
+    }
+#endif
+
     void SyncSprite()
     {
         if (art == null) return;
 
         CharacterLook look = Resolve() ? CharacterRegistry.GetLook(characterId) : null;
+#if UNITY_EDITOR
+        if (SyncView(look))
+        {
+            art.enabled = false;   // the animated prefab is showing instead of the single sprite
+            return;
+        }
+#endif
         bool have = look != null && look.sprite != null && showSprite;
         art.enabled = have;
         if (!have) return;

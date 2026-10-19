@@ -307,6 +307,7 @@ public class GameSim
         h.def = def;
         h.originX = x;
         h.originY = y;
+        h.vy = def.vy;
         h.facing = facing;
         h.lifetime = lifetime;
         h.placed = placed;
@@ -755,10 +756,20 @@ public class GameSim
         for (int i = hitboxes.Count - 1; i >= 0; i--)
         {
             HitboxInstance h = hitboxes[i];
-            if (!h.FollowsOwner) h.originX += h.facing * h.def.vx;
+            bool landed = false;
+            if (!h.FollowsOwner)
+            {
+                h.originX += h.facing * h.def.vx;
+                if (h.def.gravity != 0)
+                {
+                    h.originY += h.vy;
+                    h.vy -= h.def.gravity;
+                    landed = h.originY + h.box.y <= 0;   // a lob ends when its box reaches the ground
+                }
+            }
             h.age++;
             if (!h.def.untilHit) h.lifetime--;
-            if ((h.lifetime <= 0 && !h.def.untilHit) || h.hasHit) hitboxes.RemoveAt(i);
+            if ((h.lifetime <= 0 && !h.def.untilHit) || h.hasHit || landed) hitboxes.RemoveAt(i);
         }
     }
 
@@ -869,6 +880,8 @@ public class GameSim
                 h = h * 31 + hb.owner;
                 h = h * 31 + hb.lifetime;
                 h = h * 31 + hb.originX;
+                h = h * 31 + hb.originY;
+                h = h * 31 + hb.vy;
                 h = h * 31 + hb.facing;
                 h = h * 31 + hb.age;
                 h = h * 31 + hb.damage;

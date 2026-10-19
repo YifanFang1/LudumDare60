@@ -37,16 +37,21 @@ public class PlagueDoctor : BaseFighter
         box: new Box(400, 900, 1200, 300),
         damage: 5, hitstun: 12, knockback: 40, cooldown: LightCooldown);
 
-    public static readonly MoveDef ThrowRemy = Projectile("Heavy",
+    // An overhead lob: Remy throws the rat up and over, and it comes down on the opponent. It
+    // leaves his hand about head high, rises, then falls (RatLobUp / RatLobGravity); it is gone
+    // when it reaches the floor, about 46 ticks and 2.7 units out. Close up it sails past the head.
+    public const int RatLobUp = 45;
+    public const int RatLobGravity = 3;
+    public static readonly MoveDef ThrowRemy = MakeLob(Projectile("Heavy",
         totalTicks: 32, spawnTick: 12, lifetime: 60,
-        box: new Box(300, 600, 500, 400),
-        speed: 90, damage: 8, hitstun: 18, knockback: 50,
-        visual: "rat", cooldown: HeavyCooldown);
+        box: new Box(200, 1100, 450, 450),
+        speed: 60, damage: 8, hitstun: 18, knockback: 50,
+        visual: "rat", cooldown: HeavyCooldown), RatLobUp, RatLobGravity);
 
-    public static readonly MoveDef LeechGrab = Grab("Grab",
+    public static readonly MoveDef LeechGrab = HoldGrab(Grab("Grab",
         totalTicks: 40, spawnTick: 5, activeTicks: 2,
         box: new Box(300, 600, 700, 1000),
-        damage: 6, hitstun: 40, knockback: 90, cooldown: GrabCooldown);
+        damage: 6, hitstun: 40, knockback: 90, cooldown: GrabCooldown));
 
     // The three potions. Each waits TapWindow ticks first: let go before then = a tap (switch).
     public static readonly MoveDef PoisonPotion = MakePotion(Pose("Special", totalTicks: TapWindow + 30, cooldown: SharedPotionCooldown));
@@ -58,6 +63,13 @@ public class PlagueDoctor : BaseFighter
         visual: "potion_slow", cooldown: SharedPotionCooldown));
 
     public static readonly MoveDef UnleashTheRats = MakeRats();
+
+    static MoveDef MakeLob(MoveDef m, int up, int gravity)
+    {
+        m.hitboxes[0].vy = up;
+        m.hitboxes[0].gravity = gravity;
+        return m;
+    }
 
     static MoveDef MakePotion(MoveDef m)
     {
