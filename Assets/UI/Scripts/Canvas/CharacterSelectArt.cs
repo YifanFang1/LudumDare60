@@ -15,6 +15,8 @@ public class CharacterSelectArt : ScriptableObject
     {
         public string name;
         [TextArea(1, 4)] public string description;
+        [Tooltip("This skill's icon on the More > Skills page. Empty = the character's Skill Block square.")]
+        public Sprite icon;
     }
 
     [System.Serializable]
@@ -44,6 +46,8 @@ public class CharacterSelectArt : ScriptableObject
         public Sprite moreArt;
         public Sprite backArt;
         public Sprite miniSkill;
+        [Tooltip("The four small skill icons under the character on the main panel, left to right. An empty slot shows the Mini Skill square. Set by hand; a rebuild keeps them.")]
+        public Sprite[] skillIcons = new Sprite[4];
         public Sprite skillBlock;
         [Tooltip("The tilted word banners (up to 3), top to bottom.")]
         public Sprite[] traits;
