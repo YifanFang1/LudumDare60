@@ -31,6 +31,7 @@ MonoBehaviour:
     grab: []
     block: []
     dash: []
+    jump: []
     superFlash: {fileID: 0}
     ko: {fileID: 0}
     reflect: []
@@ -41,4 +42,30 @@ MonoBehaviour:
     powerUp: []
     outOfAmmo: []
     theme: {fileID: 8300000, guid: d7d323c89b368734ca6eb4d59a095a0e, type: 3}
+  voice:
+    select:
+    - {fileID: 8300000, guid: 18271e83f69133941bf065eeac5e2053, type: 3}
+    - {fileID: 8300000, guid: a5e4ff7b06eb99240badc50336255654, type: 3}
+    - {fileID: 8300000, guid: 444243fb58095524890cc594c805b9de, type: 3}
+    - {fileID: 8300000, guid: c1259df80ab68614ab5be53d087e76d6, type: 3}
+    - {fileID: 8300000, guid: 4b632827a5d61d9439add7769cc91a1b, type: 3}
+    - {fileID: 8300000, guid: 23c622e07aebfc54ba89fe6c07c324a1, type: 3}
+    roundWin:
+    - {fileID: 8300000, guid: 399f8222c1045884f99a03506b65db92, type: 3}
+    roundLose:
+    - {fileID: 8300000, guid: 6615de2c9a02eb648b49a8932564b61a, type: 3}
+    - {fileID: 8300000, guid: 285b148732609c441b4fdf5ac3e31faa, type: 3}
+    - {fileID: 8300000, guid: 5728b1707373e654dbb1f5eca26e0bbe, type: 3}
+    dialogue: []
+    volume: 0.6
+    moves:
+    - move: Special
+      clips:
+      - {fileID: 8300000, guid: b630b0e854a18b34b9232f36484101ba, type: 3}
+    - move: Ultimate
+      clips:
+      - {fileID: 8300000, guid: 103ec60b7cf14324a954e188c7e44613, type: 3}
+    hurt: []
+    hurtChance: 0.4
+    ko: []
   characterId: 12

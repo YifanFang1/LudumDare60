@@ -216,6 +216,10 @@ public class CharacterSelectScreen : MonoBehaviour
             return;
         }
         if (forOpponent) match.OpponentCharacter = id;
-        else match.LocalCharacter = id;
+        else
+        {
+            match.LocalCharacter = id;
+            AudioManager.CharacterPicked(id);   // your character's Select voice line
+        }
     }
 }

@@ -365,9 +365,13 @@ K3N (id 16) is set up in `Assets/Characters/K3N/Resources/K3N Art.asset` (clips 
 
 ### Voice lines
 Fill **Voice** on the same art asset (the class is in `Characters/Scripts/Data/CharacterVoice.cs`):
-- **Dialogue:** one entry per spoken line. Paste the line's text into **Line** (from `MatchupDialogue.cs` for intros, `CharacterDialogue.cs` for win/lose lines, or straight off the screen) and drag the recording into **Clip**. Lines are matched by text, ignoring capitals, spaces and punctuation, and each is spoken once when it appears. Put each line on the asset of the character who **says** it. Tick **Log Missing Voice Lines** on the AudioManager to have the Console list every line that has no recording yet.
+- **Select:** plays when you click this character on the character select screen (one at random, every time).
+- **Round Win / Round Lose:** play after **your own** character wins or loses a round that doesn't end the match. Online, each player only hears their own character. Nothing plays on a drawn round.
+- **Dialogue:** spoken versions of the pre-match intro lines (`MatchupDialogue.cs`). Paste the line's text into **Line** and drag the recording into **Clip**. Lines are matched by text, ignoring capitals, spaces and punctuation. Put each line on the asset of the character who **says** it. Tick **Log Missing Voice Lines** on the AudioManager to have the Console list every intro line that has no recording yet.
 - **Moves:** a shout per move name (Light, Heavy, Special, Ultimate...).
-- **Hurt** (played on a hit with **Hurt Chance**), **KO**, **Round Win** (not the last round, since the win line plays then).
+- **Hurt** (played on a hit with **Hurt Chance**) and **KO**.
+
+The end-of-match dialogue box (`CharacterDialogue.cs`) is never voiced, and no voice line plays on the match win or loss. Shout lists with one or two clips (Moves, Hurt, KO) only play 1/3 or 2/3 of the time; three or more always play. Select and Round Win/Lose lines always play.
 
 **Volume** on Voice turns one character's voice up or down. For a lo-fi sound, select clips in the Project window and run **Fight > Audio > Bitcrush Selected Clips**: it saves a crushed copy next to each clip and swaps it in on the art assets (WebGL can't run audio filters live, so the effect is baked into the file).
 
