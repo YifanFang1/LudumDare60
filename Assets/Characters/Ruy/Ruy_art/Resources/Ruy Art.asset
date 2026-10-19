@@ -18,11 +18,12 @@ MonoBehaviour:
   spriteOffsetY: 0
   spriteScale: 1
   flipSprite: 1
-  placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
+  placeholderColor: {r: 1, g: 0.23907588, b: 0, a: 1}
   tintByState: 1
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
+  moveFlashes: []
   sfx:
     moves:
     - move: Light
