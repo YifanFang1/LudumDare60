@@ -22,6 +22,7 @@ public enum SimEventType
     Hold,         // a held grab caught someone: a: grabber, b: victim, amount: hold ticks
     OutOfAmmo,    // a fresh Special press with no ammo left (Noir's empty click): a: who, x/y: where
     PowerUp,      // a power-up switched on or off (K3N's Install): a: who, amount: 1 on, 0 off. Sound only.
+    Jump,         // a: who jumped off the ground, x/y: where. Sound only.
 }
 
 public struct SimEvent

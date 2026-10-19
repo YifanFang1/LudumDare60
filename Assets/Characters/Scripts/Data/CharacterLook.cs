@@ -79,6 +79,8 @@ public class CharacterSfx
     public AudioClip[] block;
     [Tooltip("This character dashing.")]
     public AudioClip[] dash;
+    [Tooltip("This character jumping off the ground.")]
+    public AudioClip[] jump;
     [Tooltip("This character's Ultimate freeze.")]
     public AudioClip superFlash;
     [Tooltip("This character being knocked out.")]

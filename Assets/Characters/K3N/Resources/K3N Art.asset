@@ -54,4 +54,5 @@ MonoBehaviour:
     powerUp:
     - {fileID: 8300000, guid: 9e7a7c019202c4cf28df1b72c85a0988, type: 3}
     outOfAmmo: []
+    theme: {fileID: 8300000, guid: 5b53c7ced7ba05a4aa5cd5b8c6560d6b, type: 3}
   characterId: 16
