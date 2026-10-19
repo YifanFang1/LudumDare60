@@ -245,8 +245,8 @@ public class RosterTests
             hits += Count(sim, SimEventType.Hit);
         }
 
-        Assert.AreEqual(10, hits, "a held string lands every punch");
-        Assert.AreEqual(100 - 10 * 2, sim.fighters[1].hp);
+        Assert.AreEqual(30, hits, "a held string lands every jab: 10 passes of 3");
+        Assert.AreEqual(100 - 30 * 1, sim.fighters[1].hp);
     }
 
     [Test]
@@ -254,7 +254,7 @@ public class RosterTests
     {
         GameSim sim = NewMatch(K3N.Id, Sandbag.Id, 1200);
         Press(sim, Buttons.Special, 0, 60);
-        Assert.AreEqual(100 - 3 * 2, sim.fighters[1].hp);
+        Assert.AreEqual(100 - 3 * 3 * 1, sim.fighters[1].hp);   // 3 passes of a 3-hit jab, 1 damage each
     }
 
     [Test]
@@ -439,24 +439,18 @@ public class RosterTests
     }
 
     [Test]
-    public void RoomAddressMeSummonsFourCopiesThatLastEightSeconds()
+    public void RoomAddressMeGrowsHimForEightSecondsWithHyperArmor()
     {
         GameSim sim = AfterSuperflash(Elephant.Id, Sandbag.Id, 1200);
         sim.Step(None, None);
-        Assert.AreEqual(4, sim.CountSummons(0));
+        Elephant room = (Elephant)sim.fighters[0];
+        Assert.IsTrue(room.Grown);
+        Assert.AreEqual(0, sim.CountSummons(0), "no more copies");
+        Assert.AreEqual(1050, -room.Hurtbox.x, "body is x1.5");
 
-        Run(sim, None, None, Elephant.CopyTicks);
-        Assert.AreEqual(0, sim.CountSummons(0));
-    }
-
-    [Test]
-    public void RoomCopiesSkipSpotsNextToAFighter()
-    {
-        GameSim sim = NewMatch(Elephant.Id, Sandbag.Id, 4000);   // Room -2000, Sandbag 2000: both on a spot
-        sim.fighters[0].meter = Fighter.MeterMax;
-        sim.Step(Buttons.Ultimate, None);
-        Run(sim, None, None, GameSim.SuperFlashTicks + 1);
-        Assert.AreEqual(2, sim.CountSummons(0));
+        Run(sim, None, None, Elephant.GrowTicks);
+        Assert.IsFalse(room.Grown);
+        Assert.AreEqual(700, -room.Hurtbox.x);
     }
 
     [Test]
@@ -839,23 +833,51 @@ public class RosterTests
     }
 
     [Test]
-    public void RemyRatWavesCannotBeBlocked()
+    public void RemyRatShowerWaitsOneSecondAndCannotBeBlocked()
     {
+        MoveDef m = PlagueDoctor.UnleashTheRats;
+        for (int i = 0; i < m.hitboxes.Length; i++)
+        {
+            Assert.GreaterOrEqual(m.hitboxes[i].spawnTick, PlagueDoctor.UltDelay, "no rat before the 1 s delay");
+            Assert.IsTrue(m.hitboxes[i].unblockable);
+            StringAssert.StartsWith("rat_shower_", m.hitboxes[i].visual);
+        }
+
         GameSim sim = NewMatch(PlagueDoctor.Id, Brawler.Id, 3000);
         sim.fighters[0].meter = Fighter.MeterMax;
         sim.Step(Buttons.Ultimate, BackP1);
-        Run(sim, None, BackP1, GameSim.SuperFlashTicks + 120);
-        Assert.AreEqual(110 - 30, sim.fighters[1].hp);
+        Run(sim, None, BackP1, GameSim.SuperFlashTicks + PlagueDoctor.UltDelay);
+        Assert.AreEqual(110, sim.fighters[1].hp, "nothing hits during the delay");
+        Run(sim, None, BackP1, 250);
+        Assert.Less(sim.fighters[1].hp, 110, "the shower lands even through a block");
     }
 
     [Test]
-    public void RemyRatWavesAreLowEnoughToJump()
+    public void RemyUltimateCannotBeInterrupted()
     {
-        for (int i = 0; i < PlagueDoctor.UnleashTheRats.hitboxes.Length; i++)
+        GameSim sim = NewMatch(PlagueDoctor.Id, Brawler.Id, 800);
+        sim.fighters[0].meter = Fighter.MeterMax;
+        sim.Step(Buttons.Ultimate, None);
+        Run(sim, None, None, GameSim.SuperFlashTicks + 5);
+        Assert.AreEqual(FighterStateId.Attack, sim.fighters[0].state);
+        int before = sim.fighters[0].hp;
+        Run(sim, None, Buttons.Light, 30);
+        Assert.Less(sim.fighters[0].hp, before, "the hit still does damage");
+        Assert.AreEqual(FighterStateId.Attack, sim.fighters[0].state, "hyper armor: still in the move");
+    }
+
+    [Test]
+    public void RemyRatShowerIsScatteredNotIdentical()
+    {
+        MoveDef m = PlagueDoctor.UnleashTheRats;
+        bool speedVaries = false, artVaries = false;
+        for (int i = 1; i < m.hitboxes.Length; i++)
         {
-            Box b = PlagueDoctor.UnleashTheRats.hitboxes[i].box;
-            Assert.Less(b.y + b.h, 1000);
+            if (m.hitboxes[i].vx != m.hitboxes[0].vx) speedVaries = true;
+            if (m.hitboxes[i].visual != m.hitboxes[0].visual) artVaries = true;
         }
+        Assert.IsTrue(speedVaries);
+        Assert.IsTrue(artVaries);
     }
 
     [Test]

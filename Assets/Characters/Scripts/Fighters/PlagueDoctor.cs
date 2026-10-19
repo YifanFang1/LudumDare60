@@ -12,8 +12,9 @@
 //                    Heal    he drinks it: +10 HP (never above 60). Its own 5 s cooldown.
 //                    Slow    thrown: on hit, a 3 s slow.
 //                  Using any potion puts the others on a 30-tick cooldown too.
-//   Ultimate (O)   Unleash the Rats: 3 low waves of rats cross the screen, 30 ticks apart. Each
-//                  can't be blocked, but a jump clears it. 10 damage each.
+//   Ultimate (O)   Unleash the Rats: after a 1 s delay, a shower of 20 rats is shot forward over
+//                  about 1 s (random speed each). Can't be blocked. 1 damage each.
+//                  Uninterruptable: hyper armor from the start (hits hurt, no hitstun).
 //   Perk 1         Apothecary: the potion choice (above).
 //   Perk 2         Leeches (above).
 public class PlagueDoctor : BaseFighter
@@ -39,13 +40,13 @@ public class PlagueDoctor : BaseFighter
 
     // An overhead lob: Remy throws the rat up and over, and it comes down on the opponent. It
     // leaves his hand about head high, rises, then falls (RatLobUp / RatLobGravity); it is gone
-    // when it reaches the floor, about 46 ticks and 2.7 units out. Close up it sails past the head.
+    // when it reaches the floor, about 46 ticks and 4.6 units out. Close up it sails past the head.
     public const int RatLobUp = 45;
     public const int RatLobGravity = 3;
     public static readonly MoveDef ThrowRemy = MakeLob(Projectile("Heavy",
         totalTicks: 32, spawnTick: 12, lifetime: 60,
         box: new Box(200, 1100, 450, 450),
-        speed: 60, damage: 8, hitstun: 18, knockback: 50,
+        speed: 100, damage: 8, hitstun: 18, knockback: 50,
         visual: "rat", cooldown: HeavyCooldown), RatLobUp, RatLobGravity);
 
     public static readonly MoveDef LeechGrab = HoldGrab(Grab("Grab",
@@ -78,17 +79,41 @@ public class PlagueDoctor : BaseFighter
         return m;
     }
 
+    // Unleash the Rats: after UltDelay ticks (1 s) Remy sprays a shower of rats. Each rat spawns at the top middle
+    // of his hurtbox and is shot FORWARD in a flat arc (fast vx, only a small vy), with its own speed and kick picked from a fixed pseudo-random
+    // sequence (sim code can't use Random), so the shower lands all over the stage. Each rat's art is
+    // one of the six in the rats folder ("rat_shower_1".."rat_shower_6", view only).
+    public const int UltDelay = 60;
+    public const int ShowerRats = 20;
+    public const int ShowerGap = 3;      // ticks between rats
+    public const int ShowerRatDamage = 1;
+    public const int ShowerArt = 6;
+
+    // A repeatable pseudo-random number in [0, mod) for rat i. `salt` gives each property its own sequence.
+    static int Scatter(int i, int salt, int mod)
+    {
+        int h = (i + 1) * 73856093 ^ (salt + 1) * 19349663;
+        h ^= h >> 13;
+        h *= 1274126177;
+        h ^= h >> 16;
+        return (h & 0x7fffffff) % mod;
+    }
+
     static MoveDef MakeRats()
     {
-        MoveDef m = new MoveDef { name = "Ultimate", totalTicks = 80, ultimate = true };
-        m.hitboxes = new HitboxDef[3];
-        for (int i = 0; i < 3; i++)
+        MoveDef m = new MoveDef { name = "Ultimate", totalTicks = UltDelay + 90, ultimate = true };
+        m.hitboxes = new HitboxDef[ShowerRats];
+        for (int i = 0; i < ShowerRats; i++)
         {
             m.hitboxes[i] = new HitboxDef
             {
-                spawnTick = 6 + 30 * i, lifetime = 110, box = new Box(0, 0, 800, 500),
-                damage = 10, hitstun = 12, knockback = 0,
-                followOwner = false, vx = 160, unblockable = true, visual = "rats",
+                spawnTick = UltDelay + 6 + ShowerGap * i, lifetime = 150, box = new Box(-225, 1775, 450, 450),   // centred on the top middle of his hurtbox (x 0, y 2000)
+                damage = ShowerRatDamage, hitstun = 12, knockback = 5,
+                followOwner = false, unblockable = true,
+                vx = 60 + 15 * Scatter(i, 1, 7),      // 60..150: shoots forward, lands about 2 to 7 units out
+                vy = 10 * Scatter(i, 2, 4),           // 0..30: a slight upward kick, then it drops
+                gravity = 3,
+                visual = "rat_shower_" + (1 + Scatter(i, 3, ShowerArt)),
             };
         }
         return m;
@@ -99,6 +124,9 @@ public class PlagueDoctor : BaseFighter
 
     public override int MaxHp { get { return 60; } }
     public override int WalkSpeed { get { return 75; } }
+
+    // Hyper armor during the Ultimate (delay and shower): hits still hurt, but never interrupt it.
+    public override bool IgnoresHitstun { get { return state == FighterStateId.Attack && move == UnleashTheRats; } }
 
     protected override MoveDef LightAttack { get { return CaneJab; } }
     protected override MoveDef HeavyAttack { get { return ThrowRemy; } }

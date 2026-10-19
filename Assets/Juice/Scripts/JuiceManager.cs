@@ -507,6 +507,8 @@ public class JuiceManager : MonoBehaviour
             if (f.hp > 0 && f.hp * 100 <= f.MaxHp * profile.lowHealthPercent) active.Add(JuiceTriggers.WhileLowHealth);
             if (f.meter >= Fighter.MeterMax) active.Add(JuiceTriggers.WhileMeterFull);
             if (f.IsBlocking) active.Add(JuiceTriggers.WhileBlocking);
+            if (f.IsPoweredUp) active.Add(JuiceTriggers.WhilePoweredUp);
+            if (f.charging && f.state == FighterStateId.Attack) active.Add(JuiceTriggers.WhileCharging);
             if (f.vx != 0) active.Add(JuiceTriggers.WhileMoving);
 
             // Start or stop each While... row's effect.
@@ -847,7 +849,7 @@ public class JuiceManager : MonoBehaviour
                   "Moments: Hit, LightHit, HeavyHit, Hit:<Move>, GotHit, GotLightHit, GotHeavyHit, Grab, GotGrabbed, " +
                   "Block, AttackBlocked, AttackStart, AttackStart:<Move>, Dash, DashForward, DashBack, SuperFlash, " +
                   "KnockedOut, ScoredKO, RoundStart, RoundEnd, RoundWin, RoundLose, RoundDraw, Enter<State>\n" +
-                  "While: WhileMoving, WhileLowHealth, WhileMeterFull, WhileBlocking, While<State>, WhileAttack:<Move>\n" +
+                  "While: WhileMoving, WhileLowHealth, WhileMeterFull, WhileBlocking, WhilePoweredUp, WhileCharging, While<State>, WhileAttack:<Move>\n" +
                   "(a While row with Every Ticks > 0 replays its effect on that rhythm instead of holding one effect)\n" +
                   "States: " + states + "\n" +
                   "Moves (standard moveset): Light, Heavy, Grab, Special, Ultimate\n" +
