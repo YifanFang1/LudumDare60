@@ -106,10 +106,10 @@ MonoBehaviour:
     backArt: {fileID: 21300000, guid: 04605f2ac80c84a36b1c29da62d08fb5, type: 3}
     miniSkill: {fileID: 21300000, guid: 86b6e2885bb1b4949bf3f201546061e9, type: 3}
     skillIcons:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    - {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
+    - {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
+    - {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
+    - {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
     skillBlock: {fileID: 21300000, guid: 33206837901004ec7a234d969d57cebb, type: 3}
     traits:
     - {fileID: 21300000, guid: 4fc6ac04518874f5ab6872aa9cddc708, type: 3}
@@ -124,25 +124,25 @@ MonoBehaviour:
     skills:
     - name: 'LIGHT: JAB'
       description: A quick one-armed jab.
-      icon: {fileID: 0}
+      icon: {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
     - name: 'HEAVY: LEG SWEEP'
       description: A rising kick that also catches opponents jumping in.
-      icon: {fileID: 0}
+      icon: {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
     - name: 'GRAB: SHORT GRAB'
       description: Less reach than most grabs, but a little faster.
-      icon: {fileID: 0}
+      icon: {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
     - name: 'SPECIAL: REFLECTIVE CANVAS'
       description: Briefly raises a canvas that sends enemy projectiles back as her own. It doesn't stop close-up attacks.
-      icon: {fileID: 0}
+      icon: {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
     - name: 'ULTIMATE: PAINT SPLAT'
       description: A fast shot that can't be blocked, only jumped. On a hit, it scrambles the opponent's controls for a few seconds.
-      icon: {fileID: 0}
+      icon: {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
     - name: 'PERK: FEARLESS RUSH'
       description: Her forward dash is invincible. Her back dash costs her a little health.
-      icon: {fileID: 0}
+      icon: {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
     - name: 'PERK: PAINT SKATING'
       description: Every hit she lands leaves a paint puddle. On paint, she moves faster and her opponent moves slower.
-      icon: {fileID: 0}
+      icon: {fileID: 481627462506757345, guid: d7822a3eed79e894a9f1542831fd61e4, type: 3}
   - label: Room
     characterId: 13
     backing: {fileID: 21300000, guid: 85356beaa41914e01b3a37aa2af9adda, type: 3}
