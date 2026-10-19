@@ -68,7 +68,7 @@ MonoBehaviour:
     moves:
     - move: Light
       clips:
-      - {fileID: 8300000, guid: 85b03236daf9c5341901abdf7a093add, type: 3}
+      - {fileID: 8300000, guid: ea15cef22b2fa4462983ab74ff9a677f, type: 3}
     - move: Heavy
       clips:
       - {fileID: 8300000, guid: 4419ee6e099a95c47bc602a2fa58a382, type: 3}
@@ -83,14 +83,23 @@ MonoBehaviour:
       clips:
       - {fileID: 8300000, guid: 2ee9c5caf6eb4fe47b749da5154dbb45, type: 3}
     attackStart: []
-    hit: []
-    heavyHit: []
+    hit:
+    - {fileID: 8300000, guid: 97421d075657485f8fb7700af6754d9b, type: 3}
+    heavyHit:
+    - {fileID: 8300000, guid: 97421d075657485f8fb7700af6754d9b, type: 3}
     grab:
     - {fileID: 8300000, guid: ab41454c9775b244897559c6b938086d, type: 3}
     block:
     - {fileID: 8300000, guid: 33c4978d8bf91b74ca1e5513c5eb423d, type: 3}
     dash:
-    - {fileID: 0}
+    - {fileID: 8300000, guid: 56c4f71229ea4f0b8c0fa3286362bb36, type: 3}
+    - {fileID: 8300000, guid: 9e58668e23124e22b7d3ce4c0d4ab136, type: 3}
+    - {fileID: 8300000, guid: 2f993efc5cb844f9aa7381da4abef919, type: 3}
+    - {fileID: 8300000, guid: b5b68bbe68504394b2420ab8db76513d, type: 3}
+    - {fileID: 8300000, guid: d1ef8d84640946c9a4b083f176d8ac59, type: 3}
+    - {fileID: 8300000, guid: a1bafec307a640ebbf8ae0a8a5cfe3d3, type: 3}
+    - {fileID: 8300000, guid: 1134612752434b058677a039aac90465, type: 3}
+    - {fileID: 8300000, guid: bdc3abf8840e4d62a99ab638a6a79562, type: 3}
     jump:
     - {fileID: 8300000, guid: 982fe82e26c430d43be54bc1cff7338a, type: 3}
     superFlash: {fileID: 8300000, guid: 1cd52b14f950b97409907d7d373fc0f7, type: 3}

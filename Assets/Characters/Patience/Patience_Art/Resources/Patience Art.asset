@@ -23,6 +23,7 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
+  moveFlashes: []
   sfx:
     moves:
     - move: Light
@@ -40,7 +41,8 @@ MonoBehaviour:
     - move: Ultimate
       clips:
       - {fileID: 8300000, guid: 7f6f1219c109840e3b19df020d2be51c, type: 3}
-    attackStart: []
+    attackStart:
+    - {fileID: 8300000, guid: c6b02f9c6ccfd4443bf413c57daaec8d, type: 3}
     hit: []
     heavyHit: []
     grab:
@@ -51,7 +53,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: f1c963e49e92b4bbaa1c8a0a979b43d7, type: 3}
     - {fileID: 8300000, guid: cbe418a0900984ea5b2aae050dc08c1c, type: 3}
     jump: []
-    superFlash: {fileID: 0}
+    superFlash: {fileID: 8300000, guid: 977b99c997e3d4a54b0ea7e76c903f5b, type: 3}
     ko: {fileID: 0}
     reflect: []
     destroy: []

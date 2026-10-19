@@ -32,7 +32,7 @@ public class RelayLockstepSession : MatchSessionBase
     // 19: Room's Ultimate grows him 1.5x with hyper armor (no more copies).
     // 22: completed matchup intro sheet, including replies and mirror-match timing.
     // 20: Remy's Ultimate waits 1 s, then showers rats. 24: it is uninterruptable (hyper armor).
-    const string Version = "24";
+    const string Version = "25";
 
     public string relayUrl = "ws://localhost:8787";   // used in the Editor and for local testing
 

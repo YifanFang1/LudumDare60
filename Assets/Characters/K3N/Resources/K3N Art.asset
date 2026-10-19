@@ -23,6 +23,7 @@ MonoBehaviour:
   idleLoopTicks: 60
   walkLoopTicks: 30
   projectileSprites: []
+  moveFlashes: []
   sfx:
     moves:
     - move: Light
@@ -36,7 +37,8 @@ MonoBehaviour:
     - {fileID: 8300000, guid: ea15cef22b2fa4462983ab74ff9a677f, type: 3}
     heavyHit:
     - {fileID: 8300000, guid: be29cf966dcbd4094a391bf158fb5b22, type: 3}
-    grab: []
+    grab:
+    - {fileID: 8300000, guid: 6144dfc33c10f42298e25273aaf04c6e, type: 3}
     block:
     - {fileID: 8300000, guid: ce7f81d7279de4c73868f21ae6a2cf4a, type: 3}
     - {fileID: 8300000, guid: d6637cb9a499a4a93a165c34a035851d, type: 3}
