@@ -71,6 +71,33 @@ public class AudioManager : MonoBehaviour
     [Tooltip("Editor only: log each on-screen line that has no voice clip yet, to see which recordings are missing.")]
     public bool logMissingVoiceLines;
 
+    // ---------- player volume settings (the Options page) ----------
+    // Separate from the volumes above: those are the team's mix, these are the player's sliders
+    // (0-1, multiplied on top). Saved in PlayerPrefs so they're remembered, also in the browser.
+    public enum VolumeChannel { Master, Music, Effects, Voices }
+    static readonly string[] VolumeKeys = { "volume.master", "volume.music", "volume.effects", "volume.voices" };
+    static float[] playerVolumes;
+
+    // A player volume slider's value (1 = full).
+    public static float Player(VolumeChannel channel)
+    {
+        if (playerVolumes == null)
+        {
+            playerVolumes = new float[VolumeKeys.Length];
+            for (int i = 0; i < VolumeKeys.Length; i++) playerVolumes[i] = PlayerPrefs.GetFloat(VolumeKeys[i], 1f);
+        }
+        return playerVolumes[(int)channel];
+    }
+
+    // Changes a slider. Call PlayerPrefs.Save() afterwards (the Options page does when it closes).
+    public static void SetPlayer(VolumeChannel channel, float value)
+    {
+        Player(channel);   // loads the saved values first
+        playerVolumes[(int)channel] = Mathf.Clamp01(value);
+        PlayerPrefs.SetFloat(VolumeKeys[(int)channel], playerVolumes[(int)channel]);
+        if (channel == VolumeChannel.Master) AudioListener.volume = playerVolumes[(int)channel];
+    }
+
     // So menus can play click sounds without needing a reference (or this component at all).
     static AudioManager instance;
 
@@ -88,6 +115,7 @@ public class AudioManager : MonoBehaviour
     int countedRound;            // the last round whose countdown sound has played
     // Character voices: one source per fighter, so a new line cuts off that fighter's last one.
     readonly AudioSource[] voices = new AudioSource[2];
+    AudioSource selectVoice;     // character select lines; kept separate so starting the match doesn't cut them
     MatchCinematics cinematic;   // the intro and win/lose dialogue (added by WorldView at run time)
     string spokenLine = "";      // the dialogue line already voiced, so each is spoken once
 
@@ -101,11 +129,13 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
+        AudioListener.volume = Player(VolumeChannel.Master);   // the player's Master slider
         sfx = AddSource(false);
         ui = AddSource(false);
         music = AddSource(true);
         voices[0] = AddSource(false);
         voices[1] = AddSource(false);
+        selectVoice = AddSource(false);
 
         // Clips with "Preload Audio Data" off load on first use, which can make that first play
         // late or silent. The announcer is timed, so load these up front.
@@ -174,6 +204,14 @@ public class AudioManager : MonoBehaviour
         if (instance != null) instance.PlayUI(instance.confirm);
     }
 
+    // A KO'd fighter starts burning away (DefeatSequence): their KO sound, or the shared one.
+    public static void Defeated(int slot)
+    {
+        if (instance == null) return;
+        CharacterSfx c = instance.SfxOf(slot);
+        instance.PlayUI(c != null && c.ko != null ? c.ko : instance.koSound);
+    }
+
     public static void PageSwitch() { if (instance != null) instance.PlayUI(instance.pageSwitch); }
     public static void Glitch() { if (instance != null) instance.PlayUI(instance.glitchSound); }
     public static void GlassBreak() { if (instance != null) instance.PlayUI(instance.glassBreak); }
@@ -207,7 +245,7 @@ public class AudioManager : MonoBehaviour
     void SpeakDialogue()
     {
         if (cinematic == null) cinematic = GetComponent<MatchCinematics>();
-        if (cinematic == null || !cinematic.Active) return;
+        if (cinematic == null || !cinematic.IntroActive) return;   // the end-of-match box is never voiced
 
         int slot = cinematic.FocusSlot;
         string text = cinematic.Text;
@@ -225,6 +263,26 @@ public class AudioManager : MonoBehaviour
         }
         StopVoices();   // the other fighter's line ends when this one starts
         PlayVoice(slot, clip);
+    }
+
+    // Character select: the character you click says one of their Select lines (always, however
+    // few there are, since it's the feedback for your click). Called by CharacterSelectScreen.
+    public static void CharacterPicked(int id)
+    {
+        if (instance != null) instance.SpeakSelect(id);
+    }
+
+    void SpeakSelect(int id)
+    {
+        CharacterLook look = CharacterRegistry.GetLook(id);
+        CharacterVoice v = look != null ? look.voice : null;
+        selectVoice.Stop();
+        if (v == null || !Has(v.select)) return;
+        AudioClip clip = v.select[Random.Range(0, v.select.Length)];
+        if (clip == null) return;
+        selectVoice.clip = clip;
+        selectVoice.volume = voiceVolume * Player(VolumeChannel.Voices) * v.volume;
+        selectVoice.Play();
     }
 
     // True while the end-of-match dialogue is on screen or a character is still speaking.
@@ -261,9 +319,12 @@ public class AudioManager : MonoBehaviour
             }
             case SimEventType.RoundEnd:
             {
-                // Not after the last round: the winner's win line plays then.
-                CharacterVoice v = VoiceOf(e.a);
-                if (v != null && !sim.IsOver) PlayVoice(e.a, v.roundWin);
+                // Only your own character speaks, and only between rounds: nothing on the match
+                // win or loss, and nothing on a drawn round (e.a == 2).
+                int me = match.LocalSlot;
+                CharacterVoice v = VoiceOf(me);
+                if (v == null || sim.IsOver || e.a == 2) break;
+                PlayVoice(me, e.a == me ? v.roundWin : v.roundLose, true);   // always, however few clips
                 break;
             }
         }
@@ -271,10 +332,11 @@ public class AudioManager : MonoBehaviour
 
     // A random shout from a list. Short lists don't play every time, so the same one or two clips
     // don't get repetitive: 1 clip = 1/3 of the time, 2 clips = 2/3, 3 or more = always.
-    void PlayVoice(int slot, AudioClip[] clips)
+    // always = skip that rule (round win/lose lines).
+    void PlayVoice(int slot, AudioClip[] clips, bool always = false)
     {
         if (!Has(clips)) return;
-        if (clips.Length < 3 && Random.value >= clips.Length / 3f) return;
+        if (!always && clips.Length < 3 && Random.value >= clips.Length / 3f) return;
         PlayVoice(slot, clips[Random.Range(0, clips.Length)]);
     }
 
@@ -285,7 +347,7 @@ public class AudioManager : MonoBehaviour
         s.Stop();
         s.clip = clip;
         CharacterVoice v = VoiceOf(slot);
-        s.volume = voiceVolume * (v != null ? v.volume : 1f);
+        s.volume = voiceVolume * Player(VolumeChannel.Voices) * (v != null ? v.volume : 1f);
         s.Play();
     }
 
@@ -382,7 +444,8 @@ public class AudioManager : MonoBehaviour
                 PlayUI(c != null && c.superFlash != null ? c.superFlash : superFlashSound);
                 break;
             case SimEventType.KO:
-                PlayUI(c != null && c.ko != null ? c.ko : koSound);
+                // The KO sound plays when the fighter actually burns away, not on the hit:
+                // DefeatSequence calls Defeated() so the sound and the effect start together.
                 break;
             case SimEventType.Jump:
                 PlaySfx(Pick(c != null ? c.jump : null, jumpSounds));
@@ -438,12 +501,12 @@ public class AudioManager : MonoBehaviour
         AudioClip clip = clips[Random.Range(0, clips.Length)];
         if (clip == null) return;
         sfx.pitch = Random.Range(0.95f, 1.05f);
-        sfx.PlayOneShot(clip, sfxVolume);
+        sfx.PlayOneShot(clip, sfxVolume * Player(VolumeChannel.Effects));
     }
 
     void PlayUI(AudioClip clip)
     {
-        if (clip != null) ui.PlayOneShot(clip, uiVolume);
+        if (clip != null) ui.PlayOneShot(clip, uiVolume * Player(VolumeChannel.Effects));
     }
 
     AudioClip MusicFor(MatchPhase phase)
@@ -498,6 +561,6 @@ public class AudioManager : MonoBehaviour
         {
             musicFade = Mathf.MoveTowards(musicFade, 1f, musicFadeInSeconds > 0f ? dt / musicFadeInSeconds : 1f);
         }
-        music.volume = musicVolume * musicFade;
+        music.volume = musicVolume * Player(VolumeChannel.Music) * musicFade;
     }
 }

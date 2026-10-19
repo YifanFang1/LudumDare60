@@ -57,38 +57,27 @@ MonoBehaviour:
     outOfAmmo: []
     theme: {fileID: 8300000, guid: 5b53c7ced7ba05a4aa5cd5b8c6560d6b, type: 3}
   voice:
-    dialogue:
-    - line: Yep, gonna feel that one in the morning.
-      clip: {fileID: 8300000, guid: e400fb7d0d72ac24eb135da08759f077, type: 3}
-    - line: I thought pain was supposed to be weakness leaving the body. Why doesn't it feel like weakness is leaving my body?
-      clip: {fileID: 8300000, guid: 8a3fd41c9f99e7445bc093b1baa600f5, type: 3}
-    - line: Who hurt you?
-      clip: {fileID: 8300000, guid: a5f0a7158685c554d84af1007c2158e7, type: 3}
-    - line: How about a water break?
-      clip: {fileID: 8300000, guid: 593151f10e4bf504e87d30059117ea87, type: 3}
-    - line: Ouch, who thought a video g- er, person would hurt so much?
-      clip: {fileID: 8300000, guid: e545a7a6ddb26f94db8b289ed3889541, type: 3}
-    - line: It's pretty cool that I'm able to do dialogue with you!
-      clip: {fileID: 8300000, guid: a97f9bb2b8c2897428172615a0a202f1, type: 3}
-    - line: Well well well, look what the game dragged in.
-      clip: {fileID: 8300000, guid: 55a77cd662eccab4b973090b2cb48ca8, type: 3}
-    - line: Ha ha. You just walked into the bull K3N... Oh that sucked. Can I take it back?
-      clip: {fileID: 8300000, guid: ef4a6f039f3921e4cb245298cfa38291, type: 3}
-    - line: I never did understand what you meant when you said that.
-      clip: {fileID: 8300000, guid: 8e885cd7dc31ff844a0785a9d6ec68ea, type: 3}
-    - line: "You\u2019re exactly how I imagined."
-      clip: {fileID: 8300000, guid: 75d560b2d106fbf4da43ea30269b64f7, type: 3}
-    - line: Man, I could really go for a cheeseburger right about now.
-      clip: {fileID: 8300000, guid: b0c683d85e1dbc04ebf6f04fed49a0c1, type: 3}
-    - line: Scoreboard! Scoreboard!
-      clip: {fileID: 8300000, guid: a638d220a0be3d24998e4fb19b2ecb30, type: 3}
-    - line: Let's gooo! That's the way K3N does things.
-      clip: {fileID: 8300000, guid: 24ed3ab9ae8df1a42affd8cc8ea3d2db, type: 3}
-    - line: Hey, at least I'm not Ruy.
-      clip: {fileID: 8300000, guid: 0a5a3f3d743936a4e99994404c8098de, type: 3}
-    - line: You know, I was the top scorer in my old life, it only stands to reason that I'd be the top scorer in this life too.
-      clip: {fileID: 8300000, guid: 982f9743dffd64642b0c6d0c7e9ca8bb, type: 3}
-    volume: 0.377
+    select:
+    - {fileID: 8300000, guid: 55a77cd662eccab4b973090b2cb48ca8, type: 3}
+    - {fileID: 8300000, guid: ef4a6f039f3921e4cb245298cfa38291, type: 3}
+    - {fileID: 8300000, guid: b0c683d85e1dbc04ebf6f04fed49a0c1, type: 3}
+    roundWin:
+    - {fileID: 8300000, guid: a638d220a0be3d24998e4fb19b2ecb30, type: 3}
+    - {fileID: 8300000, guid: 24ed3ab9ae8df1a42affd8cc8ea3d2db, type: 3}
+    - {fileID: 8300000, guid: 0a5a3f3d743936a4e99994404c8098de, type: 3}
+    - {fileID: 8300000, guid: 982f9743dffd64642b0c6d0c7e9ca8bb, type: 3}
+    - {fileID: 8300000, guid: 982f9743dffd64642b0c6d0c7e9ca8bb, type: 3}
+    - {fileID: 8300000, guid: 75d560b2d106fbf4da43ea30269b64f7, type: 3}
+    - {fileID: 8300000, guid: 8e885cd7dc31ff844a0785a9d6ec68ea, type: 3}
+    - {fileID: 8300000, guid: a97f9bb2b8c2897428172615a0a202f1, type: 3}
+    roundLose:
+    - {fileID: 8300000, guid: e400fb7d0d72ac24eb135da08759f077, type: 3}
+    - {fileID: 8300000, guid: 8a3fd41c9f99e7445bc093b1baa600f5, type: 3}
+    - {fileID: 8300000, guid: a5f0a7158685c554d84af1007c2158e7, type: 3}
+    - {fileID: 8300000, guid: 593151f10e4bf504e87d30059117ea87, type: 3}
+    - {fileID: 8300000, guid: e545a7a6ddb26f94db8b289ed3889541, type: 3}
+    dialogue: []
+    volume: 0.5
     moves:
     - move: Heavy
       clips:
@@ -105,5 +94,4 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 735fe499b5ce0084197ad31542ebfadc, type: 3}
     hurtChance: 0.4
     ko: []
-    roundWin: []
   characterId: 16

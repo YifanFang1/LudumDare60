@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa5a024dae297604f829b64925f74f0e, type: 3}
+  m_Name: Patience Art
+  m_EditorClassIdentifier: LD.CharacterData::CodeCharacterArt
+  viewPrefab: {fileID: 7381733308128764330, guid: b330f3640c7b7d34db78f21bf4b1fd69, type: 3}
+  sprite: {fileID: -5071316564431061991, guid: 2dec81cfa831c684dbcaad8e14d7ef95, type: 3}
+  spriteOffsetX: 0
+  spriteOffsetY: 0
+  spriteScale: 1
+  flipSprite: 0
+  placeholderColor: {r: 0.3, g: 0.5, b: 1, a: 1}
+  tintByState: 1
+  idleLoopTicks: 60
+  walkLoopTicks: 30
+  projectileSprites: []
+  sfx:
+    moves: []
+    attackStart: []
+    hit: []
+    heavyHit: []
+    grab: []
+    block: []
+    dash: []
+    jump: []
+    superFlash: {fileID: 0}
+    ko: {fileID: 0}
+    reflect: []
+    destroy: []
+    summon: []
+    hold: []
+    heal: []
+    powerUp: []
+    outOfAmmo: []
+    theme: {fileID: 0}
+  voice:
+    select:
+    - {fileID: 8300000, guid: 6f0c5cf5bc26c6043ad1985934318c0f, type: 3}
+    roundWin:
+    - {fileID: 8300000, guid: 3b3171497c225d146b4a6fb8b814abed, type: 3}
+    roundLose:
+    - {fileID: 8300000, guid: 31719022cf779c346b2fb9bd25e3f32a, type: 3}
+    - {fileID: 8300000, guid: 98c47e83419d4af439c66a0bda23e5e7, type: 3}
+    dialogue: []
+    volume: 1
+    moves:
+    - move: Ultimate
+      clips:
+      - {fileID: 8300000, guid: 88d867c4822f73743b13c176ed2e433c, type: 3}
+    hurt:
+    - {fileID: 8300000, guid: 598b181e55910aa4ea22bf2c591e9a7c, type: 3}
+    hurtChance: 0.4
+    ko: []
+  characterId: 14
