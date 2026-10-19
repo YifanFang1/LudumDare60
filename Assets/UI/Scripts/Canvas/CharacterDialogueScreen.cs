@@ -52,7 +52,7 @@ public class CharacterDialogueScreen : MonoBehaviour
         }
         bool active = cinematic != null && cinematic.Active;
         group.alpha = active ? 1f : 0f;
-        bool executioner = active && cinematic.Speaker == "Patience";
+        bool executioner = active && cinematic.SpeakerCharacterId == 14;
         speakerBlood.SetBloody(executioner);
         dialogueBlood.SetBloody(executioner);
         if (!active) { shown = ""; return; }

@@ -10,6 +10,22 @@ public class MatchCinematics : MonoBehaviour
     GameSim previousSim;
     int previousTick;
     float outroElapsed;
+    MatchupDialogue.Exchange introExchange;
+    int introA = -1, introB = -1, introVariant = -1;
+    MatchupDialogue.Exchange IntroExchange
+    {
+        get
+        {
+            GameSim sim = match.Sim;
+            int a = sim.fighters[0].characterId, b = sim.fighters[1].characterId;
+            if (introExchange == null || a != introA || b != introB || sim.introVariant != introVariant)
+            {
+                introA = a; introB = b; introVariant = sim.introVariant;
+                introExchange = MatchupDialogue.Select(a, b, introVariant);
+            }
+            return introExchange;
+        }
+    }
 
     public bool IntroActive { get { return Playing && match.Sim.introTicks > 0; } }
     public bool HasOutro { get { return Playing && match.Sim.IsOver && match.Sim.Winner < 2; } }
@@ -38,16 +54,19 @@ public class MatchCinematics : MonoBehaviour
         get
         {
             if (IntroActive)
-                return (GameSim.IntroLineTicks * (match.Sim.IntroSlot == 0 ? 2 : 1) - match.Sim.introTicks) / 60f;
+                return match.Sim.IntroLineElapsedTicks / 60f;
             return outroElapsed < LineSeconds ? outroElapsed : outroElapsed - LineSeconds;
         }
     }
+    public int SpeakerCharacterId { get { return FocusSlot < 0 ? -1 : match.Sim.fighters[FocusSlot].characterId; } }
     public string Speaker { get { return FocusSlot < 0 ? "" : CharacterDialogue.Speaker(match.Sim.fighters[FocusSlot].characterId); } }
     public string Text
     {
         get
         {
             int slot = FocusSlot;
+            if (IntroActive)
+                return match.Sim.introTicks > match.Sim.introSecondTicks ? IntroExchange.firstText : IntroExchange.secondText;
             return slot < 0 ? "" : CharacterDialogue.Line(match.Sim.fighters[slot].characterId, Moment,
                 match.Sim.seed + slot + match.Sim.round);
         }

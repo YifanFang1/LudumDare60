@@ -1,11 +1,14 @@
-// Only the supplied Starting / Winning / Losing dialogue. Character ids stay unchanged.
+// Existing single-character ending lines. Pre-match exchanges live in MatchupDialogue.
+// Character ids and fighter class names stay unchanged.
 public enum CharacterDialogueMoment { Starting, Winning, Losing }
 
 public static class CharacterDialogue
 {
     public static string Speaker(int id)
     {
-        if (id == 14) return "Patience"; // existing Executioner
+        if (id == 14) return "Patience"; // Penance / Executioner keeps id 14 and its class name
+        if (id == 16) return "K3N";
+        if (id == 11) return "0d3tte";
         return CharacterList.NameOf(id);
     }
 
@@ -27,15 +30,35 @@ public static class CharacterDialogue
                         "It seems I have been throoughly pun-nished";
             }
         }
-        if (id == 14) // Patience
+        if (id == 14) // Penance
         {
             switch (moment)
             {
                 case CharacterDialogueMoment.Starting: return "Draw your weapon. Your judgment awaits";
                 case CharacterDialogueMoment.Winning: return "May you find forgiveness beyond this life";
-                case CharacterDialogueMoment.Losing: return "My penance... is not yet complete...";
+                case CharacterDialogueMoment.Losing: return alternate ? "You wear my patience." : "My penance... is not yet complete...";
             }
         }
+        switch (id)
+        {
+            case 11: // 0d3tte / Paintress
+                return Ending(moment, "A masterpiece. Try not to smudge it.", "No... this wasn't how I pictured it.");
+            case 12: // Noir
+                return Ending(moment, "Case closed. Nobody rides away forever.", "Guess this is where the trail goes cold.");
+            case 13: // ROOM
+                return Ending(moment, "I did warn you. There wasn't room for both of us.", "I'll remember this. Elephants always do.");
+            case 15: // Dr. Remy
+                return Ending(moment, "A successful procedure. A regrettable survival rate.", "Remy... fetch the emergency prescription.");
+            case 16: // K3N / Nek
+                return Ending(moment, "High score! Who's got the next coin?", "Not game over... just out of credits.");
+        }
+        return "To be implemented.";
+    }
+
+    static string Ending(CharacterDialogueMoment moment, string winning, string losing)
+    {
+        if (moment == CharacterDialogueMoment.Winning) return winning;
+        if (moment == CharacterDialogueMoment.Losing) return losing;
         return "To be implemented.";
     }
 }
