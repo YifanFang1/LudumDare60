@@ -25,8 +25,8 @@ A brawler who saves up meter and then spends it for a burst of power. Outside In
 | Move | Name / look | Sheet says | Startup | Active | Total | Dmg | Hitstun | KB | Box | CD | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Light (J) | Cape whip | Cape whip around | 8 | 4 | 16 (std 15) | 5 | 12 | 40 | `Box(400, 1000, 1600, 500)` (std w 900) | 5 | **Front only, a bit longer than a jab (confirmed).** 0.3 more reach, 1 tick slower |
-| Heavy (K) | Charged Punch | Charged Punch | 10 after release | 4 | 28 + charge | 12 → 20 | 20 → 26 | 80 → 120 | `Box(300, 700, 1300, 700)` (std) | 10 | **Hold K to charge, release to punch (confirmed, D-42).** 60 ticks to full (confirmed) |
-| Grab (L) | Grab with hand | Grab with hand | 5 | 2 | 40 | 12 | 40 | 90 | `Box(300, 600, 700, 1000)` | 15 | Standard |
+| Heavy (K) | Charged Punch | Charged Punch | 20 after release | 7 | 28 + charge | 12 → 20 | 20 → 26 | 80 → 120 | `Box(300, 900, 4000, 500)` | 10 | **Hold K to charge, release to punch (confirmed, D-42).** 60 ticks to full (confirmed) |
+| Grab (L) | Grab with hand | Grab with hand | 17 | 10 | 40 | 12 | 40 | 90 (30 after the held-grab clamp) | `Box(400, 700, 700, 1000)` | 15 | Standard held grab, slower |
 | Forward dash | Quick hop forward | "Quick leap back" (swapped) | - | - | 10 | - | - | - | - | 20 | **The labels were swapped in the sheet (confirmed).** Stays on the ground. 10 ticks / 150 = 1.5 units (std 14/130) |
 | Back dash | Quick leap back | "Quick hop forward" (swapped) | - | - | 12 | - | - | - | - | 20 | On the ground. 12 ticks / 130 ≈ 1.6 units (std 16/110) |
 | Block | Zeep Zorp shield | Throws Zeep Zorp in front to absorb the damage | - | - | - | 0 | 60% | 100% | - | - | **Standard hold-back block; Zeep Zorp is only the art (confirmed)** |
@@ -38,6 +38,7 @@ A brawler who saves up meter and then spends it for a burst of power. Outside In
 |---|---|---|---|---|---|---|---|
 | 6 | 5 ticks | 3 minimum (tap), up to 10 (held) | 2 | 10 | 3 (was 8, D-55) | `Box(300, 800, 900, 600)` | 6 + 5 × hits + 14 recovery |
 
+- **Retimed (D-v28, from the Character Preview):** each pass has three hitboxes: tick 7 (2 active) `Box(500, 1000, 1600, 600)`, tick 10 (6 active) `Box(300, 0, 2000, 2000)`, tick 21 (2 active) `Box(300, 1000, 2600, 700)`, 1 damage each. The loop repeats ticks 6-10 only, so the tick-21 box fires once after the loop ends. The numbers in the table below are the older triple-jab.
 - A tap gives 3 punches (6 damage). Holding gives up to 10 (20 damage). He stops when you let go or at 10 hits.
 - **Hitstun must be longer than the gap between punches**, or the victim escapes mid-string. With hit stop (`HitStopBase` 5 + damage/3) the gap is about 10 ticks, so 10 hitstun keeps them locked. Check this in a test.
 - Tiny knockback (3), so all ten punches stay in range: at 8 the victim was pushed out of reach by the 7th hit (D-55). On block he's pushed out quickly, so blocked strings end early.

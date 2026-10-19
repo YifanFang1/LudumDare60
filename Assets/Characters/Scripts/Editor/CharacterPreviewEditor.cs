@@ -45,6 +45,7 @@ public class CharacterPreviewEditor : Editor
 
             MoveDef move = moves[Mathf.Clamp(moveProp.intValue, 0, moves.Length - 1)];
             string moveName = !string.IsNullOrEmpty(move.name) ? move.name : "(unnamed)";
+            if (move == K3N.InstallWhip || move == K3N.InstallPunch) moveName += " (INSTALL)";
             EditorGUILayout.LabelField(" ", moveName + "   " + move.totalTicks + " ticks");
 
             SerializedProperty tickProp = serializedObject.FindProperty("tick");

@@ -82,6 +82,16 @@ public class ProjectileSprite
     public Sprite sprite;
     public float scale = 1f;    // view size multiplier (1 = the import size)
     public bool flip;           // tick if the art faces LEFT: it is mirrored so it flies the right way
+
+    [Header("Animation (optional, view only)")]
+    [Tooltip("Frames of an animation, in order. Empty = just the single Sprite above. Use a Center pivot, same as the Sprite.")]
+    public Sprite[] frames;
+    [Tooltip("How fast the frames play.")]
+    public float framesPerSecond = 12f;
+    [Tooltip("Repeat the frames while it is on screen. Off = play once and hold the last frame.")]
+    public bool loop;
+    [Tooltip("Placed hitboxes only (ones that do not fly or follow the fighter, like Patience's blade): keep showing this for this many seconds after it appears, even if the hitbox itself is gone sooner. 0 = only while the hitbox exists.")]
+    public float lingerSeconds;
 }
 
 // One entry in CharacterLook.moveFlashes: an image shown over the fighter when a move starts.

@@ -3,7 +3,7 @@
 //
 //   Light (J)      Cape whip: a jab with a little more reach.
 //   Heavy (K)      Charged Punch: hold K to charge, let go to punch. 12 -> 20 damage over 60 ticks.
-//   Grab           standard
+//   Grab           Hand grab: the standard held grab, slower (tick 17, 10 active)
 //   Dashes         quick and short: forward hop 1.5 units, back leap 1.6 units
 //   Special (I)    Rapid Punches: hold I to keep punching. Each pass is a triple jab (3 hitboxes, 1 damage each); 3 passes tapped, up to 10.
 //   O button       Install (perk 1, D-48). NOT a normal Ultimate: a fresh press of O turns it on
@@ -18,19 +18,38 @@ public class K3N : BaseFighter
     public const int InstallDamagePercent = 130;
     public const int PunchFullCharge = 60;
 
-    public static readonly MoveDef CapeWhip = Melee("Light",
-        totalTicks: 16, spawnTick: 8, activeTicks: 4,
-        box: new Box(400, 1000, 1600, 500),
-        damage: 5, hitstun: 12, knockback: 40, cooldown: LightCooldown);
+    public static readonly MoveDef CapeWhip = MakeCapeWhip();
+
+    static MoveDef MakeCapeWhip()
+    {
+        return Melee("Light",
+            totalTicks: 16, spawnTick: 8, activeTicks: 4,
+            box: new Box(400, 1000, 1600, 500),
+            damage: 5, hitstun: 12, knockback: 40, cooldown: LightCooldown);
+    }
+
+    // Grab with hand: the standard held grab (damage 12, hitstun 40, 20-tick hold), but slower to
+    // start (tick 17) and open for 10 ticks, over a box that starts a little further out.
+    public static readonly MoveDef HandGrab = HoldGrab(Grab("Grab",
+        totalTicks: 40, spawnTick: 17, activeTicks: 10,
+        box: new Box(400, 700, 700, 1000),
+        damage: 12, hitstun: 40, knockback: 90, cooldown: GrabCooldown));
 
     public static readonly MoveDef ChargedPunch = MakeChargedPunch();
+
+    // The two attacks he uses while Install is on. They start as copies of the normal Light and Heavy
+    // (same numbers) so you can tune them on their own in the Character Preview: they are the LAST TWO
+    // moves in its list. Both keep the move names "Light" and "Heavy", so the Install_Light /
+    // Install_Heavy animation states, the sounds and the flashes all still match.
+    public static readonly MoveDef InstallWhip = MakeCapeWhip();
+    public static readonly MoveDef InstallPunch = MakeChargedPunch();
     public static readonly MoveDef RapidPunches = MakeRapidPunches();
 
     static MoveDef MakeChargedPunch()
     {
         MoveDef m = Melee("Heavy",
-            totalTicks: 28, spawnTick: 10, activeTicks: 4,
-            box: new Box(300, 700, 1300, 700),
+            totalTicks: 28, spawnTick: 20, activeTicks: 7,
+            box: new Box(300, 900, 4000, 500),
             damage: 12, hitstun: 20, knockback: 80, cooldown: HeavyCooldown);
         m.holdButton = Buttons.Heavy;
         m.chargeTick = 0;
@@ -43,8 +62,9 @@ public class K3N : BaseFighter
     // hits keeps hitting. Knockback is tiny (3 x 10 ticks = 0.03 units a hit) so ten punches don't
     // push the victim out of reach.
     //
-    // Each pass spawns THREE hitboxes, 2 ticks apart (ticks 6, 8 and 10 of the move): a quick
-    // triple jab. Each does 1 damage, so a pass is 3 damage (it was one 2-damage hit).
+    // Each pass spawns THREE hitboxes (ticks 7, 10 and 21 of the move, different boxes), 1 damage
+    // each, so a pass is 3 damage. NOTE: the loop only repeats ticks 6-10, so the tick-21 box
+    // fires once, after the loop ends.
     static MoveDef MakeRapidPunches()
     {
         MoveDef m = Melee("Special",
@@ -52,12 +72,16 @@ public class K3N : BaseFighter
             box: new Box(300, 800, 900, 600),
             damage: 1, hitstun: 10, knockback: 1, cooldown: SpecialCooldown);
         HitboxDef first = m.hitboxes[0];
+        // Three hitboxes (tuned in the Character Preview): a short low-ish jab, a tall wide burst, and a long finisher.
+        int[] spawn = { 7, 10, 21 };
+        int[] life = { 2, 6, 2 };
+        Box[] boxes = { new Box(500, 1000, 1600, 600), new Box(300, 0, 2000, 2000), new Box(300, 1000, 2600, 700) };
         m.hitboxes = new HitboxDef[3];
         for (int i = 0; i < 3; i++)
         {
             m.hitboxes[i] = new HitboxDef
             {
-                spawnTick = 6 + 2 * i, lifetime = first.lifetime, box = first.box,
+                spawnTick = spawn[i], lifetime = life[i], box = boxes[i],
                 damage = first.damage, hitstun = first.hitstun, knockback = first.knockback,
                 followOwner = true,
             };
@@ -72,10 +96,22 @@ public class K3N : BaseFighter
 
     public bool installOn;
 
-    protected override MoveDef LightAttack { get { return CapeWhip; } }
-    protected override MoveDef HeavyAttack { get { return ChargedPunch; } }
+    protected override MoveDef LightAttack { get { return installOn ? InstallWhip : CapeWhip; } }
+    protected override MoveDef HeavyAttack { get { return installOn ? InstallPunch : ChargedPunch; } }
+    protected override MoveDef GrabMove { get { return HandGrab; } }
     protected override MoveDef SpecialMove { get { return RapidPunches; } }
     protected override MoveDef UltimateMove { get { return null; } }   // O is the Install toggle
+
+    // Editor tools list the Install attacks too (last two).
+    public override MoveDef[] ListMoves()
+    {
+        MoveDef[] normal = base.ListMoves();
+        MoveDef[] all = new MoveDef[normal.Length + 2];
+        normal.CopyTo(all, 0);
+        all[normal.Length] = InstallWhip;
+        all[normal.Length + 1] = InstallPunch;
+        return all;
+    }
 
     public override DashDef ForwardDash { get { return new DashDef(10, 150); } }
     public override DashDef BackDash { get { return new DashDef(12, 130); } }
@@ -131,7 +167,7 @@ public class K3N : BaseFighter
 
     public override void OnHitboxSpawned(GameSim sim, HitboxInstance hit)
     {
-        if (hit.def == ChargedPunch.hitboxes[0])
+        if (hit.def == ChargedPunch.hitboxes[0] || hit.def == InstallPunch.hitboxes[0])
         {
             hit.damage = 12 + 8 * chargeTicks / PunchFullCharge;
             hit.hitstun = 20 + 6 * chargeTicks / PunchFullCharge;

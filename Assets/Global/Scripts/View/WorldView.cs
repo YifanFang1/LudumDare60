@@ -77,6 +77,18 @@ public class WorldView : MonoBehaviour
     FighterView[] views = new FighterView[2];
     List<SpriteRenderer> hitboxQuads = new List<SpriteRenderer>();
     List<SpriteRenderer> projectileArt = new List<SpriteRenderer>();
+
+    // Placed hitboxes whose art outlasts them (ProjectileSprite.lingerSeconds): view only.
+    class ProjectileGhost
+    {
+        public ProjectileSprite entry;
+        public int facing;
+        public Vector3 position;
+        public float startTime;
+    }
+    List<ProjectileGhost> ghosts = new List<ProjectileGhost>();
+    HashSet<long> ghostSeen = new HashSet<long>();      // hitboxes that were alive last frame
+    HashSet<long> ghostSeenNow = new HashSet<long>();
     List<SpriteRenderer> zoneQuads = new List<SpriteRenderer>();
     List<SpriteRenderer> summonQuads = new List<SpriteRenderer>();
     List<SpriteRenderer> telegraphQuads = new List<SpriteRenderer>();
@@ -226,6 +238,9 @@ public class WorldView : MonoBehaviour
         views[1] = null;
         hitboxQuads.Clear();
         projectileArt.Clear();
+        ghosts.Clear();
+        ghostSeen.Clear();
+        ghostSeenNow.Clear();
         zoneQuads.Clear();
         summonQuads.Clear();
         telegraphQuads.Clear();
@@ -454,6 +469,24 @@ public class WorldView : MonoBehaviour
             FighterView owner = views[h.owner];
             ProjectileSprite entry = owner != null && owner.data != null ? owner.data.FindProjectileEntry(h.def.visual) : null;
             Sprite sprite = entry != null ? entry.sprite : null;
+
+            // A placed hitbox whose art lingers (or animates): remember it once, draw it from the ghost list below.
+            if (entry != null && entry.lingerSeconds > 0f && !h.FollowsOwner)
+            {
+                long key = ((long)h.owner * 73856093L) ^ ((long)h.def.GetHashCode() * 19349663L) ^ ((long)h.originX * 83492791L) ^ ((long)h.originY * 2654435761L);
+                ghostSeenNow.Add(key);
+                if (!ghostSeen.Contains(key))
+                {
+                    Box gb = h.World(sim);
+                    ghosts.Add(new ProjectileGhost
+                    {
+                        entry = entry, facing = h.facing, startTime = Time.time,
+                        position = new Vector3((gb.x + gb.w / 2f) * Scale, (gb.y + gb.h / 2f) * Scale, 0f),
+                    });
+                }
+                continue;
+            }
+
             bool placeholder = sprite == null;
             if (placeholder) sprite = PlaceholderArt.ShapeSprite(h.def.visual);
 
@@ -485,6 +518,40 @@ public class WorldView : MonoBehaviour
                 sr.transform.localScale = new Vector3(dir * size, size, 1f);
                 sr.color = Color.white;
             }
+        }
+
+        // the animated / lingering ones
+        HashSet<long> swap = ghostSeen; ghostSeen = ghostSeenNow; ghostSeenNow = swap; ghostSeenNow.Clear();
+        for (int g = ghosts.Count - 1; g >= 0; g--)
+        {
+            ProjectileGhost gh = ghosts[g];
+            float elapsed = Time.time - gh.startTime;
+            if (elapsed > gh.entry.lingerSeconds) { ghosts.RemoveAt(g); continue; }
+            Sprite frame = gh.entry.sprite;
+            if (gh.entry.frames != null && gh.entry.frames.Length > 0)
+            {
+                int n = gh.entry.frames.Length;
+                int idx = Mathf.FloorToInt(elapsed * Mathf.Max(0.01f, gh.entry.framesPerSecond));
+                idx = gh.entry.loop ? idx % n : Mathf.Min(idx, n - 1);
+                frame = gh.entry.frames[idx];
+            }
+            if (frame == null) continue;
+            if (used == projectileArt.Count)
+            {
+                GameObject go = new GameObject("Projectile");
+                go.transform.SetParent(worldRoot.transform, false);
+                SpriteRenderer created = go.AddComponent<SpriteRenderer>();
+                created.sortingOrder = 8;
+                projectileArt.Add(created);
+            }
+            SpriteRenderer gsr = projectileArt[used++];
+            gsr.enabled = true;
+            gsr.sprite = frame;
+            gsr.transform.position = gh.position;
+            float gsize = gh.entry.scale > 0f ? gh.entry.scale : 1f;
+            float gdir = gh.entry.flip ? -gh.facing : gh.facing;
+            gsr.transform.localScale = new Vector3(gdir * gsize, gsize, 1f);
+            gsr.color = Color.white;
         }
         for (int i = used; i < projectileArt.Count; i++) projectileArt[i].enabled = false;
     }
