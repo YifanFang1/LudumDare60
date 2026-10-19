@@ -33,4 +33,5 @@ public struct SimEvent
     public int x;        // world position in milli-units
     public int y;
     public int amount;   // damage for Hit/Grab, see the enum for the others
+    public bool ultimate; // Hit/Grab/Block: the hitbox came from an Ultimate (even a projectile landing after the move ended). For the view only.
 }

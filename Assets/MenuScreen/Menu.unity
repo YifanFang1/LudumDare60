@@ -11345,6 +11345,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CreditsScreen
   backButton: {fileID: 1485151296}
   namesText: {fileID: 2109837691}
+  scrollSpeed: 40
+  pauseAtEnds: 2
+  resumeAfter: 3
 --- !u!224 &1607174150
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16543,8 +16546,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28
-  m_fontSizeBase: 28
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
