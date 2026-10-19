@@ -44,6 +44,8 @@ public class AudioManager : MonoBehaviour
     public AudioClip loseJingle;
     public AudioClip drawJingle;
 
+    public AudioClip matchEndSound;
+
     [Header("Menu")]
     public AudioClip buttonClick;
     public AudioClip confirm;            // Ready / Fight! on character select
@@ -502,9 +504,18 @@ public class AudioManager : MonoBehaviour
     // Winner: 0 or 1 = that slot won, 2 = draw. Vs AI you are always slot 0.
     void PlayResult(int winner)
     {
+
+        if (matchEndSound != null)
+        {
+            PlayUI(matchEndSound);
+
+        }
+
         if (winner == 2) PlayUI(drawJingle);
         else if (winner == match.LocalSlot) PlayUI(winJingle);
         else PlayUI(loseJingle);
+
+        //PlaySfx()
     }
 
     // ---------- playing clips ----------
