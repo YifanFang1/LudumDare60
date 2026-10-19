@@ -7,7 +7,6 @@ public class CrackGraphic : MaskableGraphic
 {
     public const int Steps = 4;   // the cracks appear in this many hard frames
 
-    [System.Serializable]
     public struct Segment
     {
         public Vector2 a, b;

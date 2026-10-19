@@ -32,8 +32,8 @@ public class CharacterSelectScreen : MonoBehaviour
     bool wired;
     bool pickingOpponent;
     bool randomYou, randomOpponent;
-    // Random picker: turning Random on puts everyone in the draw except Sandbag; click a character to take
-    // it out (or put it back). Sandbag only comes up if you click it in.
+    // Random picker: with Random on, click characters to put them in the draw. Nothing picked = everyone
+    // (except Sandbag). Picking Sandbag here is the only way it can come up.
     readonly HashSet<int> poolYou = new HashSet<int>();
     readonly HashSet<int> poolOpponent = new HashSet<int>();
     readonly List<CharacterButtonUI> buttons = new List<CharacterButtonUI>();
@@ -44,10 +44,9 @@ public class CharacterSelectScreen : MonoBehaviour
         match = SessionFinder.Find();
         if (match == null) return;
         pickingOpponent = false;
-        // every time character select opens, both sides start on Random with everyone except Sandbag in the draw
-        randomYou = randomOpponent = true;
-        FillPool(poolYou);
-        FillPool(poolOpponent);
+        randomYou = randomOpponent = false;
+        poolYou.Clear();
+        poolOpponent.Clear();
         if (!wired) { Wire(); wired = true; }
         Rebuild();
     }
@@ -165,20 +164,9 @@ public class CharacterSelectScreen : MonoBehaviour
         poolOpponent.Clear();
     }
 
-    // Everyone except Sandbag.
-    static void FillPool(HashSet<int> pool)
-    {
-        pool.Clear();
-        System.Collections.Generic.IList<int> ids = CharacterList.Ids;
-        for (int i = 0; i < ids.Count; i++)
-        {
-            if (ids[i] != Sandbag.Id) pool.Add(ids[i]);
-        }
-    }
-
     static string RandomLabel(HashSet<int> picked)
     {
-        return "Random (" + picked.Count + ")";
+        return picked.Count == 0 ? "Random" : "Random (" + picked.Count + ")";
     }
 
     // picked = the characters the player ticked; empty means everyone except Sandbag.
@@ -205,14 +193,13 @@ public class CharacterSelectScreen : MonoBehaviour
         {
             // Random toggles: on = everyone is greyed, click characters to put them in the draw
             randomOn = !randomOn;
-            if (randomOn) FillPool(pool); else pool.Clear();
+            if (randomOn) pool.Clear();
             if (forOpponent) randomOpponent = randomOn; else randomYou = randomOn;
             return;
         }
         if (randomOn)
         {
-            if (pool.Contains(id)) { if (pool.Count > 1) pool.Remove(id); }   // keep at least one in the draw
-            else pool.Add(id);
+            if (!pool.Remove(id)) pool.Add(id);
             return;
         }
         if (forOpponent) match.OpponentCharacter = id;
