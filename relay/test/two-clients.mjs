@@ -100,7 +100,7 @@ if (startA && startB) {
   const pb = startB.split(",");
   check("slots are 0 and 1", pa[1] === "0" && pb[1] === "1");
   check("same seed", pa[2] === pb[2]);
-  check("delay is sent", pa[3] === "6");
+  check("delay is sent", pa[3] === "3");
 }
 
 a.ws.send("i,5,16");

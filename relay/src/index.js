@@ -18,10 +18,7 @@
 // It is bundled into the worker when you run `npm run deploy` and served at /characters.json.
 import characters from "../characters.json";
 
-// How many ticks ahead each player sends their input (60 ticks = 1 s). The game stalls whenever an
-// input takes longer than this to arrive, so it must cover the one-way trip through this relay.
-// 3 (50 ms) was only enough on localhost; real players went into slow motion. 6 = 100 ms.
-const INPUT_DELAY_TICKS = 6;
+const INPUT_DELAY_TICKS = 3;
 
 export default {
   async fetch(request, env) {
